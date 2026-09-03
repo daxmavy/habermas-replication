@@ -1,0 +1,10 @@
+.venv/
+data/*.parquet
+embeddings/*/
+embeddings/*.log
+prepared/
+results/**/*.json
+__pycache__/
+.ipynb_checkpoints/
+notebooks/*_out.ipynb
+nohup.out
