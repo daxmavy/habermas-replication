@@ -5,15 +5,20 @@ via Sentence-T5 embeddings, position-axis projection and convex regression.
 
 ## Status
 - [x] Data downloaded from GCS (4 parquet files, 450 MB) -> `data/`
-- [x] SM PDF: NOT available (not on VM, not in Zotero; science.org blocks curl/headless Chromium; Oxford ssh has no key).
-      Method reconstructed from main-paper Methods ("Embedding geometry") + Procaccia et al. footnote (arXiv 2603.16751).
+- [x] SM PDF: retrieved from the Wayback Machine -> `docs/science.adq2852_sm.pdf` (science.org itself blocks curl/headless Chromium).
+      Method taken from SM 5.1 (embedding space) and SM 5.4.1 (regression weights, Fig S60 = expanded Fig 4C).
 - [x] Prepared tables -> `prepared/` (opinions, statements, questions, texts)
-- [x] Minority definition calibrated: cohorts 1-3, neutral participants dropped, groups kept -> mean minority share 0.291 (paper: 29%)
+- [x] Pre-registered preprocessing ported (`hm_fig4c/preprocess.py`): cohorts 1-3 -> 1047 rounds, exactly as in the paper.
+- [x] Minority rule: SM 5.4.1 literal (neutral = non-minority, ties excluded) gives true share 0.263 on 560 rounds; the paper's
+      0.28-0.29 is reproduced by dropping neutral raters (0.289) or keeping ties with a fixed minority side (0.284). All reported.
+- [x] Fig 4C has 4 bars: initial statements (all 4 candidates), initial winner, revised statements, revised winner -> candidates embedded too.
 - [ ] Embeddings -> `embeddings/st5-base`, `embeddings/st5-large` (driver: `run_embed_all.sh`, log `embeddings/embed.log`)
 - [ ] Analysis notebook `notebooks/fig4c.ipynb`
 
 ## Key decisions (reversible)
-- Initial statement = critiqued top candidate (iteration-1 rows); revised = candidate in end-of-round survey.
-- Primary cohort = cohorts 1-3 pooled (matches 29%); sensitivity: per cohort, cohort 4, training, VCA.
-- Embedding: sentence-transformers/sentence-t5-{base,large} (HF ports of ST5), max_seq_length 512.
-- Convex regression pooled per division level (n,k); minority weight = sum of minority coefs; levels averaged by #rounds.
+- Initial winner = critiqued top candidate (iteration-1 rows); revised winner = candidate in end-of-round survey; candidates = all MODEL_MEDIATOR statements shown.
+- Primary cohort = cohorts 1-3, pre-registered groups (1047 rounds); sensitivity: no prereg filter, per cohort, cohort 4, training, VCA.
+- Embedding: sentence-transformers/sentence-t5-{base,large} (HF ports of ST5; SM does not say which ST5 size), max_seq_length 512.
+- Position axis: unit vector from "No, I disagree. <negating>" to "Yes, I agree. <affirming>" (SM 5.1.2); score = projection (SM eq. 5).
+- Convex regression pooled per division level (n,k); minority weight = sum of minority coefs; levels averaged by #rounds (SM eq. 19).
+- SEs: analytic OLS SE of the constrained fit (as in the paper) + cluster bootstrap over rounds.

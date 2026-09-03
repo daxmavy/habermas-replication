@@ -84,10 +84,16 @@ P.plot_fig4c(res, ax=ax, include_opinions=True, title=f"Cohorts 1-3 (pre-registe
 plt.tight_layout(); plt.savefig(f"{OUT_DIR}/fig4c.png", dpi=200)""")
 
 md("""## 5. Sensitivity analyses
-Each row varies one choice relative to the primary specification.""")
+Each row varies one choice relative to the primary specification. The SM's literal minority rule (neutral raters are
+non-minority; tied rounds have no minority) gives a true minority share of 0.26 on these rounds, whereas the paper's dotted
+line sits at 0.28-0.29; two alternative readings reproduce that number: dropping neutral raters, or keeping tied rounds with
+a fixed side taken as the minority. All are reported.""")
 code("""variants = {
   "primary (cohorts 1-3 prereg, neutral = non-minority, data order)": dict(cohort="cohorts_1_3"),
-  "neutral raters dropped (group kept)": dict(cohort="cohorts_1_3", neutral="drop_participant"),
+  "neutral raters dropped (group kept) [true share 0.29]": dict(cohort="cohorts_1_3", neutral="drop_participant"),
+  "ties kept, agree side = minority [true share 0.28]": dict(cohort="cohorts_1_3", ties="agree"),
+  "ties kept, disagree side = minority [true share 0.28]": dict(cohort="cohorts_1_3", ties="disagree"),
+  "neutral dropped + ties kept (agree = minority)": dict(cohort="cohorts_1_3", neutral="drop_participant", ties="agree"),
   "groups with any neutral rater dropped": dict(cohort="cohorts_1_3", neutral="drop_group"),
   "column order: sorted by score": dict(cohort="cohorts_1_3", order="sorted"),
   "column order: random": dict(cohort="cohorts_1_3", order="random"),

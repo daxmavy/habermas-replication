@@ -72,11 +72,11 @@ def fig4b_within_range(opinions: pd.DataFrame, statements: pd.DataFrame) -> dict
 
 
 def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, cohort: str = "cohorts_1_3", neutral: str = "as_majority",
-                          order: str = "data", min_rounds: int = 10, n_boot: int = 0, seed: int = 0, prereg_only: bool = True,
-                          phases: list[str] = PHASES, include_opinions: bool = True) -> dict:
+                          ties: str = "exclude", order: str = "data", min_rounds: int = 10, n_boot: int = 0, seed: int = 0,
+                          prereg_only: bool = True, phases: list[str] = PHASES, include_opinions: bool = True) -> dict:
     op = select_cohort(opinions, cohort, prereg_only); ca = select_cohort(candidates, cohort, prereg_only)
-    op_div = assign_minority(op, neutral=neutral)
-    res = {"cohort": cohort, "neutral": neutral, "order": order, "prereg_only": prereg_only, "phases": {}}
+    op_div = assign_minority(op, neutral=neutral, ties=ties)
+    res = {"cohort": cohort, "neutral": neutral, "ties": ties, "order": order, "prereg_only": prereg_only, "phases": {}}
     designs = {}
     for phase in phases:
         design = build_design(op_div, phase_targets(ca, phase), "score", "score", order=order, seed=seed)

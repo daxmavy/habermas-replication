@@ -56,13 +56,15 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
 
 
 # ----------------------------------------------------------------------------- group structure
-def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority") -> pd.DataFrame:
+def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: str = "exclude") -> pd.DataFrame:
     """Add is_minority / n_div / k_min columns. Rows are participant-rounds with a pre_rating.
 
     neutral = 'drop_participant': neutral raters are removed, the group is kept.
               'drop_group'      : any group containing a neutral rater is removed.
-              'as_majority'     : neutral raters are kept and counted as non-minority.
-    Rounds with a tie (equal agree/disagree) or no dissent are dropped (no minority).
+              'as_majority'     : neutral raters are kept and counted as non-minority (SM 5.4.1).
+    ties    = 'exclude'         : rounds with equal agree/disagree counts have no minority and are dropped.
+              'agree'/'disagree': in a tie, that side is taken as the minority.
+    Rounds with no dissent are always dropped.
     """
     key = ["metadata.version", "launch_id", "round_id"]
     df = opinions.dropna(subset=["pre_rating"]).copy()
@@ -76,7 +78,8 @@ def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority") -> pd.
     g = df.groupby(key)["side"]
     n_ag = g.transform(lambda s: (s > 0).sum())
     n_dis = g.transform(lambda s: (s < 0).sum())
-    minority_side = np.where(n_ag < n_dis, 1, np.where(n_dis < n_ag, -1, 0))
+    tie_side = {"exclude": 0, "agree": 1, "disagree": -1}[ties]
+    minority_side = np.where(n_ag < n_dis, 1, np.where(n_dis < n_ag, -1, tie_side))
     df["is_minority"] = (df["side"] == minority_side) & (minority_side != 0)
     df["k_min"] = np.minimum(n_ag, n_dis)
     df["n_div"] = g.transform("size")
