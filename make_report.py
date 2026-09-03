@@ -81,6 +81,8 @@ def table(df: pd.DataFrame, cols: list[str], names: list[str], nd=2) -> str:
             v = r[c]
             if isinstance(v, str):
                 return html.escape(v)
+            if v is None or (isinstance(v, float) and v != v):
+                return "–"
             if c in ("n_rounds", "n_targets") or (isinstance(v, (int, float)) and float(v).is_integer() and abs(float(v)) >= 20):
                 return f"{int(v)}"
             return fmt(v, nd)
@@ -133,6 +135,7 @@ def build(results: list[dict], out: Path):
     sens_html = ""
     if "sensitivity" in main:
         sd = main["sensitivity"].copy()
+        sd = sd[sd["n_rounds"].notna()]
         cols = ["variant", "n_rounds", "true_share"] + PHASES
         sens_html = table(sd, cols, ["Specification", "Rounds", "True share"] + [LABEL[p] for p in PHASES])
     vec_html = ""
