@@ -4,6 +4,7 @@
  "ties": "exclude",
  "order": "data",
  "prereg_only": true,
+ "minority_by": "rating",
  "phases": {
   "initial_candidates": {
    "weight": 0.21140226452482014,
