@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib>=3.11.1",
     "nbconvert>=7.17.1",
     "numpy>=2.5.2",
+    "optimum[onnxruntime]>=2.1.0",
     "pandas>=3.0.5",
     "pyarrow>=25.0.1",
     "scipy>=1.18.1",

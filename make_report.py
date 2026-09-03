@@ -48,7 +48,7 @@ def bar_chart_svg(res: dict, tag: str) -> str:
         out.append(f'<text x="{ml-6}" y="{y+4:.1f}" text-anchor="end" fill="var(--muted)">{v:.1f}</text>')
     yt = yscale(true)
     out.append(f'<line x1="{ml}" x2="{W-mr}" y1="{yt:.1f}" y2="{yt:.1f}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 4"/>')
-    out.append(f'<text x="{W-mr}" y="{yt-5:.1f}" text-anchor="end" fill="var(--ink)" font-style="italic">true minority share {true:.3f}</text>')
+    out.append(f'<text x="{ml+4}" y="{yt-5:.1f}" text-anchor="start" fill="var(--ink)" font-style="italic">true minority share {true:.3f}</text>')
     ytp = yscale(PAPER_TRUE)
     out.append(f'<line x1="{ml}" x2="{W-mr}" y1="{ytp:.1f}" y2="{ytp:.1f}" stroke="var(--paper)" stroke-width="1" stroke-dasharray="2 4"/>')
     for i, p in enumerate(phases):
@@ -64,7 +64,7 @@ def bar_chart_svg(res: dict, tag: str) -> str:
         # paper value as a hollow marker to the right of the bar
         xp = x0 + bw + 14; yp = yscale(PAPER[p])
         out.append(f'<line x1="{xp-7:.1f}" x2="{xp+7:.1f}" y1="{yp:.1f}" y2="{yp:.1f}" stroke="var(--paper)" stroke-width="3"/>')
-        out.append(f'<text x="{xp:.1f}" y="{yp-6:.1f}" text-anchor="middle" fill="var(--paper)">{PAPER[p]:.2f}</text>')
+        out.append(f'<text x="{xp+9:.1f}" y="{yp+4:.1f}" text-anchor="start" fill="var(--paper)" font-size="10">{PAPER[p]:.2f}</text>')
         lab = LABEL[p].split(" ")
         for j, word in enumerate(lab):
             out.append(f'<text x="{ml + i*slot + slot/2:.1f}" y="{H-mb+16+j*13}" text-anchor="middle" fill="var(--ink)" font-family="var(--body)" font-size="12">{html.escape(word)}</text>')
@@ -74,10 +74,17 @@ def bar_chart_svg(res: dict, tag: str) -> str:
     return "\n".join(out)
 
 
-def table(df: pd.DataFrame, cols: list[str], names: list[str], nd=3) -> str:
+def table(df: pd.DataFrame, cols: list[str], names: list[str], nd=2) -> str:
     rows = []
     for _, r in df.iterrows():
-        cells = "".join(f"<td>{html.escape(str(r[c])) if isinstance(r[c], str) else fmt(r[c], nd)}</td>" for c in cols)
+        def cell(c):
+            v = r[c]
+            if isinstance(v, str):
+                return html.escape(v)
+            if c in ("n_rounds", "n_targets") or (isinstance(v, (int, float)) and float(v).is_integer() and abs(float(v)) >= 20):
+                return f"{int(v)}"
+            return fmt(v, nd)
+        cells = "".join(f"<td>{cell(c)}</td>" for c in cols)
         rows.append(f"<tr>{cells}</tr>")
     head = "".join(f"<th>{html.escape(n)}</th>" for n in names)
     return f'<div class="tablewrap"><table><thead><tr>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
@@ -101,7 +108,8 @@ def build(results: list[dict], out: Path):
     main = results[0]; res = main["primary"]; ph = res["phases"]; s = main["summary"]["ours"]; paper = main["summary"]["paper"]
     level, verdict_text = verdict(res)
     c = res.get("contrasts", {}).get("revised_winner - initial_winner", {})
-    comp_rows = [("Rounds (main-task cohorts 1–3, pre-registered)", str(paper["n_rounds"]), str(s["n_rounds"]))]
+    comp_rows = [("Rounds in cohorts 1–3 after pre-registered preprocessing", str(paper["n_rounds"]), str(s.get("n_rounds_total", "–"))),
+                 ("Rounds with a minority (enter the regression)", "–", str(s["n_rounds"]))]
     comp_rows += [("True minority share (dotted line)", fmt(paper["minority_share"]), fmt(s["minority_share"], 3))]
     for p in ["opinions"] + PHASES:
         key = "opinions_sanity" if p == "opinions" else p
@@ -157,7 +165,8 @@ table {{ border-collapse:collapse; width:100%; font-size:0.9rem; font-variant-nu
 th, td {{ text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; }}
 thead th {{ font-family:var(--mono); font-size:0.7rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }}
 tbody th {{ font-weight:600; }}
-td {{ font-family:var(--mono); font-size:0.85rem; }}
+td {{ font-family:var(--mono); font-size:0.85rem; white-space:nowrap; }}
+td:first-child, tbody th {{ font-family:var(--body); font-size:0.9rem; white-space:normal; min-width:14ch; }}
 .compare td:nth-child(2) {{ color:var(--paper); }}
 .compare td:nth-child(3) {{ color:var(--accent); font-weight:600; }}
 p {{ margin:8px 0; }}

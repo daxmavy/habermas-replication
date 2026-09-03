@@ -150,7 +150,8 @@ code("""paper = {"n_rounds": 1047, "minority_share": 0.285, "opinions_sanity": 0
          "revised_candidates": 0.33, "revised_winner": 0.36, "revised_winner_se": 0.03, "revised_winner_t_vs_true": 2.64,
          "fig4a_r": 0.64, "fig4b_within": 0.96}
 ph = res["phases"]
-ours = {"n_rounds": ph["initial_winner"]["n_rounds"], "minority_share": ph["initial_winner"]["true_share"], "opinions_sanity": ph["opinions"]["weight"],
+ours = {"n_rounds": ph["initial_winner"]["n_rounds"], "n_rounds_total": int(P.select_cohort(statements, "cohorts_1_3")["initial_id"].notna().sum()),
+        "minority_share": ph["initial_winner"]["true_share"], "opinions_sanity": ph["opinions"]["weight"],
         **{p: ph[p]["weight"] for p in P.PHASES}, "revised_winner_se": ph["revised_winner"]["se"], "revised_winner_t_vs_true": ph["revised_winner"]["t_vs_true"],
         "fig4a_r": fig4a.loc["cohorts_1_3", "r"], "fig4b_within": fig4b["cohorts_1_3"]["both"]["within"], "model": MODEL_TAG, "endpoints": ENDPOINTS, "axis": AXIS_METHOD}
 json.dump({"paper": paper, "ours": ours}, open(f"{OUT_DIR}/summary.json", "w"), indent=1, default=float)
