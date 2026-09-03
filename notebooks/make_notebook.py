@@ -145,7 +145,41 @@ for stage, col in [("initial", "initial_text"), ("revised", "revised_text")]:
     vec_rows.append({"stage": stage, "n": "all", "k": "-", "n_rounds": tot, "minority_weight": acc_w, "true_share": acc_true})
 vec = pd.DataFrame(vec_rows); vec.to_csv(f"{OUT_DIR}/vector_regression.csv", index=False); vec.round(3)""")
 
-md("## 7. Summary vs paper")
+md("""## 7. Diagnostics
+(a) Where do the winning statements fall relative to their group's opinion scores? (b) If statements were *exactly* proportional
+convex combinations of latent positions, would measurement noise in the position scores (calibrated to the observed
+correlation with ratings) bias the recovered minority weight? A simulation with the real group structure answers this.""")
+code("""from hm_fig4c.analysis import assign_minority, build_design, minority_weight
+opd = assign_minority(P.select_cohort(opinions, "cohorts_1_3"), neutral="as_majority")
+stp = P.select_cohort(statements, "cohorts_1_3").set_index(P.KEY)
+rows = []
+for k, g in opd.groupby(P.KEY):
+    if k not in stp.index or g["score"].isna().any(): continue
+    sign = 1 if g[g["is_minority"]]["pre_rating"].iloc[0] > 4 else -1
+    lo, hi = g["score"].min(), g["score"].max(); mn = g[g["is_minority"]]["score"].mean(); mj = g[~g["is_minority"]]["score"].mean()
+    for col in ["initial_score", "revised_score"]:
+        sc = stp.at[k, col]
+        if not np.isfinite(sc): continue
+        rows.append(dict(stage=col.split("_")[0], inside=(lo <= sc <= hi), beyond_minority_side=(sc > hi) if sign > 0 else (sc < lo),
+                         beyond_majority_side=(sc < lo) if sign > 0 else (sc > hi), closer_to_minority_mean=abs(sc - mn) < abs(sc - mj)))
+where = pd.DataFrame(rows).groupby("stage").mean(numeric_only=True)
+where.to_csv(f"{OUT_DIR}/winner_position.csv"); where.round(3)""")
+code("""def simulate(target_r, n_rep=3, seed=0):
+    rng = np.random.default_rng(seed); ests = []
+    for rep in range(n_rep):
+        d = opd.copy()
+        d["true"] = (d["pre_rating"] - 4) / 3 + rng.normal(0, 0.35, len(d))          # latent position
+        base_r = np.corrcoef(d["true"], d["pre_rating"])[0, 1]; var_t = d["true"].var()
+        noise_var = var_t * ((base_r / target_r) ** 2 - 1) if target_r < base_r else 0   # noise to hit target r
+        d["score"] = d["true"] + rng.normal(0, np.sqrt(max(noise_var, 0)), len(d))
+        tg = d.groupby(P.KEY)["true"].mean().rename("score").reset_index()             # exactly proportional statement
+        tg["score"] += rng.normal(0, np.sqrt(max(noise_var, 0)), len(tg))
+        mw = minority_weight(build_design(d, tg, "score", "score"))
+        ests.append((np.corrcoef(d["score"], d["pre_rating"])[0, 1], mw.weight, mw.true_share))
+    return np.array(ests).mean(axis=0)
+atten = pd.DataFrame([dict(zip(["achieved_r", "recovered_minority_weight", "true_share"], simulate(tr))) for tr in [0.99, 0.8, 0.64, fig4a.loc["cohorts_1_3", "r"], 0.45]])
+atten.to_csv(f"{OUT_DIR}/attenuation.csv", index=False); atten.round(3)""")
+md("## 8. Summary vs paper")
 code("""paper = {"n_rounds": 1047, "minority_share": 0.285, "opinions_sanity": 0.28, "initial_candidates": 0.28, "initial_winner": 0.29,
          "revised_candidates": 0.33, "revised_winner": 0.36, "revised_winner_se": 0.03, "revised_winner_t_vs_true": 2.64,
          "fig4a_r": 0.64, "fig4b_within": 0.96}

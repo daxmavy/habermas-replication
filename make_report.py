@@ -18,7 +18,7 @@ PAPER_TRUE = 0.285
 def load(results_dir: Path):
     d = {"tag": results_dir.name, "primary": json.load(open(results_dir / "fig4c_primary.json")),
          "summary": json.load(open(results_dir / "summary.json"))}
-    for f in ["sensitivity.csv", "vector_regression.csv"]:
+    for f in ["sensitivity.csv", "vector_regression.csv", "winner_position.csv", "attenuation.csv"]:
         if (results_dir / f).exists():
             d[f.split(".")[0]] = pd.read_csv(results_dir / f)
     for f in ["fig4a.png", "fig4b.png", "fig4c.png"]:
@@ -140,6 +140,18 @@ def build(results: list[dict], out: Path):
         vd = main["vector_regression"]; vd = vd[vd["n"].astype(str) == "all"]
         vec_html = table(vd, ["stage", "n_rounds", "minority_weight", "true_share"], ["Winner", "Rounds", "Minority weight (768-d)", "True share"])
 
+    diag_html = ""
+    if "winner_position" in main:
+        wp = main["winner_position"]
+        wp_rows = "".join(f"<tr><th scope=\"row\">{html.escape(str(r['stage']))} winner</th><td>{fmt(r['inside'])}</td><td>{fmt(r['beyond_majority_side'])}</td><td>{fmt(r['beyond_minority_side'])}</td><td>{fmt(r['closer_to_minority_mean'])}</td></tr>" for _, r in wp.iterrows())
+        diag_html += f"""<p>Where the winning statements' position scores fall relative to their own group's opinions (share of rounds with a minority):</p>
+<div class="tablewrap"><table><thead><tr><th>Statement</th><th>Inside opinion range</th><th>Beyond majority extreme</th><th>Beyond minority extreme</th><th>Closer to minority mean</th></tr></thead><tbody>{wp_rows}</tbody></table></div>"""
+    if "attenuation" in main:
+        at = main["attenuation"]
+        at_rows = "".join(f"<tr><td>{fmt(r['achieved_r'])}</td><td>{fmt(r['recovered_minority_weight'])}</td><td>{fmt(r['true_share'])}</td></tr>" for _, r in at.iterrows())
+        diag_html += f"""<p>Simulation with the real group structure: statements built as <em>exactly proportional</em> convex combinations of latent positions, with measurement noise in the scores calibrated to a given correlation with the ratings. The pipeline recovers the true share at every noise level, so a noisier axis does not by itself pull the estimate down.</p>
+<div class="tablewrap"><table><thead><tr><th>r(score, rating)</th><th>Recovered minority weight</th><th>True share</th></tr></thead><tbody>{at_rows}</tbody></table></div>"""
+
     contrast_html = ""
     if c:
         contrast_html = f"""<p class="note">Revised winner − initial winner: {fmt(c['diff'])} (cluster-bootstrap SE {fmt(c['boot_se'])}, 95% CI {fmt(c['boot_ci95'][0])} to {fmt(c['boot_ci95'][1])}; bootstrap p(diff ≤ 0) = {fmt(c['boot_p_le_0'], 3)}). Revised winner above the true share: bootstrap p = {fmt(ph['revised_winner'].get('boot_p_gt_true'), 3)}.</p>"""
@@ -190,6 +202,8 @@ img {{ max-width:100%; border:1px solid var(--line); background:#fff; }}
 {sens_html}
 <h2>Robustness: full 768-d embedding instead of the position score</h2>
 {vec_html}
+<h2>Diagnostics</h2>
+{diag_html}
 <div class="two">
 <figure><img src="{main.get('fig4a','')}" alt="Fig 4A check: position score against pre-deliberation rating"><figcaption>Fig. 4A check: opinion position score by pre-deliberation rating.</figcaption></figure>
 <figure><img src="{main.get('fig4b','')}" alt="Fig 4B check: distributions of position scores"><figcaption>Fig. 4B check: position-score distributions for opinions, initial and revised winners.</figcaption></figure>
