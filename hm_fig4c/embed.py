@@ -23,7 +23,7 @@ def load_embeddings(cache_dir: Path) -> tuple[dict[str, int], np.ndarray]:
     return {t: i for i, t in enumerate(df["text_id"])}, mat
 
 
-def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int, batch_size: int, chunk_size: int, max_priority: int | None):
+def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int, batch_size: int, chunk_size: int, max_priority: int | None, dtype: str = "fp32"):
     import torch
     from sentence_transformers import SentenceTransformer
 
@@ -37,9 +37,10 @@ def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int,
     print(f"{model_name}: {len(done)} cached, {len(todo)} to embed", flush=True)
     if not len(todo):
         return
-    model = SentenceTransformer(model_name, device="cpu")
+    kw = {"model_kwargs": {"torch_dtype": torch.bfloat16}} if dtype == "bf16" else {}
+    model = SentenceTransformer(model_name, device="cpu", **kw)
     model.max_seq_length = max_seq_length
-    print("max_seq_length =", model.max_seq_length, "| threads =", torch.get_num_threads(), flush=True)
+    print("max_seq_length =", model.max_seq_length, "| threads =", torch.get_num_threads(), "| dtype =", dtype, flush=True)
     t0 = time.time(); n_done = 0
     for start in range(0, len(todo), chunk_size):
         chunk = todo.iloc[start:start + chunk_size]
@@ -61,5 +62,6 @@ if __name__ == "__main__":
     ap.add_argument("--batch-size", type=int, default=16)
     ap.add_argument("--chunk-size", type=int, default=256)
     ap.add_argument("--max-priority", type=int, default=None, help="only embed texts with priority <= this")
+    ap.add_argument("--dtype", choices=["fp32", "bf16"], default="fp32")
     a = ap.parse_args()
-    run(Path(a.texts), a.model, Path(a.cache_dir), a.max_seq_length, a.batch_size, a.chunk_size, a.max_priority)
+    run(Path(a.texts), a.model, Path(a.cache_dir), a.max_seq_length, a.batch_size, a.chunk_size, a.max_priority, a.dtype)
