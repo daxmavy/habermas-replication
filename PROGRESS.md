@@ -28,3 +28,20 @@ via Sentence-T5 embeddings, position-axis projection and convex regression.
 - Position axis: unit vector from "No, I disagree. <negating>" to "Yes, I agree. <affirming>" (SM 5.1.2); score = projection (SM eq. 5).
 - Convex regression pooled per division level (n,k); minority weight = sum of minority coefs; levels averaged by #rounds (SM eq. 19).
 - SEs: analytic OLS SE of the constrained fit (as in the paper) + cluster bootstrap over rounds.
+
+## Results so far (ST5-base, unit axis, prefixed endpoints, SM minority rule; cohorts 1-3 prereg, 560 rounds with a minority)
+| phase | paper | ours (± analytic SE) |
+|---|---|---|
+| true minority share | 0.28-0.29 | 0.262 |
+| opinions (sanity) | 0.28 | 0.263 |
+| initial statements (all candidates) | 0.28 | 0.211 ± 0.015 |
+| initial winner | 0.29 | 0.160 ± 0.019 |
+| revised statements (all candidates) | 0.33 | 0.209 ± 0.010 |
+| revised winner | 0.36 (SE 0.03) | 0.199 ± 0.018 |
+| revised winner - initial winner | +0.07 | +0.039 (cluster-bootstrap CI 0.016-0.062, p = 0.004) |
+| Fig 4A r | 0.64 | 0.56 |
+| Fig 4B within range | 0.96 | 0.86 |
+Direction (revised winner > initial winner) replicates; levels do not (all phases below proportional). Full-768-d regression: 0.236 / 0.243.
+Isotropic axis-noise simulation does not bias the estimate down (recovers 0.26 at every r).
+Report: `report/fig4c_report.html`; notebook output `notebooks/fig4c_st5-base_out.ipynb`; results `results/st5-base/`.
+Pending: ST5-large run (prereg texts) -> rerun notebook with HM_EMB_DIR=../embeddings/st5-large, regenerate report with both.
