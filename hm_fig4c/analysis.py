@@ -181,7 +181,8 @@ def minority_weight(design: dict, min_rounds: int = 10) -> MinorityWeightResult:
 
 def cluster_bootstrap(designs: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10) -> np.ndarray:
     """Bootstrap over rounds, resampling the same rounds for every phase in `designs` (phase -> design).
-    Returns an array (n_boot, n_phases) of aggregate minority weights, phases in dict order."""
+    Returns an array (n_boot, n_phases) of aggregate minority weights (levels weighted by the number of resampled
+    rounds present in that phase, as in the point estimate), phases in dict order."""
     rng = np.random.default_rng(seed)
     phases = list(designs)
     levels = sorted(set.intersection(*[set(d) for d in designs.values()]))
@@ -197,19 +198,19 @@ def cluster_bootstrap(designs: dict, n_boot: int = 500, seed: int = 0, min_round
                 m.setdefault(k, []).append(i)
             idx[p] = m
         prep.append((l, rounds, idx))
-    n_rounds_total = {p: sum(len({k for k in designs[p][l]["keys"]}) for l, _, _ in prep) for p in phases}
     out = np.empty((n_boot, len(phases)))
     for b in range(n_boot):
-        acc = np.zeros(len(phases))
+        num = np.zeros(len(phases)); den = np.zeros(len(phases))
         for (n, k), rounds, idx in prep:
             samp = rng.choice(len(rounds), len(rounds), replace=True)
             for pi, p in enumerate(phases):
-                rows = np.concatenate([idx[p].get(rounds[j], []) for j in samp]).astype(int) if len(samp) else np.array([], int)
-                if len(rows) == 0:
+                present = [j for j in samp if rounds[j] in idx[p]]
+                if not present:
                     continue
+                rows = np.concatenate([idx[p][rounds[j]] for j in present]).astype(int)
                 w = convex_lstsq(designs[p][(n, k)]["X"][rows], designs[p][(n, k)]["y"][rows])
-                acc[pi] += len({rounds[j] for j in samp if rounds[j] in idx[p]}) / n_rounds_total[p] * w[:k].sum()
-        out[b] = acc
+                num[pi] += len(present) * w[:k].sum(); den[pi] += len(present)
+        out[b] = num / np.where(den > 0, den, np.nan)
     return out
 
 

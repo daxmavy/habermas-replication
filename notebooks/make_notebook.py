@@ -30,7 +30,7 @@ from hm_fig4c import pipeline as P
 pd.set_option("display.width", 200); pd.set_option("display.max_columns", 30)
 
 EMB_DIR = os.environ.get("HM_EMB_DIR", "../embeddings/st5-base")   # embedding cache to use
-AXIS_METHOD = os.environ.get("HM_AXIS_METHOD", "affine")             # 'affine' (0 = negating, 1 = affirming) or 'unit'
+AXIS_METHOD = os.environ.get("HM_AXIS_METHOD", "unit")               # 'unit' (SM eq. 5: projection on the unit axis) or 'affine'
 N_BOOT = int(os.environ.get("HM_N_BOOT", "500"))
 MODEL_TAG = os.path.basename(EMB_DIR.rstrip("/"))
 OUT_DIR = f"../results/{MODEL_TAG}"; os.makedirs(OUT_DIR, exist_ok=True)
