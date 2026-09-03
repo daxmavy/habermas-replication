@@ -48,7 +48,7 @@ def bar_chart_svg(res: dict, tag: str) -> str:
         out.append(f'<text x="{ml-6}" y="{y+4:.1f}" text-anchor="end" fill="var(--muted)">{v:.1f}</text>')
     yt = yscale(true)
     out.append(f'<line x1="{ml}" x2="{W-mr}" y1="{yt:.1f}" y2="{yt:.1f}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 4"/>')
-    out.append(f'<text x="{ml+4}" y="{yt-5:.1f}" text-anchor="start" fill="var(--ink)" font-style="italic">true minority share {true:.3f}</text>')
+    out.append(f'<text x="{ml + 2.5 * slot:.1f}" y="{yt-6:.1f}" text-anchor="middle" fill="var(--ink)" font-style="italic">true minority share {true:.3f}</text>')
     ytp = yscale(PAPER_TRUE)
     out.append(f'<line x1="{ml}" x2="{W-mr}" y1="{ytp:.1f}" y2="{ytp:.1f}" stroke="var(--paper)" stroke-width="1" stroke-dasharray="2 4"/>')
     for i, p in enumerate(phases):
