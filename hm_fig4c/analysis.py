@@ -168,6 +168,31 @@ def minority_weight(design: dict, min_rounds: int = 10) -> MinorityWeightResult:
     return MinorityWeightResult(per, agg_w, agg_se, int(per["n_rounds"].sum()), true)
 
 
+def paired_bootstrap(design_a: dict, design_b: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10):
+    """Joint bootstrap over rounds (same resampled rounds for both designs) -> arrays (w_a, w_b) of aggregate minority weights.
+
+    Rounds present in only one design are dropped so that the difference b - a is a paired statistic."""
+    rng = np.random.default_rng(seed)
+    levels = []
+    for l in sorted(set(design_a) & set(design_b)):
+        ka = {k: i for i, k in enumerate(design_a[l]["keys"])}; kb = {k: i for i, k in enumerate(design_b[l]["keys"])}
+        common = [k for k in design_a[l]["keys"] if k in kb]
+        if len(common) < min_rounds:
+            continue
+        ia = np.array([ka[k] for k in common]); ib = np.array([kb[k] for k in common])
+        levels.append((l, design_a[l]["X"][ia], design_a[l]["y"][ia], design_b[l]["X"][ib], design_b[l]["y"][ib]))
+    N = sum(len(y) for _, _, y, _, _ in levels)
+    out = np.empty((n_boot, 2))
+    for b in range(n_boot):
+        acc = np.zeros(2)
+        for (n, k), Xa, ya, Xb, yb in levels:
+            idx = rng.integers(0, len(ya), len(ya))
+            acc[0] += len(ya) / N * convex_lstsq(Xa[idx], ya[idx])[:k].sum()
+            acc[1] += len(ya) / N * convex_lstsq(Xb[idx], yb[idx])[:k].sum()
+        out[b] = acc
+    return out
+
+
 def bootstrap_minority_weight(design: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10):
     """Resample rounds within each division level; return bootstrap distribution of the aggregate minority weight."""
     rng = np.random.default_rng(seed)

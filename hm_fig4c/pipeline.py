@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .analysis import (assign_minority, bootstrap_minority_weight, build_design, minority_weight, score_texts)
+from .analysis import (assign_minority, bootstrap_minority_weight, build_design, minority_weight, paired_bootstrap, score_texts)
 from .data import COHORTS, text_id
 from .embed import load_embeddings
 
@@ -59,8 +59,10 @@ def run_minority_analysis(opinions: pd.DataFrame, statements: pd.DataFrame, coho
         st = st.query(statement_filter)
     op_div = assign_minority(op, neutral=neutral)
     res = {"cohort": cohort, "neutral": neutral, "order": order, "statement_filter": statement_filter}
+    designs = {}
     for stage, col in [("initial", "initial_score"), ("revised", "revised_score")]:
         design = build_design(op_div, st, "score", col, order=order, seed=seed)
+        designs[stage] = design
         mw = minority_weight(design, min_rounds=min_rounds)
         entry = {"weight": mw.weight, "se": mw.se, "n_rounds": mw.n_rounds, "true_share": mw.true_share,
                  "t_vs_true": mw.t_vs_true, "per_level": mw.per_level.to_dict(orient="records")}
@@ -71,6 +73,12 @@ def run_minority_analysis(opinions: pd.DataFrame, statements: pd.DataFrame, coho
     # difference revised - initial (levels are the same rounds, so use the per-round paired structure via bootstrap if requested)
     res["diff"] = {"weight": res["revised"]["weight"] - res["initial"]["weight"],
                    "se_indep": float(np.sqrt(res["revised"]["se"] ** 2 + res["initial"]["se"] ** 2))}
+    if n_boot:
+        pb = paired_bootstrap(designs["initial"], designs["revised"], n_boot=n_boot, seed=seed, min_rounds=min_rounds)
+        d = pb[:, 1] - pb[:, 0]
+        res["diff"].update({"paired_boot_se": float(d.std(ddof=1)), "paired_boot_ci95": [float(np.quantile(d, .025)), float(np.quantile(d, .975))],
+                            "paired_boot_p_revised_gt_initial": float((d <= 0).mean()),
+                            "boot_p_revised_gt_true": float((pb[:, 1] <= res["revised"]["true_share"]).mean())})
     return res
 
 
@@ -80,6 +88,9 @@ def summarize(res: dict) -> pd.DataFrame:
         e = res[stage]
         rows.append({"stage": stage, "minority_weight": e["weight"], "se": e["se"], "boot_se": e.get("boot_se", np.nan),
                      "true_share": e["true_share"], "t_vs_true": e["t_vs_true"], "n_rounds": e["n_rounds"]})
+    d = res["diff"]
+    rows.append({"stage": "revised - initial", "minority_weight": d["weight"], "se": d["se_indep"], "boot_se": d.get("paired_boot_se", np.nan),
+                 "true_share": np.nan, "t_vs_true": d["weight"] / d["paired_boot_se"] if "paired_boot_se" in d else np.nan, "n_rounds": np.nan})
     return pd.DataFrame(rows)
 
 
