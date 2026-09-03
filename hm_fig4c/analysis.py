@@ -20,14 +20,17 @@ from scipy.optimize import lsq_linear, minimize
 
 
 # ----------------------------------------------------------------------------- position scores
-def position_axis_scores(emb: np.ndarray, e_neg: np.ndarray, e_aff: np.ndarray, method: str = "affine") -> np.ndarray:
+def position_axis_scores(emb: np.ndarray, e_neg: np.ndarray, e_aff: np.ndarray, method: str = "unit") -> np.ndarray:
     """Project rows of `emb` onto the axis from e_neg to e_aff.
 
+    unit     : scalar projection onto the unit axis vector (SM eq. 3 & 5; with normalised embeddings the affirming and
+               negating endpoints score +/- the same value, so 0 is the neutral midpoint).
     affine   : 0 at the negating statement, 1 at the affirming statement (projection of e - e_neg onto the axis,
                divided by the axis length).
-    unit     : plain dot product with the unit axis vector (no re-centring), in embedding units.
     """
     u = e_aff - e_neg
+    if u @ u == 0:  # degenerate axis (one question in the data has identical affirming/negating text)
+        return np.full(len(emb), np.nan)
     if method == "affine":
         return (emb - e_neg) @ u / (u @ u)
     if method == "unit":
@@ -36,22 +39,24 @@ def position_axis_scores(emb: np.ndarray, e_neg: np.ndarray, e_aff: np.ndarray, 
 
 
 def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup: dict, mat: np.ndarray,
-                text_id_fn, method: str = "affine") -> pd.Series:
+                text_id_fn, method: str = "unit", endpoint_style: str = "prefixed") -> pd.Series:
     """Position score for each row of df (needs question_id + text column)."""
+    from .data import endpoint_texts
     q = questions.set_index("question_id")
     out = np.full(len(df), np.nan)
     for i, (qid, text) in enumerate(zip(df["question_id"], df[text_col])):
         if not isinstance(text, str):
             continue
         tid = text_id_fn(text)
-        aff, neg = text_id_fn(q.at[qid, "affirming"]), text_id_fn(q.at[qid, "negating"])
+        a_txt, n_txt = endpoint_texts(q.at[qid, "affirming"], q.at[qid, "negating"], endpoint_style)
+        aff, neg = text_id_fn(a_txt), text_id_fn(n_txt)
         if tid in lookup and aff in lookup and neg in lookup:
             out[i] = position_axis_scores(mat[lookup[tid]][None, :], mat[lookup[neg]], mat[lookup[aff]], method)[0]
     return pd.Series(out, index=df.index)
 
 
 # ----------------------------------------------------------------------------- group structure
-def assign_minority(opinions: pd.DataFrame, neutral: str = "drop_participant") -> pd.DataFrame:
+def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority") -> pd.DataFrame:
     """Add is_minority / n_div / k_min columns. Rows are participant-rounds with a pre_rating.
 
     neutral = 'drop_participant': neutral raters are removed, the group is kept.
@@ -117,15 +122,16 @@ def convex_fit_with_se(X: np.ndarray, y: np.ndarray, contrast: np.ndarray):
     return w, float(contrast @ w), se, sigma2, r2
 
 
-def build_design(opinions_div: pd.DataFrame, statements: pd.DataFrame, score_col: str, stmt_col: str,
+def build_design(opinions_div: pd.DataFrame, targets: pd.DataFrame, score_col: str = "score", target_col: str = "score",
                  order: str = "data", seed: int = 0):
-    """For each (n_div, k_min) level: X (rounds x n_div) of opinion scores with minority columns first, y statement scores."""
+    """Per (n_div, k_min) level: X (targets x n_div) of opinion scores with minority columns first, y = target scores,
+    keys = round key per row (several targets per round are allowed, e.g. all candidate statements)."""
     key = ["metadata.version", "launch_id", "round_id"]
-    st = statements.set_index(key)[stmt_col]
+    tg = targets.dropna(subset=[target_col]).groupby(key)[target_col].apply(list)
     rng = np.random.default_rng(seed)
     levels = {}
     for k, g in opinions_div.groupby(key):
-        if k not in st.index or not np.isfinite(st[k]) or g[score_col].isna().any():
+        if k not in tg.index or g[score_col].isna().any():
             continue
         mn, mj = g[g["is_minority"]], g[~g["is_minority"]]
         if order == "sorted":
@@ -134,8 +140,9 @@ def build_design(opinions_div: pd.DataFrame, statements: pd.DataFrame, score_col
             mn, mj = mn.sample(frac=1, random_state=rng.integers(1 << 31)), mj.sample(frac=1, random_state=rng.integers(1 << 31))
         row = np.concatenate([mn[score_col].values, mj[score_col].values])
         lvl = (int(g["n_div"].iloc[0]), int(g["k_min"].iloc[0]))
-        levels.setdefault(lvl, {"X": [], "y": [], "keys": []})
-        levels[lvl]["X"].append(row); levels[lvl]["y"].append(st[k]); levels[lvl]["keys"].append(k)
+        d = levels.setdefault(lvl, {"X": [], "y": [], "keys": []})
+        for yv in tg[k]:
+            d["X"].append(row); d["y"].append(yv); d["keys"].append(k)
     return {l: {"X": np.array(v["X"]), "y": np.array(v["y"]), "keys": v["keys"]} for l, v in levels.items()}
 
 
@@ -168,42 +175,61 @@ def minority_weight(design: dict, min_rounds: int = 10) -> MinorityWeightResult:
     return MinorityWeightResult(per, agg_w, agg_se, int(per["n_rounds"].sum()), true)
 
 
-def paired_bootstrap(design_a: dict, design_b: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10):
-    """Joint bootstrap over rounds (same resampled rounds for both designs) -> arrays (w_a, w_b) of aggregate minority weights.
-
-    Rounds present in only one design are dropped so that the difference b - a is a paired statistic."""
+def cluster_bootstrap(designs: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10) -> np.ndarray:
+    """Bootstrap over rounds, resampling the same rounds for every phase in `designs` (phase -> design).
+    Returns an array (n_boot, n_phases) of aggregate minority weights, phases in dict order."""
     rng = np.random.default_rng(seed)
-    levels = []
-    for l in sorted(set(design_a) & set(design_b)):
-        ka = {k: i for i, k in enumerate(design_a[l]["keys"])}; kb = {k: i for i, k in enumerate(design_b[l]["keys"])}
-        common = [k for k in design_a[l]["keys"] if k in kb]
-        if len(common) < min_rounds:
+    phases = list(designs)
+    levels = sorted(set.intersection(*[set(d) for d in designs.values()]))
+    prep = []
+    for l in levels:
+        rounds = sorted(set.union(*[set(designs[p][l]["keys"]) for p in phases]))
+        if len(rounds) < min_rounds:
             continue
-        ia = np.array([ka[k] for k in common]); ib = np.array([kb[k] for k in common])
-        levels.append((l, design_a[l]["X"][ia], design_a[l]["y"][ia], design_b[l]["X"][ib], design_b[l]["y"][ib]))
-    N = sum(len(y) for _, _, y, _, _ in levels)
-    out = np.empty((n_boot, 2))
+        idx = {}
+        for p in phases:
+            m = {}
+            for i, k in enumerate(designs[p][l]["keys"]):
+                m.setdefault(k, []).append(i)
+            idx[p] = m
+        prep.append((l, rounds, idx))
+    n_rounds_total = {p: sum(len({k for k in designs[p][l]["keys"]}) for l, _, _ in prep) for p in phases}
+    out = np.empty((n_boot, len(phases)))
     for b in range(n_boot):
-        acc = np.zeros(2)
-        for (n, k), Xa, ya, Xb, yb in levels:
-            idx = rng.integers(0, len(ya), len(ya))
-            acc[0] += len(ya) / N * convex_lstsq(Xa[idx], ya[idx])[:k].sum()
-            acc[1] += len(ya) / N * convex_lstsq(Xb[idx], yb[idx])[:k].sum()
+        acc = np.zeros(len(phases))
+        for (n, k), rounds, idx in prep:
+            samp = rng.choice(len(rounds), len(rounds), replace=True)
+            for pi, p in enumerate(phases):
+                rows = np.concatenate([idx[p].get(rounds[j], []) for j in samp]).astype(int) if len(samp) else np.array([], int)
+                if len(rows) == 0:
+                    continue
+                w = convex_lstsq(designs[p][(n, k)]["X"][rows], designs[p][(n, k)]["y"][rows])
+                acc[pi] += len({rounds[j] for j in samp if rounds[j] in idx[p]}) / n_rounds_total[p] * w[:k].sum()
         out[b] = acc
     return out
 
 
-def bootstrap_minority_weight(design: dict, n_boot: int = 500, seed: int = 0, min_rounds: int = 10):
-    """Resample rounds within each division level; return bootstrap distribution of the aggregate minority weight."""
-    rng = np.random.default_rng(seed)
-    levels = [(l, d) for l, d in sorted(design.items()) if len(d["y"]) >= min_rounds]
-    N = sum(len(d["y"]) for _, d in levels)
-    out = np.empty(n_boot)
-    for b in range(n_boot):
-        acc = 0.0
-        for (n, k), d in levels:
-            idx = rng.integers(0, len(d["y"]), len(d["y"]))
-            w = convex_lstsq(d["X"][idx], d["y"][idx])
-            acc += len(d["y"]) / N * w[:k].sum()
-        out[b] = acc
-    return out
+def opinion_self_regression(opinions_div: pd.DataFrame, score_col: str = "score", min_rounds: int = 10) -> pd.DataFrame:
+    """SM sanity check: regress each individual opinion on convex combinations of the same group's opinions
+    (one target per opinion); the summed minority weight should equal the proportion of opinions in the minority."""
+    key = ["metadata.version", "launch_id", "round_id"]
+    levels = {}
+    for k, g in opinions_div.groupby(key):
+        if g[score_col].isna().any():
+            continue
+        mn, mj = g[g["is_minority"]], g[~g["is_minority"]]
+        row = np.concatenate([mn[score_col].values, mj[score_col].values])
+        lvl = (int(g["n_div"].iloc[0]), int(g["k_min"].iloc[0]))
+        for target in row:
+            levels.setdefault(lvl, {"X": [], "y": []}); levels[lvl]["X"].append(row); levels[lvl]["y"].append(target)
+    rows = []
+    for (n, k), d in sorted(levels.items()):
+        X, y = np.array(d["X"]), np.array(d["y"])
+        if len(y) < min_rounds:
+            continue
+        w = convex_lstsq(X, y)
+        rows.append(dict(n=n, k=k, n_targets=len(y), true_share=k / n, minority_weight=w[:k].sum()))
+    per = pd.DataFrame(rows)
+    wts = per["n_targets"] / per["n_targets"].sum()
+    per.loc[len(per)] = dict(n="all", k="-", n_targets=per["n_targets"].sum(), true_share=(wts * per["true_share"]).sum(), minority_weight=(wts * per["minority_weight"]).sum())
+    return per

@@ -12,9 +12,16 @@ Pipeline: Sentence-T5 embeddings → per-question position axis (negating → af
 convex regression of group-statement scores on constituent opinion scores, per level of division → minority weight
 (sum of minority coefficients), averaged over levels.
 
-Paper's numbers to compare against (main text, RQ3): average minority size 29%; initial statements: minority weight 0.29;
-revised statements: 0.36 (SE 0.03, t = 2.64). Fig. 4A: r = 0.64 between opinion position score and pre-deliberation rating.
-Fig. 4B: 96% of group-statement scores within the range of the group's opinions.""")
+Paper's numbers to compare against. Fig. 4C / Fig. S60 (position embedding, main-task cohorts 1-3, n = 1047 rounds):
+opinions (sanity check) 0.28, initial statements (all candidates) 0.28, initial winner 0.29, revised statements 0.33, revised winner 0.36
+(SE 0.03, t = 2.64 vs the true minority proportion, 0.28-0.29). Fig. 4A: r = 0.64 between opinion position score and
+pre-deliberation rating. Fig. 4B: 96% of group-statement scores within the range of the group's opinions.
+
+Method (SM 5.1, 5.4.1): Sentence-T5 embeddings; per-question position axis = unit vector from the embedding of
+"No, I disagree. <negating statement>" to "Yes, I agree. <affirming statement>"; position score = projection onto that axis;
+minority = the side of neutral with fewer pre-deliberation ratings, neutral raters count as non-minority; convex regression
+(weights >= 0, sum = 1) of statement scores on the group's opinion scores, one regression per (group size, minority size) level,
+minority weight = sum of minority coefficients, averaged over levels weighted by number of rounds.""")
 
 code("""import os, sys, json
 sys.path.insert(0, os.path.abspath(".."))
@@ -30,11 +37,13 @@ OUT_DIR = f"../results/{MODEL_TAG}"; os.makedirs(OUT_DIR, exist_ok=True)
 print(EMB_DIR, AXIS_METHOD, N_BOOT)""")
 
 md("## 1. Score all texts on the position axis")
-code("""opinions, statements, questions = P.score_all("../prepared", EMB_DIR, method=AXIS_METHOD)
+code("""ENDPOINTS = os.environ.get("HM_ENDPOINTS", "prefixed")  # 'prefixed' (SM: generic + question-specific), 'plain', 'generic'
+opinions, statements, questions, candidates = P.score_all("../prepared", EMB_DIR, method=AXIS_METHOD, endpoint_style=ENDPOINTS)
 cov = pd.DataFrame({"opinions_scored": opinions.groupby("cohort")["score"].apply(lambda s: s.notna().mean()),
                     "initial_scored": statements.groupby("cohort")["initial_score"].apply(lambda s: s.notna().mean()),
                     "revised_scored": statements.groupby("cohort")["revised_score"].apply(lambda s: s.notna().mean()),
-                    "n_rounds": statements.groupby("cohort").size()})
+                    "candidates_scored": candidates.groupby("cohort")["score"].apply(lambda s: s.notna().mean()),
+                    "n_rounds": statements.groupby("cohort").size(), "n_prereg_rounds": statements.groupby("cohort")["prereg"].sum()})
 cov.round(3)""")
 
 md("## 2. Fig. 4A check — opinion position score vs pre-deliberation position rating (paper: r = 0.64)")
@@ -46,6 +55,7 @@ ax.scatter(d["pre_rating"] + np.random.uniform(-.15, .15, len(d)), d["score"], s
 means = d.groupby("pre_rating")["score"].mean()
 ax.plot(means.index, means.values, "o-", color="k", ms=5)
 ax.set_xlabel("Pre-deliberation position rating (1 = strongly disagree, 7 = strongly agree)"); ax.set_ylabel("Position component score")
+ax.axhline(0, color="grey", lw=0.8, ls=":")
 ax.set_title(f"Cohorts 1-3: r = {fig4a.loc['cohorts_1_3','r']:.2f}  (paper: 0.64)", fontsize=9); plt.tight_layout()
 plt.savefig(f"{OUT_DIR}/fig4a.png", dpi=150)""")
 
@@ -61,38 +71,39 @@ plt.savefig(f"{OUT_DIR}/fig4b.png", dpi=150)""")
 
 md("""## 4. Fig. 4C — minority weight via convex regression (primary specification)
 
-Cohorts 1–3 pooled; minority = smaller side of neutral on the pre-deliberation rating; neutral raters dropped
-(this reproduces the paper's 29% average minority size); rounds with a tie or no dissent excluded; columns ordered as in the data.""")
-code("""res = P.run_minority_analysis(opinions, statements, cohort="cohorts_1_3", neutral="drop_participant", order="data", n_boot=N_BOOT)
+Main-task cohorts 1–3, pre-registered groups (n = 1047 rounds); minority = smaller side of neutral on the pre-deliberation
+rating, neutral raters kept as non-minority (SM 5.4.1); rounds with a tie or no dissent excluded; columns ordered as in the data.
+Analytic SEs are the OLS standard errors of the constrained fit (as in the paper); bootstrap SEs resample rounds.""")
+code("""res = P.run_minority_analysis(opinions, candidates, cohort="cohorts_1_3", neutral="as_majority", order="data", n_boot=N_BOOT)
 P.save_results(res, f"{OUT_DIR}/fig4c_primary.json")
-summary = P.summarize(res); summary""")
-code("""P.per_level_table(res)""")
-code("""fig, ax = plt.subplots(figsize=(4.2, 3.6))
-P.plot_fig4c(res, ax=ax, title=f"Cohorts 1-3, {MODEL_TAG} (n = {res['initial']['n_rounds']} rounds)")
+summary = P.summarize(res); summary.round(3)""")
+code("""pd.DataFrame(res["contrasts"]).T.round(3)""")
+code("""P.per_level_table(res).round(3)""")
+code("""fig, ax = plt.subplots(figsize=(5.2, 3.6))
+P.plot_fig4c(res, ax=ax, include_opinions=True, title=f"Cohorts 1-3 (pre-registered groups), {MODEL_TAG}, n = {res['phases']['initial_winner']['n_rounds']} rounds")
 plt.tight_layout(); plt.savefig(f"{OUT_DIR}/fig4c.png", dpi=200)""")
 
 md("""## 5. Sensitivity analyses
 Each row varies one choice relative to the primary specification.""")
 code("""variants = {
-  "primary (cohorts 1-3, drop neutral participant, data order)": dict(cohort="cohorts_1_3"),
-  "neutral: drop whole group": dict(cohort="cohorts_1_3", neutral="drop_group"),
-  "neutral: count as non-minority": dict(cohort="cohorts_1_3", neutral="as_majority"),
+  "primary (cohorts 1-3 prereg, neutral = non-minority, data order)": dict(cohort="cohorts_1_3"),
+  "neutral raters dropped (group kept)": dict(cohort="cohorts_1_3", neutral="drop_participant"),
+  "groups with any neutral rater dropped": dict(cohort="cohorts_1_3", neutral="drop_group"),
   "column order: sorted by score": dict(cohort="cohorts_1_3", order="sorted"),
   "column order: random": dict(cohort="cohorts_1_3", order="random"),
+  "all cohorts 1-3 rounds (no pre-registration filter)": dict(cohort="cohorts_1_3", prereg_only=False),
   "cohort 1 only": dict(cohort="cohort1"), "cohort 2 only": dict(cohort="cohort2"), "cohort 3 only": dict(cohort="cohort3"),
   "cohort 4 (critique exclusion)": dict(cohort="cohort4"),
   "training data": dict(cohort="training"), "virtual citizens' assembly": dict(cohort="vca"),
-  "initial stmt from fine-tuned generator only": dict(cohort="cohorts_1_3", statement_filter="initial_gen_api == 'hydra_70b_generative'"),
-  "initial stmt from base Chinchilla generator only": dict(cohort="cohorts_1_3", statement_filter="initial_gen_api == 'chinchilla'"),
 }
 rows = []
 for name, kw in variants.items():
     try:
-        r = P.run_minority_analysis(opinions, statements, **kw)
-        rows.append({"variant": name, "n_rounds": r["initial"]["n_rounds"], "true_share": r["initial"]["true_share"],
-                     "initial_w": r["initial"]["weight"], "initial_se": r["initial"]["se"],
-                     "revised_w": r["revised"]["weight"], "revised_se": r["revised"]["se"],
-                     "revised_t_vs_true": r["revised"]["t_vs_true"], "diff": r["diff"]["weight"]})
+        r = P.run_minority_analysis(opinions, candidates, include_opinions=False, **kw)
+        row = {"variant": name, "n_rounds": r["phases"]["initial_winner"]["n_rounds"], "true_share": r["phases"]["initial_winner"]["true_share"]}
+        for ph in P.PHASES:
+            row[ph] = r["phases"][ph]["weight"]; row[ph + "_se"] = r["phases"][ph]["se"]
+        rows.append(row)
     except Exception as e:
         rows.append({"variant": name, "error": str(e)[:80]})
 sens = pd.DataFrame(rows); sens.to_csv(f"{OUT_DIR}/sensitivity.csv", index=False); sens.round(3)""")
@@ -102,7 +113,7 @@ code("""from hm_fig4c.analysis import assign_minority, convex_fit_with_se
 from hm_fig4c.data import text_id
 from hm_fig4c.embed import load_embeddings
 lookup, mat = load_embeddings(EMB_DIR)
-op = assign_minority(P.select_cohort(opinions, "cohorts_1_3"), neutral="drop_participant")
+op = assign_minority(P.select_cohort(opinions, "cohorts_1_3"), neutral="as_majority")
 st = P.select_cohort(statements, "cohorts_1_3").set_index(P.KEY)
 def vec_design(stmt_col):
     lv = {}
@@ -129,11 +140,13 @@ for stage, col in [("initial", "initial_text"), ("revised", "revised_text")]:
 vec = pd.DataFrame(vec_rows); vec.to_csv(f"{OUT_DIR}/vector_regression.csv", index=False); vec.round(3)""")
 
 md("## 7. Summary vs paper")
-code("""paper = {"minority_share": 0.29, "initial_w": 0.29, "revised_w": 0.36, "revised_se": 0.03, "fig4a_r": 0.64, "fig4b_within": 0.96}
-ours = {"minority_share": res["initial"]["true_share"], "initial_w": res["initial"]["weight"], "initial_se": res["initial"]["se"],
-        "revised_w": res["revised"]["weight"], "revised_se": res["revised"]["se"], "revised_t_vs_true": res["revised"]["t_vs_true"],
-        "fig4a_r": fig4a.loc["cohorts_1_3", "r"], "fig4b_within_initial": fig4b["cohorts_1_3"]["initial_score"]["within"],
-        "fig4b_within_revised": fig4b["cohorts_1_3"]["revised_score"]["within"], "n_rounds": res["initial"]["n_rounds"], "model": MODEL_TAG}
+code("""paper = {"n_rounds": 1047, "minority_share": 0.285, "opinions_sanity": 0.28, "initial_candidates": 0.28, "initial_winner": 0.29,
+         "revised_candidates": 0.33, "revised_winner": 0.36, "revised_winner_se": 0.03, "revised_winner_t_vs_true": 2.64,
+         "fig4a_r": 0.64, "fig4b_within": 0.96}
+ph = res["phases"]
+ours = {"n_rounds": ph["initial_winner"]["n_rounds"], "minority_share": ph["initial_winner"]["true_share"], "opinions_sanity": ph["opinions"]["weight"],
+        **{p: ph[p]["weight"] for p in P.PHASES}, "revised_winner_se": ph["revised_winner"]["se"], "revised_winner_t_vs_true": ph["revised_winner"]["t_vs_true"],
+        "fig4a_r": fig4a.loc["cohorts_1_3", "r"], "fig4b_within": fig4b["cohorts_1_3"]["both"]["within"], "model": MODEL_TAG, "endpoints": ENDPOINTS, "axis": AXIS_METHOD}
 json.dump({"paper": paper, "ours": ours}, open(f"{OUT_DIR}/summary.json", "w"), indent=1, default=float)
 pd.DataFrame({"paper": paper, "ours": ours}).round(3)""")
 

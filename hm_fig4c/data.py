@@ -32,6 +32,21 @@ COHORTS["cohorts_1_3"] = COHORTS["cohort1"] + COHORTS["cohort2"] + COHORTS["coho
 EMBED_PRIORITY = ["cohort1", "cohort2", "cohort3", "cohort4", "training", "vca"]
 
 
+AFFIRM_PREFIX, NEGATE_PREFIX = "Yes, I agree. ", "No, I disagree. "
+
+
+def endpoint_texts(affirming: str, negating: str, style: str = "prefixed") -> tuple[str, str]:
+    """Position-axis endpoint texts. SM 5.1.2: 'generic + question-specific' endpoints, e.g.
+    'Yes, I agree. It is the government's role to [...]' / 'No, I disagree. It is not the government's role to [...]'."""
+    if style == "prefixed":
+        return AFFIRM_PREFIX + affirming.strip(), NEGATE_PREFIX + negating.strip()
+    if style == "plain":
+        return affirming.strip(), negating.strip()
+    if style == "generic":
+        return AFFIRM_PREFIX.strip(), NEGATE_PREFIX.strip()
+    raise ValueError(style)
+
+
 def text_id(text: str) -> str:
     return hashlib.sha1(text.strip().encode("utf-8")).hexdigest()[:16]
 
@@ -53,7 +68,7 @@ def load_comparisons(data_dir: Path) -> pd.DataFrame:
         "top_candidate.metadata.generative_model.api_version",
         "top_candidate.metadata.reward_model.api_version",
         "candidates.metadata.id", "candidates.text", "candidates.metadata.provenance",
-        "critique.text", "critique.metadata.provenance",
+        "critique.text", "critique.metadata.provenance", "monotonic_timestamp", "ratings.agreement", "rankings.numerical_ranks",
     ]
     return pd.read_parquet(data_dir / "hm_all_candidate_comparisons.parquet", columns=cols)
 
@@ -85,10 +100,14 @@ def build_tables(data_dir: Path, verbose: bool = True):
     comps = comps[comps["metadata.version"].apply(_version_to_cohort) != "other"]
     comps["cohort"] = comps["metadata.version"].apply(_version_to_cohort)
     key = ["metadata.version", "launch_id", "round_id"]
+    from .preprocess import preregistered_launches
+    prereg = preregistered_launches(comps)
+    prereg_set = {(v, l) for v, ls in prereg.items() for l in ls}
+    comps["prereg"] = [(v, l) in prereg_set for v, l in zip(comps["metadata.version"], comps["launch_id"])]
 
     # --- opinions: from iteration-0 rows (one row per human participant per round)
     i0 = comps[(comps["iteration_index"] == 0) & (comps["own_opinion.metadata.provenance"] == "HUMAN_CITIZEN")]
-    opinions = i0[key + ["cohort", "metadata.participant_id", "worker_id", "question.id",
+    opinions = i0[key + ["cohort", "prereg", "metadata.participant_id", "worker_id", "question.id",
                          "own_opinion.metadata.id", "own_opinion.text"]].rename(columns={
         "metadata.participant_id": "participant_id", "question.id": "question_id",
         "own_opinion.metadata.id": "opinion_id", "own_opinion.text": "opinion_text"})
@@ -129,8 +148,28 @@ def build_tables(data_dir: Path, verbose: bool = True):
     revised = sv.drop_duplicates(key)[key + ["candidate.metadata.id", "candidate.text"]].rename(columns={
         "candidate.metadata.id": "revised_id", "candidate.text": "revised_text"})
 
+    # --- all candidate statements shown at each iteration (same list for every participant in a round-iteration)
+    cand_rows = []
+    ci = comps[comps["iteration_index"].isin([0, 1])].drop_duplicates(key + ["iteration_index"])
+    for v, l, rd, it, ids, texts_, provs in zip(ci["metadata.version"], ci["launch_id"], ci["round_id"], ci["iteration_index"],
+                                                ci["candidates.metadata.id"], ci["candidates.text"], ci["candidates.metadata.provenance"]):
+        for cid, ctext, cprov in zip(ids, texts_, provs):
+            if cprov == "MODEL_MEDIATOR":
+                cand_rows.append((v, l, rd, int(it), cid, ctext))
+    candidates = pd.DataFrame(cand_rows, columns=key + ["iteration_index", "candidate_id", "candidate_text"]).drop_duplicates(key + ["iteration_index", "candidate_id"])
+    # check the candidate list is identical across participants of a round-iteration
+    n_lists = comps[comps["iteration_index"].isin([0, 1])].groupby(key + ["iteration_index"])["candidates.metadata.id"].apply(lambda s: len({tuple(sorted(x)) for x in s}))
+    assert (n_lists == 1).mean() > 0.99, "candidate lists differ across participants"
+
     statements = initial.merge(revised, on=key, how="outer")
     statements["cohort"] = statements["metadata.version"].apply(_version_to_cohort)
+    statements["prereg"] = [(v, l) in prereg_set for v, l in zip(statements["metadata.version"], statements["launch_id"])]
+
+    candidates = candidates.merge(statements[key + ["initial_id", "revised_id", "cohort", "prereg"]], on=key, how="inner")
+    candidates["phase"] = np.where(candidates["iteration_index"] == 0, "initial", "revised")
+    candidates["is_winner"] = np.where(candidates["iteration_index"] == 0, candidates["candidate_id"] == candidates["initial_id"],
+                                       candidates["candidate_id"] == candidates["revised_id"])
+    candidates = candidates.drop(columns=["initial_id", "revised_id"])
 
     questions = comps.drop_duplicates("question.id")[["question.id", "question.text", "question.affirming_statement",
                                                        "question.negating_statement", "question.topic", "question.split"]]
@@ -140,18 +179,25 @@ def build_tables(data_dir: Path, verbose: bool = True):
         print("opinions:", opinions.shape, "| pre-rating coverage:", opinions["pre_rating"].notna().mean().round(4))
         print(opinions.groupby("cohort").size())
         print("statements:", statements.shape)
+        print("pre-registered groups / rounds per version:\n", statements[statements["prereg"]].groupby("metadata.version").agg(groups=("launch_id", "nunique"), rounds=("round_id", "size")))
         print(statements.groupby("cohort")[["initial_id", "revised_id"]].apply(lambda g: g.notna().mean()).round(3))
         print("questions:", questions.shape)
-    return opinions, statements, questions
+        print("candidates:", candidates.shape, "| per round-iteration:", candidates.groupby(key + ["iteration_index"]).size().value_counts().to_dict())
+        print("winner found among candidates:", candidates.groupby(key + ["phase"])["is_winner"].any().mean().round(4))
+    return opinions, statements, questions, candidates
 
 
-def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions: pd.DataFrame) -> pd.DataFrame:
+def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions: pd.DataFrame, candidates: pd.DataFrame | None = None) -> pd.DataFrame:
     """Unique texts to embed, with a priority (lower = embed first)."""
     prio = {c: i for i, c in enumerate(EMBED_PRIORITY)}
     rows = []
     for q in questions.itertuples():
+        a, n = endpoint_texts(q.affirming, q.negating, "prefixed")
+        rows.append((a, "position_prefixed", -2))
+        rows.append((n, "position_prefixed", -2))
         rows.append((q.affirming, "position", -1))
         rows.append((q.negating, "position", -1))
+    rows.append((AFFIRM_PREFIX.strip(), "position_generic", -2)); rows.append((NEGATE_PREFIX.strip(), "position_generic", -2))
     for r in opinions.itertuples():
         rows.append((r.opinion_text, "opinion", prio.get(r.cohort, 99)))
     for r in statements.itertuples():
@@ -159,6 +205,10 @@ def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions
             rows.append((r.initial_text, "initial", prio.get(r.cohort, 99)))
         if isinstance(r.revised_text, str):
             rows.append((r.revised_text, "revised", prio.get(r.cohort, 99)))
+    if candidates is not None:  # non-winning candidates: right after the main cohorts' winners, or last for other cohorts
+        for r in candidates[~candidates["is_winner"]].itertuples():
+            base = prio.get(r.cohort, 99)
+            rows.append((r.candidate_text, "candidate", (3 if r.prereg else 6) if base <= 2 else base + 3))
     t = pd.DataFrame(rows, columns=["text", "kind", "priority"])
     t["text_id"] = t["text"].apply(text_id)
     t = t.sort_values("priority").drop_duplicates("text_id")
@@ -168,15 +218,16 @@ def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions
 
 def prepare(data_dir: Path, out_dir: Path):
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-    opinions, statements, questions = build_tables(data_dir)
-    texts = build_text_table(opinions, statements, questions)
+    opinions, statements, questions, candidates = build_tables(data_dir)
+    texts = build_text_table(opinions, statements, questions, candidates)
     opinions.to_parquet(out_dir / "opinions.parquet", index=False)
+    candidates.to_parquet(out_dir / "candidates.parquet", index=False)
     statements.to_parquet(out_dir / "statements.parquet", index=False)
     questions.to_parquet(out_dir / "questions.parquet", index=False)
     texts.to_parquet(out_dir / "texts.parquet", index=False)
     print("texts to embed:", len(texts)); print(texts.groupby(["priority", "kind"]).size())
     print("word-count quantiles:\n", texts.groupby("kind")["n_words"].describe(percentiles=[.5, .9, .99]).round(0))
-    return opinions, statements, questions, texts
+    return opinions, statements, questions, candidates, texts
 
 
 if __name__ == "__main__":
