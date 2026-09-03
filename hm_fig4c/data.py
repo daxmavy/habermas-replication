@@ -190,30 +190,32 @@ def build_tables(data_dir: Path, verbose: bool = True):
 def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions: pd.DataFrame, candidates: pd.DataFrame | None = None) -> pd.DataFrame:
     """Unique texts to embed, with a priority (lower = embed first)."""
     prio = {c: i for i, c in enumerate(EMBED_PRIORITY)}
+    prereg_q = set(statements.loc[statements["prereg"], "question_id"])  # questions used by pre-registered rounds
     rows = []
     for q in questions.itertuples():
+        pq = q.question_id in prereg_q
         a, n = endpoint_texts(q.affirming, q.negating, "prefixed")
-        rows.append((a, "position_prefixed", -2))
-        rows.append((n, "position_prefixed", -2))
-        rows.append((q.affirming, "position", -1))
-        rows.append((q.negating, "position", -1))
-    rows.append((AFFIRM_PREFIX.strip(), "position_generic", -2)); rows.append((NEGATE_PREFIX.strip(), "position_generic", -2))
+        rows.append((a, "position_prefixed", -2, pq))
+        rows.append((n, "position_prefixed", -2, pq))
+        rows.append((q.affirming, "position", -1, pq))
+        rows.append((q.negating, "position", -1, pq))
+    rows.append((AFFIRM_PREFIX.strip(), "position_generic", -2, True)); rows.append((NEGATE_PREFIX.strip(), "position_generic", -2, True))
     for r in opinions.itertuples():
-        rows.append((r.opinion_text, "opinion", prio.get(r.cohort, 99)))
+        rows.append((r.opinion_text, "opinion", prio.get(r.cohort, 99), bool(r.prereg)))
     for r in statements.itertuples():
         if isinstance(r.initial_text, str):
-            rows.append((r.initial_text, "initial", prio.get(r.cohort, 99)))
+            rows.append((r.initial_text, "initial", prio.get(r.cohort, 99), bool(r.prereg)))
         if isinstance(r.revised_text, str):
-            rows.append((r.revised_text, "revised", prio.get(r.cohort, 99)))
+            rows.append((r.revised_text, "revised", prio.get(r.cohort, 99), bool(r.prereg)))
     if candidates is not None:  # non-winning candidates: right after the main cohorts' winners, or last for other cohorts
         for r in candidates[~candidates["is_winner"]].itertuples():
             base = prio.get(r.cohort, 99)
-            rows.append((r.candidate_text, "candidate", (3 if r.prereg else 6) if base <= 2 else base + 3))
-    t = pd.DataFrame(rows, columns=["text", "kind", "priority"])
+            rows.append((r.candidate_text, "candidate", (3 if r.prereg else 6) if base <= 2 else base + 3, bool(r.prereg)))
+    t = pd.DataFrame(rows, columns=["text", "kind", "priority", "prereg"])
     t["text_id"] = t["text"].apply(text_id)
-    t = t.sort_values("priority").drop_duplicates("text_id")
+    t = t.sort_values(["priority", "prereg"], ascending=[True, False]).drop_duplicates("text_id")
     t["n_words"] = t["text"].str.split().str.len()
-    return t[["text_id", "text", "kind", "priority", "n_words"]].reset_index(drop=True)
+    return t[["text_id", "text", "kind", "priority", "prereg", "n_words"]].reset_index(drop=True)
 
 
 def prepare(data_dir: Path, out_dir: Path):
