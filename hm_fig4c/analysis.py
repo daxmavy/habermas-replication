@@ -121,7 +121,8 @@ def convex_fit_with_se(X: np.ndarray, y: np.ndarray, contrast: np.ndarray):
     sigma2 = resid @ resid / dof
     c = contrast[others] - contrast[ref]
     se = float(np.sqrt(sigma2 * c @ ZtZ_inv @ c))
-    r2 = 1 - resid @ resid / np.sum((y - y.mean()) ** 2) if len(y) > 1 else np.nan
+    full_resid = y - X @ w
+    r2 = 1 - full_resid @ full_resid / np.sum((y - y.mean()) ** 2) if len(y) > 1 else np.nan
     return w, float(contrast @ w), se, sigma2, r2
 
 
