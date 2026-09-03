@@ -94,6 +94,7 @@ code("""variants = {
   "ties kept, agree side = minority [true share 0.28]": dict(cohort="cohorts_1_3", ties="agree"),
   "ties kept, disagree side = minority [true share 0.28]": dict(cohort="cohorts_1_3", ties="disagree"),
   "neutral dropped + ties kept (agree = minority)": dict(cohort="cohorts_1_3", neutral="drop_participant", ties="agree"),
+  "minority by sign of opinion position score (SM Fig. S62)": dict(cohort="cohorts_1_3", minority_by="score"),
   "groups with any neutral rater dropped": dict(cohort="cohorts_1_3", neutral="drop_group"),
   "column order: sorted by score": dict(cohort="cohorts_1_3", order="sorted"),
   "column order: random": dict(cohort="cohorts_1_3", order="random"),

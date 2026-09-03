@@ -45,3 +45,7 @@ Direction (revised winner > initial winner) replicates; levels do not (all phase
 Isotropic axis-noise simulation does not bias the estimate down (recovers 0.26 at every r).
 Report: `report/fig4c_report.html`; notebook output `notebooks/fig4c_st5-base_out.ipynb`; results `results/st5-base/`.
 Pending: ST5-large run (prereg texts) -> rerun notebook with HM_EMB_DIR=../embeddings/st5-large, regenerate report with both.
+
+## ST5-large (winners; candidates partial at time of writing)
+Fig 4A r = 0.63 (paper 0.64) -> axis quality matches the paper. Minority weights: initial winner 0.141 ± 0.018, revised winner 0.164 ± 0.017
+(diff +0.023, bootstrap CI -0.001..0.044, p = 0.03); true share 0.262. 768-d regression 0.229 / 0.237. Fig 4B 0.86.

@@ -56,7 +56,7 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
 
 
 # ----------------------------------------------------------------------------- group structure
-def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: str = "exclude") -> pd.DataFrame:
+def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: str = "exclude", by: str = "rating") -> pd.DataFrame:
     """Add is_minority / n_div / k_min columns. Rows are participant-rounds with a pre_rating.
 
     neutral = 'drop_participant': neutral raters are removed, the group is kept.
@@ -64,11 +64,17 @@ def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: 
               'as_majority'     : neutral raters are kept and counted as non-minority (SM 5.4.1).
     ties    = 'exclude'         : rounds with equal agree/disagree counts have no minority and are dropped.
               'agree'/'disagree': in a tie, that side is taken as the minority.
+    by      = 'rating'          : sides from the pre-deliberation Likert rating (SM Fig. S60).
+              'score'           : sides from the sign of the opinion's position score (SM Fig. S62; no neutrals).
     Rounds with no dissent are always dropped.
     """
     key = ["metadata.version", "launch_id", "round_id"]
-    df = opinions.dropna(subset=["pre_rating"]).copy()
-    df["side"] = np.sign(df["pre_rating"] - 4).astype(int)  # -1 disagree, 0 neutral, +1 agree
+    if by == "score":
+        df = opinions.dropna(subset=["score"]).copy()
+        df["side"] = np.sign(df["score"]).astype(int)
+    else:
+        df = opinions.dropna(subset=["pre_rating"]).copy()
+        df["side"] = np.sign(df["pre_rating"] - 4).astype(int)  # -1 disagree, 0 neutral, +1 agree
     if neutral == "drop_group":
         bad = df.loc[df["side"] == 0, key].drop_duplicates()
         df = df.merge(bad.assign(_bad=1), on=key, how="left")
