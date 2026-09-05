@@ -1,0 +1,158 @@
+{
+ "codeApproach": [
+  {
+   "module": "hm_fig4c/data.py",
+   "symbol": "build_tables",
+   "start": 97,
+   "end": 187
+  },
+  {
+   "module": "hm_fig4c/data.py",
+   "symbol": "prepare",
+   "start": 221,
+   "end": 232
+  },
+  {
+   "module": "hm_fig4c/preprocess.py",
+   "symbol": "preregistered_launches",
+   "start": 50,
+   "end": 61
+  },
+  {
+   "module": "hm_fig4c/preprocess.py",
+   "symbol": "filter_by_number_of_groups_of_min_size",
+   "start": 41,
+   "end": 47
+  }
+ ],
+ "codeMinority": [
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "assign_minority",
+   "start": 59,
+   "end": 93
+  },
+  {
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "select_cohort",
+   "start": 40,
+   "end": 45
+  }
+ ],
+ "codeAgreement": [
+  {
+   "module": "hm_fig4c/data.py",
+   "symbol": "endpoint_texts",
+   "start": 38,
+   "end": 47
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "position_axis_scores",
+   "start": 23,
+   "end": 38
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "score_texts",
+   "start": 41,
+   "end": 55
+  },
+  {
+   "module": "hm_fig4c/embed.py",
+   "symbol": "run",
+   "start": 26,
+   "end": 58
+  }
+ ],
+ "codeAgreementValidation": [
+  {
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "fig4a_correlation",
+   "start": 54,
+   "end": 57
+  },
+  {
+   "module": "report/compute_values.py",
+   "symbol": "marginal_r2",
+   "start": 46,
+   "end": 64
+  }
+ ],
+ "codeRepresentation": [
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "convex_lstsq",
+   "start": 97,
+   "end": 108
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "convex_fit_with_se",
+   "start": 111,
+   "end": 132
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "build_design",
+   "start": 135,
+   "end": 156
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "minority_weight",
+   "start": 172,
+   "end": 185
+  }
+ ],
+ "codeSanity": [
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "opinion_self_regression",
+   "start": 223,
+   "end": 246
+  }
+ ],
+ "codeResults": [
+  {
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "run_minority_analysis",
+   "start": 74,
+   "end": 105
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "cluster_bootstrap",
+   "start": 188,
+   "end": 220
+  },
+  {
+   "module": "report/figures.py",
+   "symbol": null,
+   "start": 1,
+   "end": 130
+  }
+ ],
+ "codeSensitivity": [
+  {
+   "module": "notebooks/make_notebook.py",
+   "symbol": null,
+   "start": 1,
+   "end": 197
+  },
+  {
+   "module": "report/compute_values.py",
+   "symbol": "sensitivity_summary",
+   "start": 67,
+   "end": 90
+  }
+ ],
+ "codeValidationExtra": [
+  {
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "fig4b_within_range",
+   "start": 60,
+   "end": 71
+  }
+ ]
+}

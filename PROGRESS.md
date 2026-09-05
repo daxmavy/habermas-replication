@@ -64,3 +64,39 @@ Fig 4A r = 0.63 (paper 0.64) -> axis quality matches the paper. Minority weights
 Verdict: direction for winners replicates weakly; levels do not (all phases below proportional, every specification and both models).
 Optional follow-up still running in the background: embeddings for training data / VCA / cohort 4 candidates (driver `run_embed_all.sh`);
 rerun the notebooks afterwards to fill the last sensitivity rows.
+
+## Report (2026-09-05) — LaTeX write-up of the reMarkable draft
+
+`report/fig4c_report.tex` -> `report/fig4c_report.pdf` (9 pp). The prose is the handwritten
+notebook "Habermas replication" transcribed verbatim; red = a placeholder filled in, blue = a
+factual correction (each with a footnote giving the original wording and the source).
+
+Build chain — no number is typed into the .tex:
+
+    uv run python report/compute_values.py      # results/ + prepared/ + embeddings/ -> report/values.json
+    uv run python report/build_parameters.py    # values.json -> report/parameters.tex (135 macros)
+    uv run python report/codelinks.py           # ast line spans -> report/codelinks.tex (9 section macros)
+    uv run python report/figures.py             # values.json -> report/figures/*.pdf
+    cd report && pdflatex fig4c_report.tex      # twice, for refs
+    uv run python report/build_parameters.py --check   # freshness gate
+
+Paper-side numbers live in `report/paper_citations.json`, each with the SM section it was read
+from; `compute_values.py` cross-checks them against the pipeline's own `paper` block and dies on
+drift. SM Fig. S60 bar values verified by rendering PDF p.197 of the SM.
+
+New findings this pass:
+- Marginal r^2 of the paper's validation model (SM eq. 7, random intercept per round): ST5-base
+  0.291, ST5-large 0.392, paper 0.41. This is what picks ST5-large as the most-likely model.
+  ST5-xl not run: 3B params, no GPU and 7 GB RAM on this VM.
+- Sensitivity: 16 specifications attempted per model, 14 completed (training data and VCA fail —
+  texts outside the pre-registered embedding set; both out of scope for main-text Fig. 4C).
+  Revised winner exceeds its own true share in 0 of 14. Winner-to-winner rise holds in 93%.
+- Fact-check corrections applied to the draft: (a) SM 5.1.2 *does* specify the endpoint phrases;
+  (b) the implementation check regresses opinions on convex combinations of the same opinions and
+  should recover the minority share, not 1/m per input; (c) the sensitivity section's 0.291 is a
+  variant's true share, not the primary 0.262. The draft's "R^2 of 0.41" is correct as written
+  (marginal r^2, SM 5.1.3).
+
+Still open: code references render as file:line, not permalinks — `\repourl` in the preamble is
+empty because this VM cannot create the GitHub remote (exe.dev proxy serves only
+/repos/OWNER/REPO; `gh repo create` -> 403). Add a repo integration, set `\repourl`, rebuild.

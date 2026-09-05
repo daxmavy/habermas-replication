@@ -1,0 +1,38 @@
+{
+ "_note": "Numbers quoted FROM Tessler et al. (2024). Each carries the place it was read from. Bar values were read off SM Fig. S60 (position-embedding panel) and verified against the rendered page (docs/science.adq2852_sm.pdf, PDF p.197 = printed p.229); they are also printed as data labels on the bars themselves.",
+ "fig4c": {
+  "_source": "SM Fig. S60, 'Position Embedding' panel (expanded version of main-text Fig. 4C, per SM 5.2.2)",
+  "minority_share": 0.285,
+  "opinions_sanity": 0.28,
+  "initial_candidates": 0.28,
+  "initial_winner": 0.29,
+  "revised_candidates": 0.33,
+  "revised_winner": 0.36,
+  "revised_winner_se": 0.03
+ },
+ "axis_validation": {
+  "_source": "Main-text Materials and Methods (SM front matter, printed p.39) and SM 5.1.3",
+  "marginal_r2": 0.41,
+  "conditional_r2": 0.45,
+  "_marginal_quote": "A random-effects estimator of the regression coefficient for Likert ratings on position embeddings yields a marginal r-squared value of 0.41 (SM 5.1.3).",
+  "_conditional_quote": "We find the marginal r2 and conditional r2 to be 0.41 and 0.45 respectively"
+ },
+ "endpoints": {
+  "_source": "SM 5.1.2",
+  "affirming": "Yes, I agree. It is the government's role to [...]",
+  "negating": "No, I disagree. It is not the government's role to [...]",
+  "_quote": "our choice of embedding space consists of sentence text-to-text transfer transformer as embedding function, a generic + question-specific combination as position endpoints ... and using a dipolar position axis for each round"
+ },
+ "sanity_check": {
+  "_source": "Main-text Materials and Methods (SM front matter, printed p.39-40)",
+  "_quote": "As a sanity check, we similarly regress individual opinions on convex combinations of those same opinions, which we verify to simply yield the proportion of opinions in the minority."
+ },
+ "minority_rule": {
+  "_source": "SM 5.4.1",
+  "_quote": "we may define the 'minority' side of the Likert scale as the side that contains the smaller number of opinions, and define all other opinions as 'non-minority' opinions--which include 'majority' opinions ... as well as 'neutral' opinions (i.e. with a Likert rating of 4), if any."
+ },
+ "group_design": {
+  "_source": "SM 1.2 / 4.1 (\"participants were silently organised into groups of five\"); target size raised to 6 in one later setup",
+  "designed_size": 5
+ }
+}
