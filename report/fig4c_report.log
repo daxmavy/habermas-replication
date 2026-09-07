@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  7 SEP 2026 19:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  7 SEP 2026 19:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -681,7 +681,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 177--177
 
 Underfull \hbox (badness 10000) in paragraph at lines 183--183
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:54--57 \T1/lmr/m
-/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:39--56
+/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:40--57
  []
 
 
@@ -705,7 +705,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 199--199
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 229--229
-[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:74--105 \T1/lmr/
+[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:74--106 \T1/lmr/
 m/n/10 run_minority_analysis()[] []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:188--22
 0
  []
@@ -766,8 +766,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 321--321
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 328--328
-[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:114--126 \T1/lmr
-/m/n/10 sen-si-tiv-ity_grid()[] []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:129--139
+[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:115--127 \T1/lmr
+/m/n/10 sen-si-tiv-ity_grid()[] []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:130--140
 
  []
 
@@ -837,7 +837,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 Underfull \hbox (badness 10000) in paragraph at lines 407--407
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:54--57 \T1/lmr/m
-/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:39--56
+/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:40--57
  []
 
 
@@ -877,7 +877,7 @@ hare/texmf/fonts/type1/public/lm/lmr9.pfb></usr/share/texmf/fonts/type1/public/
 lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/te
 xmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lms
 y9.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb>
-Output written on fig4c_report.pdf (9 pages, 397149 bytes).
+Output written on fig4c_report.pdf (9 pages, 397134 bytes).
 PDF statistics:
  422 PDF objects out of 1000 (max. 8388607)
  236 compressed objects within 3 object streams

@@ -75,8 +75,8 @@
   {
    "module": "report/compute_values.py",
    "symbol": "marginal_r2",
-   "start": 39,
-   "end": 56
+   "start": 40,
+   "end": 57
   }
  ],
  "codeRepresentation": [
@@ -118,7 +118,7 @@
    "module": "hm_fig4c/pipeline.py",
    "symbol": "run_minority_analysis",
    "start": 74,
-   "end": 105
+   "end": 106
   },
   {
    "module": "hm_fig4c/analysis.py",
@@ -130,27 +130,27 @@
    "module": "report/figures.py",
    "symbol": null,
    "start": 1,
-   "end": 128
+   "end": 134
   }
  ],
  "codeSensitivity": [
   {
    "module": "hm_fig4c/pipeline.py",
    "symbol": "sensitivity_grid",
-   "start": 114,
-   "end": 126
+   "start": 115,
+   "end": 127
   },
   {
    "module": "hm_fig4c/pipeline.py",
    "symbol": "run_sensitivity",
-   "start": 129,
-   "end": 139
+   "start": 130,
+   "end": 140
   },
   {
    "module": "report/compute_values.py",
    "symbol": "sensitivity_summary",
-   "start": 81,
-   "end": 94
+   "start": 82,
+   "end": 95
   }
  ],
  "codeValidationExtra": [
