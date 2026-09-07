@@ -136,3 +136,37 @@ assigned; each column's coefficient pools across rounds, so the assignment chang
 
 Not touched: the Isambard ST5-xl embedding work in progress (isambard/, embed.py, pyproject.toml,
 uv.lock changes are uncommitted and belong to that effort).
+
+## Fig. 4D (2026-09-07) — HM "majority bias" vs group movement toward the majority
+
+Main text RQ3 (main paper p.5; PDF mirror at https://www.rivista.ai/wp-content/uploads/2024/10/science.adq2852.pdf; caption: "Individual points represent a single group discussing
+a single question"): x = fraction of the round's group statements (4 initial + 4 revised candidates) whose position component score
+falls on the majority side of the median opinion score; y = the group's viewpoint change toward the majority between the pre- and
+post-deliberation position ratings. Paper: **no association, b = 0.058, SE = 0.07, z = 0.9, P = 0.37**. The panel's x values sit at
+multiples of 1/8 and its y values at multiples of 1/5 and 1/4, so y is a group mean of a per-participant {-1, 0, +1} quantity; we use
+mean sign(post' − pre') on majority-aligned ratings (SM 4.1.2.1: majority = side of neutral with more pre ratings, tie → AGREE).
+Code: `hm_fig4c/fig4d.py`; notebook `notebooks/fig4d.ipynb` (`make_notebook.py --figure 4d`); outputs `results/<model>/fig4d*`.
+
+| | paper | ST5-large (primary) | ST5-base |
+|---|---|---|---|
+| n rounds (cohorts 1-3, prereg) | ? | 1047 | 1047 |
+| slope b (OLS on rounds) | 0.058 | 0.183 | 0.097 |
+| SE | 0.07 | 0.038 | 0.039 |
+| z | 0.9 | 4.8 | 2.5 |
+| P | 0.37 | < 0.001 | 0.012 |
+| mixed model, random intercept by group | — | 0.183 ± 0.038 | 0.097 ± 0.039 |
+| crossed intercepts (group + question) | — | 0.187 ± 0.038 | — |
+| mean majority bias (initial / revised) | — | 0.52 (0.54 / 0.50) | 0.51 |
+| mean movement to majority | — | 0.137 (56% of rounds > 0) | 0.137 |
+
+Verdict: the figure's *layout* reproduces (same banding, same mean movement toward the majority), but the paper's null does not:
+we find a positive association under every specification tried (movement as mean rating change or Group Agreement Index change;
+majority side from the sign of opinion scores; initial- or revised-only candidates; adjusting for pre-deliberation agreement; rounds
+with a minority only, b = 0.28; ties excluded; no pre-registration filter, n = 1476). It vanishes only in unanimous rounds (b ≈ 0,
+n = 388) and is imprecise in cohort 4 (0.14 ± 0.09, n = 150). Adjusting for pre-deliberation agreement (ceiling on movement) does
+not remove it, so it is not the obvious regression-to-the-mean artefact. Open question: the paper's SE (0.07) is twice ours for the
+sign measure but matches our SE for mean rating change (0.078); their y scale or model may differ from what the axis suggests.
+
+Concurrency note: another Claude session was revising the report in this tree at the same time. My `git checkout` of
+`notebooks/fig4c.ipynb` / `make_notebook.py` at ~18:15 reverted its uncommitted sensitivity-grid cells; restored from the executed
+`fig4c_*_out.ipynb` (sources verified identical). Do not `git checkout`/`stash` shared files here without checking `ps`/mtimes.

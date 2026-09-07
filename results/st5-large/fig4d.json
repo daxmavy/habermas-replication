@@ -1,0 +1,70 @@
+{
+ "paper": {
+  "b": 0.058,
+  "se": 0.07,
+  "z": 0.9,
+  "p": 0.37
+ },
+ "ours": {
+  "n_rounds": 1047,
+  "b_ols": 0.18349460369805656,
+  "se_ols": 0.038088713254514475,
+  "z_ols": 4.8175584843709,
+  "p_ols": 1.6679564946743372e-06,
+  "b_mixed": 0.18349459076684568,
+  "se_mixed": 0.03812102715756604,
+  "z_mixed": 4.813474464064297,
+  "p_mixed": 1.483285624661343e-06,
+  "mean_majority_bias": 0.518505253104107,
+  "mean_movement_sign": 0.13720152817574022,
+  "model": "st5-large",
+  "endpoints": "prefixed",
+  "axis": "unit"
+ },
+ "fits": [
+  {
+   "model": "OLS (rounds independent)",
+   "b": 0.18349460369805656,
+   "se": 0.038088713254514475,
+   "z": 4.8175584843709,
+   "p": 1.6679564946743372e-06,
+   "n_rounds": 1047,
+   "n_groups": 349,
+   "n_questions": 659,
+   "intercept": 0.04205861224204184
+  },
+  {
+   "model": "OLS, cluster-robust SE by group",
+   "b": 0.18349460369805656,
+   "se": 0.036754282914300745,
+   "z": 4.992468609057274,
+   "p": 5.961240480186377e-07,
+   "n_rounds": 1047,
+   "n_groups": 349,
+   "n_questions": 659,
+   "intercept": 0.04205861224204184
+  },
+  {
+   "model": "mixed: random intercept by group",
+   "b": 0.18349459076684568,
+   "se": 0.03812102715756604,
+   "z": 4.813474464064297,
+   "p": 1.483285624661343e-06,
+   "n_rounds": 1047,
+   "n_groups": 349,
+   "n_questions": 659,
+   "intercept": 0.042058618946942496
+  },
+  {
+   "model": "mixed: crossed random intercepts by group and question",
+   "b": 0.1873881158655691,
+   "se": 0.03815866132694115,
+   "z": 4.910762310554839,
+   "p": 9.072300477435681e-07,
+   "n_rounds": 1047,
+   "n_groups": 349,
+   "n_questions": 659,
+   "intercept": 0.03803992193671229
+  }
+ ]
+}
