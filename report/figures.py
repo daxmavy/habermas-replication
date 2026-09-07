@@ -58,32 +58,30 @@ def fig_paper(V, path):
 
 
 def fig_contrast(V, path):
-    """Paper vs. our reproduction, both embedding models, across the four phases."""
-    p, models = V["paper"], V["models"]
+    """Paper vs. our reproduction under the primary embedding model, across the four phases.
+    Error bars: +/- 1 SE of the estimated regression coefficients (SM Fig. S60 convention)."""
+    p, m = V["paper"], V["primary_model"]
+    o = V["ours"][m]
     keys = ["opinions_sanity"] + PHASES
-    series = [("Paper (Tessler et al.)", [p[k] for k in keys], [None] * 4 + [p["revised_winner_se"]], C_PAPER)]
-    for m, c in zip(models, (C_BASE, C_LARGE)):
-        o = V["ours"][m]
-        series.append((f"Ours ({m})", [o["opinions_sanity"]] + [o[k] for k in PHASES],
-                       [None] + [o["phase_se"][k] for k in PHASES], c))
+    series = [("Paper (Tessler et al.)", [p[k] for k in keys], [None] * 4 + [p["revised_winner_se"]], C_PAPER),
+              (f"Ours ({m})", [o["opinions_sanity"]] + [o[k] for k in PHASES], [None] + [o["phase_se"][k] for k in PHASES], C_LARGE)]
 
     x = np.arange(len(keys))
-    w = 0.26
+    w = 0.36
     fig, ax = plt.subplots(figsize=(6.2, 2.9))
     for i, (name, vals, ses, c) in enumerate(series):
-        off = (i - 1) * w
+        off = (i - 0.5) * w
         bars = ax.bar(x + off, vals, width=w * 0.92, color=c, label=name)
         for xi, v, se in zip(x + off, vals, ses):
             if se:
                 ax.errorbar(xi, v, yerr=se, fmt="none", ecolor=C_INK, capsize=2, lw=0.9)
         _bar_labels(ax, bars, vals, dy=0.004, ses=ses)
 
-    ours_share = V["ours"][models[0]]["minority_share"]
     ax.axhline(p["minority_share"], ls=":", lw=1, color=C_PAPER)
-    ax.axhline(ours_share, ls=(0, (1, 2)), lw=1, color=C_RULE)
+    ax.axhline(o["minority_share"], ls=(0, (1, 2)), lw=1, color=C_RULE)
     # The two reference lines sit ~0.02 apart: label one above its line and one below, so they never collide.
     ax.text(x[-1] + 0.45, p["minority_share"], "true share (paper)", va="bottom", fontsize=6, color=C_PAPER)
-    ax.text(x[-1] + 0.45, ours_share, "true share (ours)", va="top", fontsize=6, color=C_RULE)
+    ax.text(x[-1] + 0.45, o["minority_share"], "true share (ours)", va="top", fontsize=6, color=C_RULE)
     ax.set_xticks(x, [LABELS["opinions"]] + [LABELS[k] for k in PHASES])
     ax.set_ylabel("Weight of minority opinions")
     ax.set_ylim(0, 0.46)
@@ -93,21 +91,21 @@ def fig_contrast(V, path):
 
 
 def fig_sensitivity(V, path):
-    """Mean weight at each phase across the completed specifications, 5th-95th percentile whiskers."""
+    """Mean weight at each phase across the specifications run under each model; whiskers span the full range."""
     models = V["models"]
     x = np.arange(len(PHASES))
     fig, ax = plt.subplots(figsize=(5.4, 2.7))
     for i, (m, c) in enumerate(zip(models, (C_BASE, C_LARGE))):
-        s = V["sensitivity"][m]
-        mean = np.array([s[f"{k}_mean"] for k in PHASES])
-        lo = np.array([s[f"{k}_p5"] for k in PHASES])
-        hi = np.array([s[f"{k}_p95"] for k in PHASES])
+        s = V["sensitivity"]["per_model"][m]
+        mean = np.array([s[k]["mean"] for k in PHASES])
+        lo = np.array([s[k]["min"] for k in PHASES])
+        hi = np.array([s[k]["max"] for k in PHASES])
         off = (i - 0.5) * 0.16
         ax.errorbar(x + off, mean, yerr=[mean - lo, hi - mean], fmt="o", ms=5, color=c, lw=1.4,
-                    capsize=3, label=f"{m}  (n={s['n_variants']} specifications)")
-    ref = V["sensitivity"][models[0]]["true_share_mean"]
+                    capsize=3, label=f"{m}  (n={s['n_runs']} specifications)")
+    ref = V["sensitivity"]["pooled"]["true_share_mean"]
     ax.axhline(ref, ls=":", lw=1, color=C_RULE)
-    ax.text(x[-1] + 0.28, ref, " mean true\n share", va="center", fontsize=6, color=C_RULE)
+    ax.text(x[-1] + 0.28, ref + 0.004, " mean true\n share", va="bottom", fontsize=6, color=C_RULE)
     ax.set_xticks(x, [LABELS[k] for k in PHASES])
     ax.set_ylabel("Weight of minority opinions")
     ax.set_ylim(0, 0.35)

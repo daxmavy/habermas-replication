@@ -100,3 +100,39 @@ New findings this pass:
 Still open: code references render as file:line, not permalinks — `\repourl` in the preamble is
 empty because this VM cannot create the GitHub remote (exe.dev proxy serves only
 /repos/OWNER/REPO; `gh repo create` -> 403). Add a repo integration, set `\repourl`, rebuild.
+
+## Report revision (2026-09-07) — Max's 18 feedback items applied
+
+`report/fig4c_report.tex` -> `fig4c_report.pdf` (8 pp). Prose changes: intro "more precisely" paragraph,
+scope tail, group-size footnote, discussion caveats and open notes removed; "agreement score" ->
+"position component score" throughout (footnote: SM 5.1.1 term, read as a valence-style agreement
+score); endpoint-phrase passage replaced by a footnote (method given in SM 5.1.2, exact per-question
+phrases not); paper-vs-ours comparison now ST5-large only; "Three observations: 1) 2) 3)"; "Validation
+checks" heading; the three mechanical-explanation rows (768-d regression, axis-noise simulation,
+winner-inside-range) and their paragraph dropped from the report (the notebook still computes them).
+
+Error bars: SM Fig. S60 defines them as +/-1 SE of the estimated regression coefficients; ours are the
+same quantity (active-set OLS covariance of the constrained fit, combined across levels with SM eq. 19
+weights). Bootstrap SE for the revised winner agrees with the analytic SE to 3 dp (0.017). Stated in a
+footnote and both figure captions.
+
+New Appendix A on the paper's R^2: what the text specifies, why marginal R^2 of a round-intercept
+mixed model was chosen (Pearson r^2 = 0.64^2 = 0.41 coincides, so the paper's number cannot
+discriminate), the model equation, and the full table (marginal, conditional, Pearson r, Pearson r^2)
+for both models.
+
+Sensitivity sweep rebuilt as a full factorial over the four remaining ambiguities (`P.sensitivity_grid()`
+in hm_fig4c/pipeline.py, run from notebook section 5): model size {base, large} x neutral raters
+{non-minority, rater dropped, group dropped} x split basis {Likert, score sign} x column order {data,
+sorted, random}; score-sign split has no neutrals, so 12 runs per model, 24 in all. Tie handling and
+sample are SM-specified and no longer varied (cohort-4 / per-cohort / prereg-off / training / VCA rows
+gone). Whiskers are now the full range, not 5th-95th percentiles. Pooled results: revised winner >
+initial candidates in 12% of runs (3/24, all ST5-base with neutral groups dropped); revised winner
+above its own true share in 0%; max revised winner 0.274 vs mean true share 0.282.
+
+Primary results unchanged (notebook re-executed for both models; summary.json and contrasts identical).
+Column order explained in the text: SM eq. 13 indexes a round's opinions by j without saying how j is
+assigned; each column's coefficient pools across rounds, so the assignment changes the fit.
+
+Not touched: the Isambard ST5-xl embedding work in progress (isambard/, embed.py, pyproject.toml,
+uv.lock changes are uncommitted and belong to that effort).

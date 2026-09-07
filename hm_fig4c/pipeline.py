@@ -105,6 +105,40 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
     return res
 
 
+# ----------------------------------------------------------------------------- sensitivity grid
+NEUTRAL_OPTIONS = {"non-minority": "as_majority", "rater dropped": "drop_participant", "group dropped": "drop_group"}
+ORDER_OPTIONS = {"data": "data", "sorted by score": "sorted", "random": "random"}
+SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
+
+
+def sensitivity_grid() -> dict[str, dict]:
+    """Every combination of the choices the SM leaves open, for one embedding model (model size is the
+    remaining axis and is swept by running the notebook once per model).  When the minority side is
+    taken from the sign of the position score there are no neutral raters, so that split is crossed
+    with column order only.  All runs use the pre-registered rounds of cohorts 1-3 with tied rounds
+    excluded, as the SM specifies."""
+    grid = {}
+    for split, by in SPLIT_OPTIONS.items():
+        neutrals = NEUTRAL_OPTIONS.items() if by == "rating" else [("n/a", "as_majority")]
+        for neutral, nv in neutrals:
+            for order, ov in ORDER_OPTIONS.items():
+                grid[f"split={split} | neutral={neutral} | order={order}"] = dict(minority_by=by, neutral=nv, order=ov)
+    return grid
+
+
+def run_sensitivity(opinions: pd.DataFrame, candidates: pd.DataFrame, grid: dict[str, dict], **kw) -> pd.DataFrame:
+    """One row per grid entry: n_rounds, true_share and the minority weight (+ SE) at each phase."""
+    rows = []
+    for name, spec in grid.items():
+        r = run_minority_analysis(opinions, candidates, include_opinions=False, **spec, **kw)
+        row = {"variant": name, **spec, "n_rounds": r["phases"]["initial_winner"]["n_rounds"],
+               "true_share": r["phases"]["initial_winner"]["true_share"]}
+        for ph in PHASES:
+            row[ph] = r["phases"][ph]["weight"]; row[ph + "_se"] = r["phases"][ph]["se"]
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def summarize(res: dict) -> pd.DataFrame:
     rows = []
     for phase in ["opinions"] + PHASES:

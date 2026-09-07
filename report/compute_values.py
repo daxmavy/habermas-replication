@@ -20,16 +20,12 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from hm_fig4c.data import COHORTS  # noqa: E402
-from hm_fig4c.pipeline import PHASES, score_all, select_cohort  # noqa: E402
+from hm_fig4c.pipeline import PHASES, run_minority_analysis, score_all, select_cohort  # noqa: E402
 PRIMARY_MODEL = "st5-large"
 
-# Which sensitivity rows vary an *analytic* choice on the primary sample, and which swap the sample.
-SAMPLE_VARIANTS = ("all cohorts 1-3 rounds", "cohort 1 only", "cohort 2 only", "cohort 3 only",
-                   "cohort 4 (critique exclusion)", "training data", "virtual citizens")
-
-
-def _is_sample_variant(name: str) -> bool:
-    return any(name.startswith(p) for p in SAMPLE_VARIANTS)
+# Minority rules whose true share the report quotes when explaining the gap to the paper's 0.285.
+SHARE_RULES = {"neutral_dropped": dict(neutral="drop_participant", ties="exclude"),
+               "ties_kept": dict(neutral="as_majority", ties="agree")}
 
 
 def group_sizes(prep_dir: Path) -> dict:
@@ -37,13 +33,10 @@ def group_sizes(prep_dir: Path) -> dict:
     op = pd.read_parquet(prep_dir / "opinions.parquet")
     op = select_cohort(op, "cohorts_1_3", prereg_only=True)
     sizes = op.groupby(["metadata.version", "launch_id", "round_id"])["participant_id"].nunique()
-    vc = sizes.value_counts().sort_index()
-    return {"min": int(sizes.min()), "max": int(sizes.max()), "modal": int(sizes.mode().iloc[0]),
-            "n_rounds": int(len(sizes)), "counts": {int(k): int(v) for k, v in vc.items()},
-            "modal_share": float((sizes == sizes.mode().iloc[0]).mean())}
+    return {"min": int(sizes.min()), "max": int(sizes.max()), "n_rounds": int(len(sizes))}
 
 
-def marginal_r2(prep_dir: Path, emb_dir: Path) -> dict:
+def marginal_r2(opinions: pd.DataFrame) -> dict:
     """Paper SM eq. 7: y_ij = a + b*x_position + u_i + e_ij, random intercept per round.
 
     Marginal R^2 (Nakagawa) = var(fixed prediction) / (var_fixed + var_round + var_resid), the
@@ -51,7 +44,6 @@ def marginal_r2(prep_dir: Path, emb_dir: Path) -> dict:
     """
     import statsmodels.formula.api as smf
 
-    opinions, _, _, _ = score_all(prep_dir, emb_dir)
     d = select_cohort(opinions, "cohorts_1_3", prereg_only=True).dropna(subset=["score", "pre_rating"]).copy()
     d["round_key"] = d["metadata.version"].astype(str) + "|" + d["launch_id"].astype(str) + "|" + d["round_id"].astype(str)
     fit = smf.mixedlm("pre_rating ~ score", d, groups=d["round_key"]).fit(reml=True)
@@ -64,36 +56,48 @@ def marginal_r2(prep_dir: Path, emb_dir: Path) -> dict:
             "pearson_r": r, "pearson_r2": r ** 2, "n": int(len(d)), "n_rounds": int(d["round_key"].nunique())}
 
 
-def sensitivity_summary(path: Path) -> dict:
-    s_all = pd.read_csv(path)
-    s = s_all[s_all["error"].isna()] if "error" in s_all else s_all
-    failed = s_all[s_all["error"].notna()]["variant"].tolist() if "error" in s_all else []
-    analytic = s[~s["variant"].map(_is_sample_variant)]
-    out = {"n_attempted": int(len(s_all)), "n_variants": int(len(s)), "n_failed": int(len(failed)),
-           "failed_variants": failed, "n_analytic": int(len(analytic)), "n_sample": int(len(s) - len(analytic))}
-    for label, frame in (("all", s), ("analytic", analytic)):
-        # "increases from initial to final": stage 1 (initial candidates) -> stage 4 (revised winner),
-        # and the winner-to-winner contrast the paper's Fig. 4C emphasises.
-        inc_stage = float((frame["revised_winner"] > frame["initial_candidates"]).mean())
-        inc_winner = float((frame["revised_winner"] > frame["initial_winner"]).mean())
-        above = float((frame["revised_winner"] > frame["true_share"]).mean())
-        out[label] = {"prop_increase_initial_to_final": inc_stage, "prop_increase_winner_to_winner": inc_winner,
-                      "prop_final_above_true_share": above,
-                      "max_revised_winner": float(frame["revised_winner"].max()),
-                      "min_true_share": float(frame["true_share"].min()), "max_true_share": float(frame["true_share"].max())}
+def true_share_by_rule(opinions: pd.DataFrame, candidates: pd.DataFrame) -> dict:
+    """True minority share of the primary sample under each rule in SHARE_RULES (same rounds as the pipeline)."""
+    out = {}
+    for name, rule in SHARE_RULES.items():
+        r = run_minority_analysis(opinions, candidates, phases=["initial_winner"], include_opinions=False, **rule)
+        e = r["phases"]["initial_winner"]
+        out[name] = {"true_share": e["true_share"], "n_rounds": e["n_rounds"]}
+    return out
+
+
+def _sweep_stats(frame: pd.DataFrame) -> dict:
+    out = {"n_runs": int(len(frame)),
+           # "increases from initial to final": initial candidates -> revised winner
+           "prop_increase_initial_to_final": float((frame["revised_winner"] > frame["initial_candidates"]).mean()),
+           "prop_final_above_true_share": float((frame["revised_winner"] > frame["true_share"]).mean()),
+           "max_revised_winner": float(frame["revised_winner"].max()),
+           "true_share_mean": float(frame["true_share"].mean())}
     for phase in PHASES:
-        out[f"{phase}_mean"] = float(s[phase].mean())
-        out[f"{phase}_p5"] = float(s[phase].quantile(0.05))
-        out[f"{phase}_p95"] = float(s[phase].quantile(0.95))
-    out["true_share_mean"] = float(s["true_share"].mean())
-    out["variants"] = s["variant"].tolist()
+        out[phase] = {"mean": float(frame[phase].mean()), "min": float(frame[phase].min()), "max": float(frame[phase].max())}
+    return out
+
+
+def sensitivity_summary(paths: dict[str, Path]) -> dict:
+    """Per-model and pooled statistics of the sensitivity sweep (model size is one of the swept choices)."""
+    frames = {m: pd.read_csv(p).assign(model=m) for m, p in paths.items()}
+    for m, f in frames.items():
+        if "error" in f and f["error"].notna().any():
+            raise SystemExit(f"{m}: sensitivity rows failed: {f[f['error'].notna()]['variant'].tolist()}")
+    pooled = pd.concat(frames.values(), ignore_index=True)
+    out = {"pooled": _sweep_stats(pooled), "per_model": {m: _sweep_stats(f) for m, f in frames.items()},
+           "variants": frames[next(iter(frames))]["variant"].tolist()}
+    n = {len(f) for f in frames.values()}
+    if len(n) != 1:
+        raise SystemExit(f"models ran different numbers of specifications: {n}")
+    out["n_runs_per_model"] = n.pop()
     return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=["st5-base", "st5-large"])
-    ap.add_argument("--skip-mixed", action="store_true", help="skip the random-effects fit (needs embeddings)")
+    ap.add_argument("--skip-mixed", action="store_true", help="skip the random-effects fit and rule shares (need embeddings)")
     ap.add_argument("--out", default=str(ROOT / "report" / "values.json"))
     args = ap.parse_args()
 
@@ -112,38 +116,30 @@ def main() -> None:
     V["paper"]["fig4b_within"] = first["paper"]["fig4b_within"]
     V["paper"]["marginal_r2"] = cites["axis_validation"]["marginal_r2"]
     V["paper"]["conditional_r2"] = cites["axis_validation"]["conditional_r2"]
-    V["paper"]["designed_group_size"] = cites["group_design"]["designed_size"]
     V["citations"] = cites
 
-    V["ours"], V["contrasts"], V["sensitivity"], V["axis"] = {}, {}, {}, {}
+    V["ours"], V["contrasts"], V["axis"] = {}, {}, {}
     for m in args.models:
         rdir = ROOT / "results" / m
         V["ours"][m] = json.loads((rdir / "summary.json").read_text())["ours"]
         prim = json.loads((rdir / "fig4c_primary.json").read_text())
         V["contrasts"][m] = prim.get("contrasts", {})
         V["ours"][m]["phase_se"] = {p: prim["phases"][p]["se"] for p in PHASES}
+        V["ours"][m]["phase_boot_se"] = {p: prim["phases"][p].get("boot_se") for p in PHASES}
         V["ours"][m]["phase_boot_ci"] = {p: prim["phases"][p].get("boot_ci95") for p in PHASES}
         V["ours"][m]["opinions_sanity_true_share"] = prim["phases"]["opinions"]["true_share"]
-        V["sensitivity"][m] = sensitivity_summary(rdir / "sensitivity.csv")
-
-        vr = pd.read_csv(rdir / "vector_regression.csv")
-        vr_all = vr[vr["n"] == "all"].set_index("stage")["minority_weight"]
-        V["axis"][m] = {"full768_initial": float(vr_all["initial"]), "full768_revised": float(vr_all["revised"])}
-        att = pd.read_csv(rdir / "attenuation.csv")
-        V["axis"][m]["attenuation_min_r"] = float(att["achieved_r"].min())
-        V["axis"][m]["attenuation_recovered_at_min_r"] = float(att.loc[att["achieved_r"].idxmin(), "recovered_minority_weight"])
-        V["axis"][m]["attenuation_true_share"] = float(att["true_share"].iloc[0])
-        wp = pd.read_csv(rdir / "winner_position.csv").set_index("stage")
-        V["axis"][m]["winner_inside_initial"] = float(wp.loc["initial", "inside"])
-        V["axis"][m]["winner_inside_revised"] = float(wp.loc["revised", "inside"])
 
         if not args.skip_mixed:
             emb = ROOT / "embeddings" / m
             if emb.exists():
-                V["axis"][m]["mixed"] = marginal_r2(ROOT / "prepared", emb)
+                opinions, _, _, candidates = score_all(ROOT / "prepared", emb)
+                V["axis"][m] = {"mixed": marginal_r2(opinions)}
                 print(f"[{m}] marginal r2 = {V['axis'][m]['mixed']['marginal_r2']:.3f} "
                       f"(pearson r = {V['axis'][m]['mixed']['pearson_r']:.3f})")
+                if m == PRIMARY_MODEL:
+                    V["share_by_rule"] = true_share_by_rule(opinions, candidates)
 
+    V["sensitivity"] = sensitivity_summary({m: ROOT / "results" / m / "sensitivity.csv" for m in args.models})
     V["groups"] = group_sizes(ROOT / "prepared")
     V["cohorts_in_primary"] = list(COHORTS["cohorts_1_3"])
 

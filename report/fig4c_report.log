@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  5 SEP 2026 19:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  7 SEP 2026 18:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -522,61 +522,45 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <6> on input line 61.
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 6
-7.
+8.
 
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-Underfull \hbox (badness 10000) in paragraph at lines 67--67
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
 []\T1/lmr/bx/n/10 How to read this doc-u-ment. \T1/lmr/m/n/10 The prose is my n
-ote-book draft, tran-scribed un-changed. []Red text[]
+ote-book draft, tran-scribed with light ed-its. []Red
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 67--67
-\T1/lmr/m/n/10 fills a place-holder that the draft left open. []Blue text[] re-
-places some-thing the draft got wrong; a foot-
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
+\T1/lmr/m/n/10 text[] fills a place-holder that the draft left open. []Blue tex
+t[] re-places some-thing the draft got wrong; a
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 67--67
-\T1/lmr/m/n/10 note gives the orig-i-nal word-ing and the source that cor-rects
- it. Ev-ery num-ber is gen-er-ated from
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
+\T1/lmr/m/n/10 foot-note gives the orig-i-nal word-ing and the source that cor-
+rects it. Ev-ery num-ber is gen-er-ated from
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 67--67
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
 \T1/lmtt/m/n/10 report/values.json \T1/lmr/m/n/10 (see \T1/lmtt/m/n/10 report/b
 uild_parameters.py\T1/lmr/m/n/10 ); none is typed into this doc-u-ment. Code
  []
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 67.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 90.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 90.
+(Font)              <10.95> on input line 68.
 
-Underfull \hbox (badness 10000) in paragraph at lines 90--90
-[][][]\T1/lmr/m/n/9 Added. The draft stopped at ``I was un-able to repli-cate t
-his find-ing'', which is true of the pa-per's head-line
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 90--90
-\T1/lmr/m/n/9 but omits that one com-po-nent of the re-sult does re-pro-duce. S
-ource: \T1/lmtt/m/n/9 results/*/fig4c_primary.json\T1/lmr/m/n/9 , clus-ter
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 93--93
+Underfull \hbox (badness 10000) in paragraph at lines 83--83
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/data.py:97--187 \T1/lmr/m/n/
 10 build_tables()[] []\T1/lmtt/m/n/10 hm_fig4c/data.py:221--232 \T1/lmr/m/n/10 
 pre-pare()[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 93--93
+Underfull \hbox (badness 10000) in paragraph at lines 83--83
 []\T1/lmtt/m/n/10 hm_fig4c/preprocess.py:50--61 \T1/lmr/m/n/10 pre-reg-is-tered
 _launches()[] []\T1/lmtt/m/n/10 hm_fig4c/preprocess.py:41--47 \T1/lmr/m/n/10 fi
 l-
@@ -585,323 +569,350 @@ l-
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/
-dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/t
-exmf/fonts/enc/dvips/lm/lm-mathit.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 129--129
+dvips/lm/lm-ec.enc}]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 115.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 115.
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--115
 [][][]\T1/lmr/m/n/9 The dot-ted ``true pro-por-tion'' line in SM Fig-ure S60 is
  at 0.285; the 0.28 and 0.29 bars are the ini-tial can-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 129--129
+Underfull \hbox (badness 10000) in paragraph at lines 115--115
 \T1/lmr/m/n/9 di-dates and the ini-tial win-ner re-spec-tively. The com-par-i-s
 on in this sen-tence is there-fore be-tween 0.285 and
  []
 
-<figures/fig_paper.pdf, id=34, 359.26968pt x 177.70013pt>
+<figures/fig_paper.pdf, id=26, 359.26968pt x 177.70013pt>
 File: figures/fig_paper.pdf Graphic file (type pdf)
 <use figures/fig_paper.pdf>
-Package pdftex.def Info: figures/fig_paper.pdf  used on input line 134.
+Package pdftex.def Info: figures/fig_paper.pdf  used on input line 120.
 (pdftex.def)             Requested size: 432.48051pt x 213.92238pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 138.
+(Font)              <10> on input line 125.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 138.
+(Font)              <7> on input line 125.
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 143--143
+Underfull \hbox (badness 10000) in paragraph at lines 130--130
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:59--93 \T1/lmr/m
 /n/10 as-sign_minority()[] []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:40--45 \T1/lm
 r/m/n/10 se-
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 149--149
-[][][][]\T1/lmr/m/n/9 The study de-sign as-signed par-tic-i-pants to groups of 
-5 (SM 1.2); in the 1047 pre-registered rounds of co-horts
+[2{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/en
+c/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc} <./fig
+ures/fig_paper.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+[][][][]\T1/lmr/m/n/9 The pa-per re-ports 0.285. The gap is al-most en-tirely t
+he treat-ment of neu-tral raters. SM 5.4.1 counts a
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 149--149
-\T1/lmr/m/n/9 1--3 that this anal-y-sis uses, 77% of rounds have 5 opin-ions an
-d the re-main-der have 4, af-ter the pa-per's own
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 neu-tral (4) rat-ing as non-minority: ``we may de-fine the `mi-no
+r-ity' side of the Lik-ert scale as the side that con-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 165--165
-[][][]\T1/lmr/m/n/9 SM 5.4.1: ``we may de-fine the `mi-nor-ity' side of the Lik
--ert scale as the side that con-tains the smaller num-
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 tains the smaller num-ber of opin-ions, and de-fine all other opi
+n-ions as `non-minority' opinions---which in-clude
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 165--165
-\T1/lmr/m/n/9 ber of opin-ions, and de-fine all other opin-ions as `non-minorit
-y' opinions---which in-clude `ma-jor-ity' opin-ions [...]
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 `ma-jor-ity' opin-ions [...] as well as `neu-tral' opin-ions (i.e
+. with a Lik-ert rat-ing of 4), if any.'' Ap-plied lit-er-ally,
  []
 
-[2]
-Underfull \hbox (badness 10000) in paragraph at lines 181--181
+
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 with rounds that have equal num-bers on each side ex-cluded, that
+ rule gives 0.262 on these rounds. Two other
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 read-ings land on the pa-per's fig-ure: drop-ping neu-tral raters
+ from their groups be-fore the sides are counted
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 152--152
+\T1/lmr/m/n/9 gives 0.289 (560 rounds), and keep-ing the tied rounds with a fix
+ed side taken as the mi-nor-ity gives 0.284 (659
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 163--163
+[][][][]\T1/lmr/m/n/9 The name fol-lows SM 5.1.1, where the po-si-tion com-po-n
+ent of a text em-bed-ding is its value along the po-si-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 163--163
+\T1/lmr/m/n/9 tion axis. It is best un-der-stood as a way of mea-sur-ing the le
+vel of agree-ment with the propo-si-tion, sim-i-lar to a
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 163--163
+\T1/lmr/m/n/9 po-lit-i-cal va-lence score: a sin-gle num-ber that places a text
+ be-tween the negat-ing and the af-firm-ing po-si-tion on
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 172--172
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/data.py:38--47 \T1/lmr/m/n/1
 0 end-point_texts()[] []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:23--38 \T1/lmr/m/n
 /10 po-si-
  []
 
-[3{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc} <./figures/fig_paper.pdf>
-]
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
-[][][]\T1/lmr/m/n/9 The draft read: ``There are two main de-tails miss-ing from
- the SM. First, we don't have the ex-act phrases
+
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+[][][][]\T1/lmr/m/n/9 SM 5.1.2 gives the method for con-struct-ing the two end-
+points --- a generic pre-fix (``Yes, I agree.'' or ``No,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
-\T1/lmr/m/n/9 used to con-struct the end-points of this pro-jec-tion vec-tor.''
- SM 5.1.2 spec-i-fies them: the end-points are a ``generic
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+\T1/lmr/m/n/9 I dis-agree.'') con-cate-nated with the ques-tion's own af-firm-i
+ng or negat-ing po-si-tion state-ment --- and one il-lus-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
-\T1/lmr/m/n/9 + question-specific com-bi-na-tion'', i.e. the generic pre-fix fo
-l-lowed by the ques-tion's af-firm-ing or negat-ing po-si-tion
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+\T1/lmr/m/n/9 tra-tive ex-am-ple, but not the ex-act phrases used for each ques
+-tion. Here each end-point is the pre-fix fol-lowed
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
-\T1/lmr/m/n/9 state-ment. Only the model size re-mains gen-uinely un-spec-i-fie
-d, so the count of miss-ing de-tails drops from two to
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+\T1/lmr/m/n/9 by the po-si-tion state-ment re-leased with the data; the axis is
+ the unit vec-tor from the negat-ing to the af-firm-ing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 203--203
+Underfull \hbox (badness 10000) in paragraph at lines 187--187
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:54--57 \T1/lmr/m
-/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:46--64
+/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:39--56
+ []
+
+[3]
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[][][][]\T1/lmr/m/n/9 The pa-per does not say ex-actly how this $\OML/lmm/m/it/
+9 R[]$ \T1/lmr/m/n/9 is com-puted. []Ap-pendix A[] sets out the can-di-date def
+-i-ni-tions,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 211--211
-[][][]\T1/lmr/m/n/9 Correct as writ-ten, and worth pin-ning down: this is the \
-T1/lmr/m/it/9 marginal $\OML/lmm/m/it/9 r[]$ \T1/lmr/m/n/9 of the random-effect
-s model of SM
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 211--211
-\T1/lmr/m/n/9 eq. 7 (Lik-ert rat-ing on po-si-tion score, ran-dom in-ter-cept p
-er round). The pa-per's con-di-tional $\OML/lmm/m/it/9 r[]$ \T1/lmr/m/n/9 is 0.
-45. My
- []
-
-[4]
-Underfull \hbox (badness 10000) in paragraph at lines 251--251
+Underfull \hbox (badness 10000) in paragraph at lines 207--207
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:97--108 \T1/lmr/
 m/n/10 con-vex_lstsq()[] []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:111--132
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 251--251
+Underfull \hbox (badness 10000) in paragraph at lines 207--207
 \T1/lmr/m/n/10 con-vex_fit_with_se()[] []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:1
 35--156 \T1/lmr/m/n/10 build_design()[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 278--278
+Underfull \hbox (badness 10000) in paragraph at lines 234--234
 [][][]\T1/lmr/m/n/9 Corrected. The draft read: ``the out-put state-ment was sim
 -ply one of the $\OML/lmm/m/it/9 m$ \T1/lmr/m/n/9 hu-man opin-ion in-puts, and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 278--278
+Underfull \hbox (badness 10000) in paragraph at lines 234--234
 \T1/lmr/m/n/9 re-peated this $\OML/lmm/m/it/9 m$ \T1/lmr/m/n/9 times (once for 
 each in-put). [this may be in-cor-rect] Af-ter av-er-ag-ing across these runs, 
 the av-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 278--278
+Underfull \hbox (badness 10000) in paragraph at lines 234--234
 \T1/lmr/m/n/9 er-age rep-re-sen-ta-tion $[]$ of an in-put $\OML/lmm/m/it/9 x[]$
  \T1/lmr/m/n/9 should be $[]$.'' The draft's own flag was right. The pa-per's M
 a-te-ri-als and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 278--278
+Underfull \hbox (badness 10000) in paragraph at lines 234--234
 \T1/lmr/m/n/9 Meth-ods de-scribe it as: ``As a san-ity check, we sim-i-larly re
 gress in-di-vid-ual opin-ions on con-vex com-bi-na-tions of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 278--278
+Underfull \hbox (badness 10000) in paragraph at lines 234--234
 \T1/lmr/m/n/9 those same opin-ions, which we ver-ify to sim-ply yield the pro-p
 or-tion of opin-ions in the mi-nor-ity.'' The tar-get of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 286--286
+Underfull \hbox (badness 10000) in paragraph at lines 242--242
 []\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:74--105 \T1/lmr/
 m/n/10 run_minority_analysis()[] []\T1/lmtt/m/n/10 hm_fig4c/analysis.py:188--22
 0
  []
 
-<figures/fig_contrast.pdf, id=139, 445.27603pt x 206.60812pt>
+[4{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+[][][][]\T1/lmr/m/n/9 Error bars in both fig-ures are $\OMS/lmsy/m/n/9 ^^F\OT1/
+lmr/m/n/9 1$ \T1/lmr/m/n/9 stan-dard er-ror of the es-ti-mated re-gres-sion co-
+ef-fi-cients, which is how SM
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+\T1/lmr/m/n/9 Fig-ure S60 de-fines them. The SM does not say how that stan-dard
+ er-ror is ob-tained for a con-strained re-gres-sion.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+\T1/lmr/m/n/9 Here the con-strained fit is treated as an or-di-nary least-squar
+es fit on its ac-tive set (the co-ef-fi-cients above zero)
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+\T1/lmr/m/n/9 with the sum-to-one con-straint elim-i-nated; the stan-dard er-ro
+r of the summed mi-nor-ity co-ef-fi-cients is read from
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+\T1/lmr/m/n/9 the re-sult-ing co-vari-ance ma-trix, and the level-specific stan
+-dard er-rors are com-bined with the same round-count
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 254--254
+\T1/lmr/m/n/9 weights as the es-ti-mate it-self (SM eq. 19). As a check on that
+ con-struc-tion, a clus-ter boot-strap over rounds
+ []
+
+<figures/fig_contrast.pdf, id=149, 445.27603pt x 206.60812pt>
 File: figures/fig_contrast.pdf Graphic file (type pdf)
 <use figures/fig_contrast.pdf>
-Package pdftex.def Info: figures/fig_contrast.pdf  used on input line 294.
+Package pdftex.def Info: figures/fig_contrast.pdf  used on input line 258.
 (pdftex.def)             Requested size: 455.24411pt x 211.24506pt.
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[5{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 337--337
+[5 <./figures/fig_contrast.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 301--301
 [][]\T1/lmr/m/n/10 Sanity check: opin-ions re-gressed on them-selves
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 338--338
+Underfull \hbox (badness 10000) in paragraph at lines 302--302
 [][]\T1/lmr/m/n/10 Position axis qual-ity: marginal $\OML/lmm/m/it/10 r[]$ \T1/
 lmr/m/n/10 of Lik-ert on
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 339--339
-[][]\T1/lmr/m/n/10 Fig. 4A: cor-re-la-tion of po-si-tion score with Lik-
+Underfull \hbox (badness 10000) in paragraph at lines 303--303
+[][]\T1/lmr/m/n/10 Fig. 4A: cor-re-la-tion of po-si-tion com-po-nent
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 340--340
+Underfull \hbox (badness 10000) in paragraph at lines 304--304
 [][]\T1/lmr/m/n/10 Fig. 4B: state-ments falling within the range of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 342--342
-[][]\T1/lmr/m/n/10 Regression on the full 768-d em-bed-ding rather
+Underfull \hbox (badness 10000) in paragraph at lines 311--311
+[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:114--126 \T1/lmr
+/m/n/10 sen-si-tiv-ity_grid()[] []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:129--139
+
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 343--343
-[][]\T1/lmr/m/n/10 Axis-noise sim-u-la-tion: weight re-cov-ered when
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 344--344
-[][]\T1/lmr/m/n/10 Winning state-ment lies in-side the group's opin-
- []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 360--360
-[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 notebooks/make_notebook.py:1--197 \T1
-/lmr/m/n/10 (whole file)[] []\T1/lmtt/m/n/10 report/compute_values.py:67--90 \T
-1/lmr/m/n/10 sen-si-
- []
-
-[6 <./figures/fig_contrast.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 376--376
+Underfull \hbox (badness 10000) in paragraph at lines 327--327
 [][]\T1/lmr/m/n/10 count as non-minority; drop the rater;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 376--377
+Underfull \hbox (badness 10000) in paragraph at lines 327--328
 [][]\T1/lmr/m/n/10 count as non-minority (SM
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 377--377
-[][]\T1/lmr/m/n/10 Groups with equal num-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 377--377
-[][]\T1/lmr/m/n/10 exclude; keep with the agree-ing side as
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 377--377
-\T1/lmr/m/n/10 mi-nor-ity; keep with the dis-agree-ing side
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 378--378
+Underfull \hbox (badness 10000) in paragraph at lines 328--328
 [][]\T1/lmr/m/n/10 Basis for split-ting mi-nor-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 378--378
-[][]\T1/lmr/m/n/10 Likert rat-ing; sign of the po-si-tion score
+Underfull \hbox (badness 10000) in paragraph at lines 328--328
+[][]\T1/lmr/m/n/10 Likert rat-ing; sign of the po-si-tion com-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 379--379
-[][]\T1/lmr/m/n/10 Column or-der of the de-
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+[][]\T1/lmr/m/n/10 Column or-der: how a
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 380--380
-[][]\T1/lmr/m/n/10 cohorts 1--3 pre-registered; all co-hort
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+\T1/lmr/m/n/10 round's opin-ions are as-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 391--391
-[][][][]\T1/lmr/m/n/9 16 spec-i-fi-ca-tions were run per em-bed-ding model, of 
-which 14 com-pleted: 9 vary an an-a-lytic choice on the
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+[][]\T1/lmr/m/n/10 order in the re-leased data; sorted by
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 391--391
-\T1/lmr/m/n/9 pri-mary sam-ple and 5 swap the sam-ple. The 2 that did not com-p
-lete are the training-data and virtual-citizens'-
+Underfull \hbox (badness 10000) in paragraph at lines 348--348
+[][][][]\T1/lmr/m/n/9 Two model sizes $\OMS/lmsy/m/n/9 ^^B$ \T1/lmr/m/n/9 three
+ neutral-rater treat-ments $\OMS/lmsy/m/n/9 ^^B$ \T1/lmr/m/n/9 three col-umn or
+-ders when the split is by Lik-ert rat-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 391--391
-\T1/lmr/m/n/9 assembly sam-ples, whose texts fall out-side the pre-registered s
-et that was em-bed-ded; both are out-side the scope
+Underfull \hbox (badness 10000) in paragraph at lines 348--348
+\T1/lmr/m/n/9 ing, plus two model sizes $\OMS/lmsy/m/n/9 ^^B$ \T1/lmr/m/n/9 thr
+ee col-umn or-ders when the split is by the sign of the score, where there are 
+no
  []
 
+[6]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 3
-94.
-(/usr/share/texmf/tex/latex/lm/ts1lmr.fd
+51.
+ (/usr/share/texmf/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-Overfull \hbox (6.44827pt too wide) in paragraph at lines 394--398
-\T1/lmr/m/n/10.95 sured from the ini-tial can-di-dates to the re-vised win-ner,
- and 93% mea-sured winner-to-winner, 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 403--403
+Underfull \hbox (badness 10000) in paragraph at lines 358--358
 [][][]\T1/lmr/m/n/9 Corrected. The draft gave 0.291. That is the true share un-
 der one vari-ant --- neu-tral raters dropped --- not
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 403--403
+Underfull \hbox (badness 10000) in paragraph at lines 358--358
 \T1/lmr/m/n/9 un-der the pri-mary spec-i-fi-ca-tion, where it is 0.262. Each ru
 n is com-pared against its own true share rather than
  []
 
-[7{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}]
-<figures/fig_sensitivity.pdf, id=231, 384.69107pt x 192.15413pt>
+<figures/fig_sensitivity.pdf, id=229, 384.69107pt x 192.15413pt>
 File: figures/fig_sensitivity.pdf Graphic file (type pdf)
 <use figures/fig_sensitivity.pdf>
-Package pdftex.def Info: figures/fig_sensitivity.pdf  used on input line 413.
+Package pdftex.def Info: figures/fig_sensitivity.pdf  used on input line 367.
 (pdftex.def)             Requested size: 418.82375pt x 209.20341pt.
+[7{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc} <./figures/fig_sensitivity.p
+df>]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <14.4> on input line 390.
 
-Overfull \hbox (2.58286pt too wide) in paragraph at lines 441--442
-[][]\T1/lmr/m/n/10.95 Two caveats be-long next to that con-clu-sion. The first 
-is that ``sup-presses'' is a state-ment about 
+Underfull \hbox (badness 10000) in paragraph at lines 392--392
+[]\T1/lmr/bx/n/10 Code: []\T1/lmtt/m/n/10 hm_fig4c/pipeline.py:54--57 \T1/lmr/m
+/n/10 fig4a_correlation()[] []\T1/lmtt/m/n/10 report/compute_values.py:39--56
  []
 
+[8
 
-Overfull \hbox (4.71643pt too wide) in paragraph at lines 452--453
-\T1/lmr/m/n/10.95 sur-vey data needed to an-swer it (\T1/lmtt/m/n/10.95 hm_all_
-round_survey_responses.parquet\T1/lmr/m/n/10.95 ) is al-ready down- 
- []
-
-[8 <./figures/fig_sensitivity.pdf>] [9] (./fig4c_report.aux)
+] (./fig4c_report.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -910,30 +921,31 @@ Package rerunfilecheck Info: File `fig4c_report.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 12460 strings out of 476182
- 197295 string characters out of 5795596
- 1940975 words of memory out of 5000000
- 34239 multiletter control sequences out of 15000+600000
- 633964 words of font info for 81 fonts, out of 8000000 for 9000
+ 12449 strings out of 476182
+ 197028 string characters out of 5795596
+ 1938975 words of memory out of 5000000
+ 34229 multiletter control sequences out of 15000+600000
+ 636935 words of font info for 82 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,11n,79p,580b,574s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,609b,546s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/p
-ublic/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/shar
-e/texmf/fonts/type1/public/lm/lmmi9.pfb></usr/share/texmf/fonts/type1/public/lm
-/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/
-fonts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pf
-b></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type
-1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr9.pfb></usr/sha
-re/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/
-lm/lmri9.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/tex
-mf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt
-10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt9.pfb>
-Output written on fig4c_report.pdf (9 pages, 425920 bytes).
+ublic/lm/lmmi12.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/share/texmf/fonts/type1/public/l
+m/lmmi9.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf
+/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr17.
+pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/ty
+pe1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/s
+hare/texmf/fonts/type1/public/lm/lmr9.pfb></usr/share/texmf/fonts/type1/public/
+lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmri9.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lms
+y8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb></usr/share/texmf/font
+s/type1/public/lm/lmtt10.pfb>
+Output written on fig4c_report.pdf (8 pages, 413144 bytes).
 PDF statistics:
- 404 PDF objects out of 1000 (max. 8388607)
- 220 compressed objects within 3 object streams
+ 414 PDF objects out of 1000 (max. 8388607)
+ 231 compressed objects within 3 object streams
  41 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

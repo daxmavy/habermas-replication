@@ -62,7 +62,7 @@
    "module": "hm_fig4c/embed.py",
    "symbol": "run",
    "start": 26,
-   "end": 58
+   "end": 62
   }
  ],
  "codeAgreementValidation": [
@@ -75,8 +75,8 @@
   {
    "module": "report/compute_values.py",
    "symbol": "marginal_r2",
-   "start": 46,
-   "end": 64
+   "start": 39,
+   "end": 56
   }
  ],
  "codeRepresentation": [
@@ -130,21 +130,27 @@
    "module": "report/figures.py",
    "symbol": null,
    "start": 1,
-   "end": 130
+   "end": 128
   }
  ],
  "codeSensitivity": [
   {
-   "module": "notebooks/make_notebook.py",
-   "symbol": null,
-   "start": 1,
-   "end": 197
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "sensitivity_grid",
+   "start": 114,
+   "end": 126
+  },
+  {
+   "module": "hm_fig4c/pipeline.py",
+   "symbol": "run_sensitivity",
+   "start": 129,
+   "end": 139
   },
   {
    "module": "report/compute_values.py",
    "symbol": "sensitivity_summary",
-   "start": 67,
-   "end": 90
+   "start": 81,
+   "end": 94
   }
  ],
  "codeValidationExtra": [
