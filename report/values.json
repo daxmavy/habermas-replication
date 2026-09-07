@@ -23,6 +23,30 @@
     "pearson_r": 0.6326342956348658,
     "pearson_r2": 0.4002261520134228
    }
+  },
+  "st5-xl": {
+   "mixed": {
+    "beta": 9.967081592167421,
+    "beta_se": 0.17110979442013477,
+    "conditional_r2": 0.5299939491657657,
+    "marginal_r2": 0.44670108931239494,
+    "n": 4979,
+    "n_rounds": 1047,
+    "pearson_r": 0.6694638133220294,
+    "pearson_r2": 0.44818179734767305
+   }
+  },
+  "st5-xxl": {
+   "mixed": {
+    "beta": 10.669013960374699,
+    "beta_se": 0.16056509616384884,
+    "conditional_r2": 0.5601373190917855,
+    "marginal_r2": 0.502747023780803,
+    "n": 4979,
+    "n_rounds": 1047,
+    "pearson_r": 0.7131416327938201,
+    "pearson_r2": 0.5085709884238359
+   }
   }
  },
  "citations": {
@@ -57,6 +81,12 @@
   "minority_rule": {
    "_quote": "we may define the 'minority' side of the Likert scale as the side that contains the smaller number of opinions, and define all other opinions as 'non-minority' opinions--which include 'majority' opinions ... as well as 'neutral' opinions (i.e. with a Likert rating of 4), if any.",
    "_source": "SM 5.4.1"
+  },
+  "sample": {
+   "_source": "SM 4.4 'Main Task (Ablation) Cohorts 1 - 3' (docs/science.adq2852_sm.pdf, PDF p.95): Cohort 1 100 groups / 485 unique participants, Cohort 2 150 / 726, Cohort 3 99 / 481 ('total n = 1692'). Three questions per group: SM 8 (VCA), 'In each of our other cohorts, three questions were sampled randomly from a large set for each group to deliberate over', so 349 x 3 = 1047 rounds.",
+   "n_groups": 349,
+   "n_participants": 1692,
+   "rounds_per_group": 3
   },
   "sanity_check": {
    "_quote": "As a sanity check, we similarly regress individual opinions on convex combinations of those same opinions, which we verify to simply yield the proportion of opinions in the minority.",
@@ -126,16 +156,78 @@
     "boot_se": 0.011652541935733295,
     "diff": 0.0231587616007721
    }
+  },
+  "st5-xl": {
+   "revised_candidates - initial_candidates": {
+    "boot_ci95": [
+     -0.0502317086414617,
+     0.01283090572504421
+    ],
+    "boot_p_le_0": 0.918,
+    "boot_se": 0.015851575583883483,
+    "diff": -0.02180899515432075
+   },
+   "revised_winner - initial_candidates": {
+    "boot_ci95": [
+     -0.07397051692142774,
+     -0.007824945135832153
+    ],
+    "boot_p_le_0": 0.992,
+    "boot_se": 0.017465776278947923,
+    "diff": -0.04271274884600171
+   },
+   "revised_winner - initial_winner": {
+    "boot_ci95": [
+     0.010766474467920827,
+     0.052988383502060185
+    ],
+    "boot_p_le_0": 0.002,
+    "boot_se": 0.010583286440389793,
+    "diff": 0.03374876599810811
+   }
+  },
+  "st5-xxl": {
+   "revised_candidates - initial_candidates": {
+    "boot_ci95": [
+     -0.05693751329995332,
+     -0.0005656426972227218
+    ],
+    "boot_p_le_0": 0.976,
+    "boot_se": 0.015569467589562448,
+    "diff": -0.02998956082011045
+   },
+   "revised_winner - initial_candidates": {
+    "boot_ci95": [
+     -0.0815980718076776,
+     -0.014531724142812591
+    ],
+    "boot_p_le_0": 0.996,
+    "boot_se": 0.017019655515862712,
+    "diff": -0.0495233186519535
+   },
+   "revised_winner - initial_winner": {
+    "boot_ci95": [
+     0.005081893882251739,
+     0.04426559336679698
+    ],
+    "boot_p_le_0": 0.006,
+    "boot_se": 0.00956299961991107,
+    "diff": 0.025620498040813428
+   }
   }
  },
  "groups": {
   "max": 5,
   "min": 4,
+  "n_groups": 349,
+  "n_participants": 1720,
   "n_rounds": 1047
  },
  "models": [
   "st5-base",
-  "st5-large"
+  "st5-large",
+  "st5-xl",
+  "st5-xxl"
  ],
  "ours": {
   "st5-base": {
@@ -147,6 +239,7 @@
    "initial_winner": 0.15950188498025225,
    "minority_share": 0.2624551971326165,
    "model": "st5-base",
+   "n_boot": 500,
    "n_rounds": 560,
    "n_rounds_total": 1047,
    "opinions_sanity": 0.26292301970992904,
@@ -175,12 +268,6 @@
     "revised_candidates": 0.01721880158293323,
     "revised_winner": 0.0183461156735207
    },
-   "phase_se": {
-    "initial_candidates": 0.014643188143801033,
-    "initial_winner": 0.018966385413859775,
-    "revised_candidates": 0.010193862944851952,
-    "revised_winner": 0.017891717695637722
-   },
    "revised_candidates": 0.20894907487660663,
    "revised_winner": 0.19897062520865988,
    "revised_winner_se": 0.017891717695637722,
@@ -195,6 +282,7 @@
    "initial_winner": 0.1408080151963527,
    "minority_share": 0.2624551971326165,
    "model": "st5-large",
+   "n_boot": 500,
    "n_rounds": 560,
    "n_rounds_total": 1047,
    "opinions_sanity": 0.26292301970992843,
@@ -223,16 +311,96 @@
     "revised_candidates": 0.016579084571172745,
     "revised_winner": 0.016937950241949728
    },
-   "phase_se": {
-    "initial_candidates": 0.013743991199011409,
-    "initial_winner": 0.018219654246487776,
-    "revised_candidates": 0.009513957190078071,
-    "revised_winner": 0.016840595659504708
-   },
    "revised_candidates": 0.18567146240856003,
    "revised_winner": 0.1639667767971248,
    "revised_winner_se": 0.016840595659504708,
    "revised_winner_t_vs_true": -5.848274154121477
+  },
+  "st5-xl": {
+   "axis": "unit",
+   "endpoints": "prefixed",
+   "fig4a_r": 0.6694638133220294,
+   "fig4b_within": 0.8595988538681948,
+   "initial_candidates": 0.19980547407936886,
+   "initial_winner": 0.12334395923525904,
+   "minority_share": 0.2624551971326165,
+   "model": "st5-xl",
+   "n_boot": 500,
+   "n_rounds": 560,
+   "n_rounds_total": 1047,
+   "opinions_sanity": 0.26292301970992926,
+   "opinions_sanity_true_share": 0.2629230197099293,
+   "phase_boot_ci": {
+    "initial_candidates": [
+     0.17125016362099799,
+     0.23268411108946305
+    ],
+    "initial_winner": [
+     0.09280107435573759,
+     0.15721139751255714
+    ],
+    "revised_candidates": [
+     0.14924187790026078,
+     0.20608966358732694
+    ],
+    "revised_winner": [
+     0.12636896611269557,
+     0.18611667045220487
+    ]
+   },
+   "phase_boot_se": {
+    "initial_candidates": 0.015349191253503033,
+    "initial_winner": 0.01705107102920277,
+    "revised_candidates": 0.01534629735801727,
+    "revised_winner": 0.015208375585864955
+   },
+   "revised_candidates": 0.1779964789250481,
+   "revised_winner": 0.15709272523336715,
+   "revised_winner_se": 0.016200916284451465,
+   "revised_winner_t_vs_true": -6.5034884477718755
+  },
+  "st5-xxl": {
+   "axis": "unit",
+   "endpoints": "prefixed",
+   "fig4a_r": 0.7131416327938201,
+   "fig4b_within": 0.8519579751671442,
+   "initial_candidates": 0.18535550324541297,
+   "initial_winner": 0.11021168655264604,
+   "minority_share": 0.2624551971326165,
+   "model": "st5-xxl",
+   "n_boot": 500,
+   "n_rounds": 560,
+   "n_rounds_total": 1047,
+   "opinions_sanity": 0.2629230197099306,
+   "opinions_sanity_true_share": 0.2629230197099293,
+   "phase_boot_ci": {
+    "initial_candidates": [
+     0.15785189440062322,
+     0.21477652809536152
+    ],
+    "initial_winner": [
+     0.0744872564948498,
+     0.1449040686841183
+    ],
+    "revised_candidates": [
+     0.12482312530841762,
+     0.18720907868464776
+    ],
+    "revised_winner": [
+     0.10138778786533463,
+     0.1656176287491342
+    ]
+   },
+   "phase_boot_se": {
+    "initial_candidates": 0.01488941971994109,
+    "initial_winner": 0.01803510561819327,
+    "revised_candidates": 0.016189708341972555,
+    "revised_winner": 0.016080642838514184
+   },
+   "revised_candidates": 0.15536594242530252,
+   "revised_winner": 0.13583218459345947,
+   "revised_winner_se": 0.01610835753872763,
+   "revised_winner_t_vs_true": -7.86070288263286
   }
  },
  "paper": {
@@ -247,93 +415,157 @@
   "opinions_sanity": 0.28,
   "revised_candidates": 0.33,
   "revised_winner": 0.36,
-  "revised_winner_se": 0.03
+  "revised_winner_se": 0.03,
+  "sample": {
+   "n_groups": 349,
+   "n_participants": 1692,
+   "rounds_per_group": 3
+  }
  },
  "primary_model": "st5-large",
  "sensitivity": {
-  "n_runs_per_model": 12,
+  "design": {
+   "n_models": 4,
+   "n_neutral": 2,
+   "n_orders": 3
+  },
+  "n_runs_per_model": 9,
   "per_model": {
    "st5-base": {
     "initial_candidates": {
      "max": 0.278045017007477,
-     "mean": 0.23133461904207406,
-     "min": 0.1999177820729978
+     "mean": 0.24122604179568327,
+     "min": 0.2114022645248201
     },
     "initial_winner": {
      "max": 0.2445154830872501,
-     "mean": 0.1864127733628852,
-     "min": 0.1566419828247675
+     "mean": 0.19568356059417408,
+     "min": 0.1595018849802522
     },
     "max_revised_winner": 0.2743451364519159,
-    "n_runs": 12,
+    "n_runs": 9,
     "prop_final_above_true_share": 0.0,
-    "prop_increase_initial_to_final": 0.25,
+    "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
      "max": 0.2800172181916238,
-     "mean": 0.23381801372502942,
+     "mean": 0.23986223012443986,
      "min": 0.2089490748766066
     },
     "revised_winner": {
      "max": 0.2743451364519159,
-     "mean": 0.22635234205837815,
+     "mean": 0.23164562934072652,
      "min": 0.1989706252086598
     },
-    "true_share_mean": 0.2823611861888496
+    "true_share_mean": 0.2803794310474984
    },
    "st5-large": {
     "initial_candidates": {
      "max": 0.2481877070369285,
-     "mean": 0.22529132184713566,
-     "min": 0.2054532440862898
+     "mean": 0.2311006794823253,
+     "min": 0.2064928236350386
     },
     "initial_winner": {
      "max": 0.2044068551243939,
-     "mean": 0.1657916608152541,
-     "min": 0.1396711741959324
+     "mean": 0.17318426596740435,
+     "min": 0.1408080151963527
     },
     "max_revised_winner": 0.219019118547468,
-    "n_runs": 12,
+    "n_runs": 9,
     "prop_final_above_true_share": 0.0,
     "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
      "max": 0.2385379780474573,
-     "mean": 0.20838974666052834,
+     "mean": 0.21302086934292533,
      "min": 0.18567146240856
     },
     "revised_winner": {
      "max": 0.219019118547468,
-     "mean": 0.1876453033840784,
+     "mean": 0.1933313745702439,
      "min": 0.1639667767971248
     },
-    "true_share_mean": 0.2818949282319286
+    "true_share_mean": 0.2797577537716037
+   },
+   "st5-xl": {
+    "initial_candidates": {
+     "max": 0.249659315823224,
+     "mean": 0.22649779427607988,
+     "min": 0.1998054740793688
+    },
+    "initial_winner": {
+     "max": 0.1877320640258141,
+     "mean": 0.15666261948802665,
+     "min": 0.123343959235259
+    },
+    "max_revised_winner": 0.2064576612544422,
+    "n_runs": 9,
+    "prop_final_above_true_share": 0.0,
+    "prop_increase_initial_to_final": 0.0,
+    "revised_candidates": {
+     "max": 0.2293168113612511,
+     "mean": 0.20602126872358256,
+     "min": 0.1779964789250481
+    },
+    "revised_winner": {
+     "max": 0.2064576612544422,
+     "mean": 0.1847574956466362,
+     "min": 0.1567209607790861
+    },
+    "true_share_mean": 0.27796125618706263
+   },
+   "st5-xxl": {
+    "initial_candidates": {
+     "max": 0.2237851939164354,
+     "mean": 0.207587407141904,
+     "min": 0.1841894695151517
+    },
+    "initial_winner": {
+     "max": 0.151947152700836,
+     "mean": 0.13761842309052502,
+     "min": 0.110211686552646
+    },
+    "max_revised_winner": 0.1753056029203554,
+    "n_runs": 9,
+    "prop_final_above_true_share": 0.0,
+    "prop_increase_initial_to_final": 0.0,
+    "revised_candidates": {
+     "max": 0.1961921273636878,
+     "mean": 0.18189272644170218,
+     "min": 0.1553659424253025
+    },
+    "revised_winner": {
+     "max": 0.1753056029203554,
+     "mean": 0.1599485735388181,
+     "min": 0.1358321845934594
+    },
+    "true_share_mean": 0.27967585266822537
    }
   },
   "pooled": {
    "initial_candidates": {
     "max": 0.278045017007477,
-    "mean": 0.22831297044460488,
-    "min": 0.1999177820729978
+    "mean": 0.2266029806739981,
+    "min": 0.1841894695151517
    },
    "initial_winner": {
     "max": 0.2445154830872501,
-    "mean": 0.17610221708906967,
-    "min": 0.1396711741959324
+    "mean": 0.1657872172850325,
+    "min": 0.110211686552646
    },
    "max_revised_winner": 0.2743451364519159,
-   "n_runs": 24,
+   "n_runs": 36,
    "prop_final_above_true_share": 0.0,
-   "prop_increase_initial_to_final": 0.125,
+   "prop_increase_initial_to_final": 0.0,
    "revised_candidates": {
     "max": 0.2800172181916238,
-    "mean": 0.22110388019277885,
-    "min": 0.18567146240856
+    "mean": 0.2101992736581625,
+    "min": 0.1553659424253025
    },
    "revised_winner": {
     "max": 0.2743451364519159,
-    "mean": 0.20699882272122827,
-    "min": 0.1639667767971248
+    "mean": 0.19242076827410617,
+    "min": 0.1358321845934594
    },
-   "true_share_mean": 0.2821280572103891
+   "true_share_mean": 0.27944357341859755
   },
   "variants": [
    "split=Likert rating | neutral=non-minority | order=data",
@@ -342,9 +574,6 @@
    "split=Likert rating | neutral=rater dropped | order=data",
    "split=Likert rating | neutral=rater dropped | order=sorted by score",
    "split=Likert rating | neutral=rater dropped | order=random",
-   "split=Likert rating | neutral=group dropped | order=data",
-   "split=Likert rating | neutral=group dropped | order=sorted by score",
-   "split=Likert rating | neutral=group dropped | order=random",
    "split=sign of position score | neutral=n/a | order=data",
    "split=sign of position score | neutral=n/a | order=sorted by score",
    "split=sign of position score | neutral=n/a | order=random"
@@ -354,10 +583,6 @@
   "neutral_dropped": {
    "n_rounds": 560,
    "true_share": 0.2891369047619048
-  },
-  "ties_kept": {
-   "n_rounds": 659,
-   "true_share": 0.28409436834094365
   }
  }
 }

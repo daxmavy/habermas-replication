@@ -15,8 +15,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "report" / "figures"
 
-# Okabe-Ito: the standard CVD-safe qualitative palette. Fixed order, never cycled.
-C_PAPER, C_BASE, C_LARGE = "#0072B2", "#E69F00", "#009E73"
+# Two entities get categorical hues (paper = orange, ours = blue); model size is ordinal, so the four
+# sizes are evenly spaced steps (250/400/550/700) of the blue ramp, light -> dark with size.
+C_PAPER = "#eb6834"
+MODEL_COLORS = {"st5-base": "#86b6ef", "st5-large": "#3987e5", "st5-xl": "#1c5cab", "st5-xxl": "#0d366b"}
 C_RULE, C_INK, C_MUTED = "#333333", "#222222", "#666666"
 
 PHASES = ["initial_candidates", "initial_winner", "revised_candidates", "revised_winner"]
@@ -58,30 +60,34 @@ def fig_paper(V, path):
 
 
 def fig_contrast(V, path):
-    """Paper vs. our reproduction under the primary embedding model, across the four phases.
-    Error bars: +/- 1 SE of the estimated regression coefficients (SM Fig. S60 convention)."""
-    p, m = V["paper"], V["primary_model"]
-    o = V["ours"][m]
+    """Paper vs. our reproduction under every embedding model, across the four phases.
+    Error bars: paper, +/- 1 SE as printed (SM Fig. S60); ours, +/- 1 cluster-bootstrap SE over rounds.
+    No per-bar value labels: the numbers are in the phases table of the report."""
+    p, models = V["paper"], V["models"]
     keys = ["opinions_sanity"] + PHASES
-    series = [("Paper (Tessler et al.)", [p[k] for k in keys], [None] * 4 + [p["revised_winner_se"]], C_PAPER),
-              (f"Ours ({m})", [o["opinions_sanity"]] + [o[k] for k in PHASES], [None] + [o["phase_se"][k] for k in PHASES], C_LARGE)]
+    series = [("Paper (Tessler et al.)", [p[k] for k in keys], [None] * 4 + [p["revised_winner_se"]], C_PAPER)]
+    for m in models:
+        o = V["ours"][m]
+        series.append((f"Ours, {m}", [o["opinions_sanity"]] + [o[k] for k in PHASES],
+                       [None] + [o["phase_boot_se"][k] for k in PHASES], MODEL_COLORS[m]))
 
     x = np.arange(len(keys))
-    w = 0.36
-    fig, ax = plt.subplots(figsize=(6.2, 2.9))
+    n = len(series)
+    w = 0.8 / n
+    fig, ax = plt.subplots(figsize=(6.6, 3.0))
     for i, (name, vals, ses, c) in enumerate(series):
-        off = (i - 0.5) * w
-        bars = ax.bar(x + off, vals, width=w * 0.92, color=c, label=name)
+        off = (i - (n - 1) / 2) * w
+        ax.bar(x + off, vals, width=w * 0.9, color=c, label=name)
         for xi, v, se in zip(x + off, vals, ses):
             if se:
-                ax.errorbar(xi, v, yerr=se, fmt="none", ecolor=C_INK, capsize=2, lw=0.9)
-        _bar_labels(ax, bars, vals, dy=0.004, ses=ses)
+                ax.errorbar(xi, v, yerr=se, fmt="none", ecolor=C_INK, capsize=1.5, lw=0.8)
 
+    share_ours = V["ours"][V["primary_model"]]["minority_share"]
     ax.axhline(p["minority_share"], ls=":", lw=1, color=C_PAPER)
-    ax.axhline(o["minority_share"], ls=(0, (1, 2)), lw=1, color=C_RULE)
+    ax.axhline(share_ours, ls=(0, (1, 2)), lw=1, color=C_RULE)
     # The two reference lines sit ~0.02 apart: label one above its line and one below, so they never collide.
     ax.text(x[-1] + 0.45, p["minority_share"], "true share (paper)", va="bottom", fontsize=6, color=C_PAPER)
-    ax.text(x[-1] + 0.45, o["minority_share"], "true share (ours)", va="top", fontsize=6, color=C_RULE)
+    ax.text(x[-1] + 0.45, share_ours, "true share (ours)", va="top", fontsize=6, color=C_RULE)
     ax.set_xticks(x, [LABELS["opinions"]] + [LABELS[k] for k in PHASES])
     ax.set_ylabel("Weight of minority opinions")
     ax.set_ylim(0, 0.46)
@@ -94,22 +100,22 @@ def fig_sensitivity(V, path):
     """Mean weight at each phase across the specifications run under each model; whiskers span the full range."""
     models = V["models"]
     x = np.arange(len(PHASES))
-    fig, ax = plt.subplots(figsize=(5.4, 2.7))
-    for i, (m, c) in enumerate(zip(models, (C_BASE, C_LARGE))):
+    fig, ax = plt.subplots(figsize=(5.6, 2.8))
+    for i, m in enumerate(models):
         s = V["sensitivity"]["per_model"][m]
         mean = np.array([s[k]["mean"] for k in PHASES])
         lo = np.array([s[k]["min"] for k in PHASES])
         hi = np.array([s[k]["max"] for k in PHASES])
-        off = (i - 0.5) * 0.16
-        ax.errorbar(x + off, mean, yerr=[mean - lo, hi - mean], fmt="o", ms=5, color=c, lw=1.4,
-                    capsize=3, label=f"{m}  (n={s['n_runs']} specifications)")
+        off = (i - (len(models) - 1) / 2) * 0.14
+        ax.errorbar(x + off, mean, yerr=[mean - lo, hi - mean], fmt="o", ms=4.5, color=MODEL_COLORS[m], lw=1.3,
+                    capsize=2.5, label=f"{m}  (n={s['n_runs']} specifications)")
     ref = V["sensitivity"]["pooled"]["true_share_mean"]
     ax.axhline(ref, ls=":", lw=1, color=C_RULE)
-    ax.text(x[-1] + 0.28, ref + 0.004, " mean true\n share", va="bottom", fontsize=6, color=C_RULE)
+    ax.text(x[-1] + 0.3, ref + 0.004, " mean true\n share", va="bottom", fontsize=6, color=C_RULE)
     ax.set_xticks(x, [LABELS[k] for k in PHASES])
     ax.set_ylabel("Weight of minority opinions")
     ax.set_ylim(0, 0.35)
-    ax.set_xlim(-0.45, len(PHASES) - 0.35)
+    ax.set_xlim(-0.5, len(PHASES) - 0.3)
     ax.legend(frameon=False, fontsize=6.5, loc="lower right")
     fig.tight_layout(); fig.savefig(path, bbox_inches="tight"); plt.close(fig)
 

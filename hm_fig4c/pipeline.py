@@ -91,6 +91,7 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
         res["phases"]["opinions"] = {"weight": float(last["minority_weight"]), "se": 0.0, "n_targets": int(last["n_targets"]),
                                      "true_share": float(last["true_share"]), "per_level": sr.iloc[:-1].to_dict(orient="records")}
     if n_boot:
+        res["n_boot"] = n_boot
         bs = cluster_bootstrap(designs, n_boot=n_boot, seed=seed, min_rounds=min_rounds)
         for i, phase in enumerate(phases):
             e = res["phases"][phase]
@@ -106,7 +107,7 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
 
 
 # ----------------------------------------------------------------------------- sensitivity grid
-NEUTRAL_OPTIONS = {"non-minority": "as_majority", "rater dropped": "drop_participant", "group dropped": "drop_group"}
+NEUTRAL_OPTIONS = {"non-minority": "as_majority", "rater dropped": "drop_participant"}
 ORDER_OPTIONS = {"data": "data", "sorted by score": "sorted", "random": "random"}
 SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
 

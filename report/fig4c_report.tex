@@ -1,7 +1,7 @@
 % Fig. 4C replication report.
 % The prose is the author's notebook text, transcribed verbatim. Two kinds of editorial mark:
 %   \fillin{} (red)  -- a placeholder in the notebook, filled in
-%   \fix{}    (blue) -- a factual correction, always with a footnote giving the original wording
+%   \fix{}    (blue) -- a factual correction to the draft
 % Every number comes from report/parameters.tex, generated from report/values.json.
 \documentclass[11pt,a4paper]{article}
 
@@ -62,8 +62,7 @@
 \noindent\colorbox{boxgrey}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
 \small\textbf{How to read this document.} The prose is my notebook draft, transcribed with light
 edits. \fillin{Red text} fills a placeholder that the draft left open. \fix{Blue text} replaces
-something the draft got wrong; a footnote gives the original wording and the source that corrects
-it. Every number is generated from \texttt{report/values.json} (see
+something the draft got wrong. Every number is generated from \texttt{report/values.json} (see
 \texttt{report/build\_parameters.py}); none is typed into this document. Code references are
 pinned to commit \texttt{\repocommit}.}}
 
@@ -136,19 +135,17 @@ possible to provide a neutral (4) opinion. A group was defined as having a minor
 was an unequal amount of agreeing (5--7) and disagreeing (1--3) opinions. Groups without a minority
 group were excluded from this analysis.
 
-\fillin{\textbf{Reproduction parameters.} The primary sample is the pre-registered groups of
+The sample for this analysis is the pre-registered groups of
 cohorts 1--3: \groupNRounds{} rounds, of which \oursNRoundsLarge{} contain a minority under this
-rule, giving a true minority share of \oursShareLarge{}.}\footnote{\fillin{The paper reports
+rule, giving a true minority share of \oursShareLarge{}.\footnote{\fillin{The paper reports
 \paperShare{}. The gap is almost entirely the treatment of neutral raters. SM 5.4.1 counts a
 neutral (4) rating as non-minority: ``we may define the `minority' side of the Likert scale as the
 side that contains the smaller number of opinions, and define all other opinions as `non-minority'
 opinions---which include `majority' opinions [\ldots] as well as `neutral' opinions (i.e.\ with a
 Likert rating of 4), if any.'' Applied literally, with rounds that have equal numbers on each side
-excluded, that rule gives \oursShareLarge{} on these rounds. Two other readings land on the
+excluded, that rule gives \oursShareLarge{} on these rounds. One other reading lands on the
 paper's figure: dropping neutral raters from their groups before the sides are counted gives
-\shareRuleNeutralDropped{} (\shareRuleNeutralDroppedNRounds{} rounds), and keeping the tied rounds
-with a fixed side taken as the minority gives \shareRuleTiesKept{} (\shareRuleTiesKeptNRounds{}
-rounds). The treatment of neutral raters is carried through the
+\shareRuleNeutralDropped{} (\shareRuleNeutralDroppedNRounds{} rounds). The treatment of neutral raters is carried through the
 \hyperref[sec:sensitivity]{sensitivity analysis} below.}}
 
 \section*{How does the HM paper measure how well-represented minority opinions are?}
@@ -156,9 +153,8 @@ rounds). The treatment of neutral raters is carried through the
 This part of the analysis has two components. First, each participant's free-text opinion and the
 statements produced by the HM (including intermediate statements produced in its iterative process)
 are given a scalar score to measure to what extent they agree or disagree with the political
-proposition. I refer to this score as the ``position component score''.\footnote{\fillin{The name
-follows SM 5.1.1, where the position component of a text embedding is its value along the position
-axis. It is best understood as a way of measuring the level of agreement with the proposition,
+proposition. The paper refers to this score as the ``position component score''.\footnote{\fillin{It
+is best understood as a way of measuring the level of agreement with the proposition,
 similar to a political valence score: a single number that places a text between the negating and
 the affirming position on the question.}}
 
@@ -197,18 +193,15 @@ $R^2$ of each embedding model is shown in Table~\fillin{\ref{tab:rsq}}
 
 Based on these results, we choose model \fillin{sentence-t5-large} as the most-likely model used in
 the original analysis. \fillin{Its marginal $r^2$ of \oursMarginalRsqLarge{} is within
-\oursMarginalRsqGapLarge{} of the paper's \paperMarginalRsq{}, and its Pearson $r$ of
-\oursPearsonRLarge{} against the paper's \paperFigAr{} says the same thing: the position axis this
-report is built on is about as good as the one the paper used. The other size that could be run
-here, sentence-t5-base, enters the \hyperref[sec:sensitivity]{sensitivity analysis} as the
-alternative model.}
+\oursMarginalRsqGapLarge{} of the paper's \paperMarginalRsq{}.}
 
 \section*{Measuring representativeness}
 \codebox{\codeRepresentation}
 
 Given a set of human-authored opinions $\{x_i \mid i \in 1,\dots,n\}$, a partition of opinions into
 minority $M$ \& non-minority $N$ sets, position component scores $\{a_i \mid i \in 1,\dots,n\}$,
-the ``representation'' of an opinion $x_i$ is given by $\lambda_i$ in
+the ``representation'' of an opinion $x_i$ in a target output $x_0$ (with position component score
+$a_0$) is given by $\lambda_i$, where $\lambda_i$ is part of the solution to the optimisation problem
 %
 \begin{equation*}
 \text{set } \lambda_i \text{ to minimise } \Big(a_0 - \sum_i \lambda_i a_i\Big)^2
@@ -225,13 +218,7 @@ To test that the implementation of this procedure works as expected, the origina
 check where \fix{each human opinion in turn is treated as the target and regressed on convex
 combinations of that same set of opinions. Averaged over the set, the recovered minority weight
 should come back as simply the proportion of opinions in the
-minority.}\footnote{Corrected. The draft read: ``the output statement was simply one of the $m$
-human opinion inputs, and repeated this $m$ times (once for each input). [this may be incorrect]
-After averaging across these runs, the average representation $\bar\lambda_i$ of an input $x_i$
-should be $\frac{1}{m}$.'' The draft's own flag was right. The paper's Materials and Methods
-describe it as: ``As a sanity check, we similarly regress individual opinions on convex
-combinations of those same opinions, which we verify to simply yield the proportion of opinions in
-the minority.'' The target of the check is the \emph{minority share}, not $1/m$ per input.} We
+minority.} We
 replicate this implementation check. \fillin{It passes: the recovered weight is
 \oursOpinionsLarge{} against a true share of \oursShareLarge{}; the paper reports
 \paperOpinions{} against its true share of \paperShare{}. This is the leftmost bar of
@@ -243,60 +230,90 @@ Figure~\ref{fig:contrast}.}
 
 We fail to replicate the results from the original paper. Figure~\fillin{\ref{fig:contrast}}
 displays an adjusted version of Figure~\fillin{\ref{fig:paper}} above, where we contrast the
-original paper's results against our own.\footnote{\fillin{Error bars in both figures are $\pm 1$
-standard error of the estimated regression coefficients, which is how SM Figure S60 defines them.
-The SM does not say how that standard error is obtained for a constrained regression. Here the
-constrained fit is treated as an ordinary least-squares fit on its active set (the coefficients
-above zero) with the sum-to-one constraint eliminated; the standard error of the summed minority
-coefficients is read from the resulting covariance matrix, and the level-specific standard errors
-are combined with the same round-count weights as the estimate itself (SM eq.~19). As a check on
-that construction, a cluster bootstrap over rounds gives a standard error of
-\oursRevWinBootSELarge{} for the revised winner against the analytic \oursRevWinSELarge{}.}}
+original paper's results against our own.\footnote{\fillin{The paper's error bar is $\pm 1$ standard error of the estimated
+regression coefficient, as SM Figure S60 states. Error bars on our estimates are $\pm 1$ standard
+error from a cluster bootstrap over rounds (\nBoot{} resamples, drawing the same rounds in every
+phase, so that differences between phases are bootstrapped on matched samples).}}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_contrast.pdf}
-\caption{\fillin{Minority weight at each phase: the paper against this reproduction under
-sentence-t5-large. Error bars are $\pm 1$ standard error of the estimated regression coefficients,
-as in SM Figure S60. The two dotted lines are the true minority share in each case (\paperShare{}
-for the paper, \oursShareLarge{} here; the difference is the treatment of neutral raters).
-$n=\oursNRoundsLarge$ rounds with a minority, from \oursNRoundsTotalLarge{} pre-registered rounds
-in cohorts 1--3.}}
+\caption{\fillin{Minority weight at each phase: the paper against this reproduction under each
+Sentence-T5 size. Error bars: paper, $\pm 1$ standard error of the regression coefficient as
+printed (SM Figure S60); ours, $\pm 1$ cluster-bootstrap standard error over rounds. The two dotted
+lines are the true minority share in each case (\paperShare{} for the paper, \oursShareLarge{}
+here; the difference is the treatment of neutral raters). $n=\oursNRoundsLarge$ rounds with a
+minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, for every model.}}
 \label{fig:contrast}
 \end{figure}
 
-\fillin{Three observations: 1) The sanity check reproduces exactly --- the leftmost bars sit on
-their respective true shares --- so the regression machinery is doing what the paper says it does.
-2) Every statement phase, by contrast, sits below the true share rather than at or above it: the
-revised winner carries \oursRevWinLarge{} $\pm$ \oursRevWinSELarge{} against the paper's
-\paperRevWin{}. 3) The shape differs: in the paper the four phases rise monotonically, whereas here
-the winner-selection step \emph{drops} minority weight at both rounds (initial candidates
-\oursInitCandLarge{} $\rightarrow$ initial winner \oursInitWinLarge{}), and the revision step
-partially restores it (\oursRevWinLarge{}). The paper's rise from initial winner to revised winner
-is therefore present ($+\diffWinToWinLarge$, 95\% CI $[\diffWinToWinCIloLarge,
-\diffWinToWinCIhiLarge]$, $p=\diffWinToWinPLarge$), but it starts from a lower base and does not
-carry the final statement above proportionality; measured from the initial candidates instead, the
-change over the whole process is $\diffInitToFinalLarge$ (95\% CI $[\diffInitToFinalCIloLarge,
-\diffInitToFinalCIhiLarge]$).}
+\fillin{Three observations:}
+{\color{fillred}
+\begin{enumerate}[leftmargin=1.6em,itemsep=0.25em]
+  \item The sanity check reproduces exactly --- the leftmost bars sit on their respective true
+        shares --- so the regression machinery is doing what the paper says it does.
+  \item Every statement phase, by contrast, sits below the true share rather than at or above it:
+        under sentence-t5-large the revised winner carries \oursRevWinLarge{} $\pm$
+        \oursRevWinBootSELarge{} against the paper's \paperRevWin{}.
+  \item The shape differs: in the paper the four phases rise monotonically, whereas here the
+        winner-selection step \emph{drops} minority weight at both rounds (initial candidates
+        \oursInitCandLarge{} $\rightarrow$ initial winner \oursInitWinLarge{}), and the revision
+        step partially restores it (\oursRevWinLarge{}). The paper's rise from initial winner to
+        revised winner is therefore present ($+\diffWinToWinLarge$, 95\% CI
+        $[\diffWinToWinCIloLarge, \diffWinToWinCIhiLarge]$, $p=\diffWinToWinPLarge$), but it
+        starts from a lower base and does not carry the final statement above proportionality;
+        measured from the initial candidates instead, the change over the whole process is
+        $\diffInitToFinalLarge$ (95\% CI $[\diffInitToFinalCIloLarge, \diffInitToFinalCIhiLarge]$).
+\end{enumerate}}
 
-\subsection*{Validation checks}
-\codebox{\codeValidationExtra}
-
-\fillin{Everything above is only interesting if the pipeline is sound, so the checks that bear on
-that are collected in Table~\ref{tab:validation}. Three of the four independent checks land on the
-paper's values, which is the basis for reporting the disagreement rather than assuming a bug. The
-one that does not --- the share of statements falling inside the range of their group's opinions
---- is lower here than in the paper, and is the clearest remaining candidate for an unmodelled
-difference.}
+\fillin{The same holds at every model size (Table~\ref{tab:phases}): the minority weight of the
+revised winner falls as the model grows --- \oursRevWinBase{}, \oursRevWinLarge{}, \oursRevWinXl{}
+and \oursRevWinXxl{} for base, large, xl and xxl --- while the quality of the position axis rises
+(Table~\ref{tab:rsq}).}
 
 \begin{table}[h]
 \centering
 \small
-\caption{\fillin{Checks on the reproduction, independent of the minority-weight result.}}
+\caption{\fillin{Minority weight at each phase by embedding model, with the cluster-bootstrap
+standard error in parentheses; the paper's values are from SM Figure S60. The sanity-check row
+regresses the opinions on themselves and should recover the true share (\paperShare{} in the paper,
+\oursShareLarge{} here).}}
+\label{tab:phases}
+\begin{tabular}{lccccc}
+\toprule
+ & paper & base & large & xl & xxl \\
+\midrule
+\fillin{Opinions (sanity check)} & \fillin{\paperOpinions} & \fillin{\oursOpinionsBase} & \fillin{\oursOpinionsLarge} & \fillin{\oursOpinionsXl} & \fillin{\oursOpinionsXxl} \\
+\fillin{Initial statements} & \fillin{\paperInitCand} & \fillin{\oursInitCandBase{} (\oursInitCandBootSEBase)} & \fillin{\oursInitCandLarge{} (\oursInitCandBootSELarge)} & \fillin{\oursInitCandXl{} (\oursInitCandBootSEXl)} & \fillin{\oursInitCandXxl{} (\oursInitCandBootSEXxl)} \\
+\fillin{Initial winner} & \fillin{\paperInitWin} & \fillin{\oursInitWinBase{} (\oursInitWinBootSEBase)} & \fillin{\oursInitWinLarge{} (\oursInitWinBootSELarge)} & \fillin{\oursInitWinXl{} (\oursInitWinBootSEXl)} & \fillin{\oursInitWinXxl{} (\oursInitWinBootSEXxl)} \\
+\fillin{Revised statements} & \fillin{\paperRevCand} & \fillin{\oursRevCandBase{} (\oursRevCandBootSEBase)} & \fillin{\oursRevCandLarge{} (\oursRevCandBootSELarge)} & \fillin{\oursRevCandXl{} (\oursRevCandBootSEXl)} & \fillin{\oursRevCandXxl{} (\oursRevCandBootSEXxl)} \\
+\fillin{Revised winner} & \fillin{\paperRevWin{} (\paperRevWinSE)} & \fillin{\oursRevWinBase{} (\oursRevWinBootSEBase)} & \fillin{\oursRevWinLarge{} (\oursRevWinBootSELarge)} & \fillin{\oursRevWinXl{} (\oursRevWinBootSEXl)} & \fillin{\oursRevWinXxl{} (\oursRevWinBootSEXxl)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Validation checks}
+\codebox{\codeValidationExtra}
+
+\fillin{Table~\ref{tab:validation} has several validation checks where we compared intermediate
+parameter estimates against those reported in the paper.}
+
+\begin{table}[h]
+\centering
+\small
+\caption{\fillin{Checks on the reproduction, independent of the minority-weight result: the sample
+reconstructed from the released data against the paper's description of it, and the intermediate
+estimates the paper reports.}}
 \label{tab:validation}
 \begin{tabular}{p{7.4cm}cc}
 \toprule
 \fillin{check} & \fillin{paper} & \fillin{ours (sentence-t5-large)} \\
+\midrule
+\fillin{Pre-registered groups in cohorts 1--3 (SM 4.4)} & \fillin{\paperNGroups} & \fillin{\groupNGroups} \\
+\fillin{Unique participants in those groups (SM 4.4)} & \fillin{\paperNParticipants} & \fillin{\groupNParticipants} \\
+\fillin{Rounds (\paperRoundsPerGroup{} questions per group)} & \fillin{\paperNRounds} & \fillin{\groupNRounds} \\
+\fillin{Rounds with a minority, entering the regression} & \fillin{not stated} & \fillin{\oursNRoundsLarge} \\
+\fillin{Opinions in the position-axis regression (Appendix~A)} & \fillin{not stated} & \fillin{\oursMixedNLarge} \\
 \midrule
 \fillin{Sanity check: opinions regressed on themselves recover the minority share} & \fillin{\paperOpinions{} vs \paperShare{}} & \fillin{\oursOpinionsLarge{} vs \oursShareLarge{}} \\
 \fillin{Position axis quality: marginal $r^2$ of Likert on position component score} & \fillin{\paperMarginalRsq} & \fillin{\oursMarginalRsqLarge} \\
@@ -323,8 +340,8 @@ primary specification above.}}
 \toprule
 \fillin{ambiguity} & \fillin{possible options} & \fillin{option chosen above} \\
 \midrule
-\fillin{ST5 model size} & \fillin{base, large, xlarge, xxl} & \fillin{large (\hyperref[app:rsq]{Appendix~A})} \\
-\fillin{Neutral (Likert 4) raters} & \fillin{count as non-minority; drop the rater; drop the whole group} & \fillin{count as non-minority (SM 5.4.1)} \\
+\fillin{ST5 model size} & \fillin{base, large, xl, xxl} & \fillin{large (\hyperref[app:rsq]{Appendix~A})} \\
+\fillin{Neutral (Likert 4) raters} & \fillin{count as non-minority; drop the rater} & \fillin{count as non-minority (SM 5.4.1)} \\
 \fillin{Basis for splitting minority / non-minority} & \fillin{Likert rating; sign of the position component score (SM Fig.\ S62)} & \fillin{Likert rating (SM Fig.\ S60)} \\
 \fillin{Column order: how a round's opinions are assigned to the regressors} & \fillin{order in the released data; sorted by position component score; random} & \fillin{data order} \\
 \bottomrule
@@ -341,21 +358,19 @@ on order within the minority block when the minority has one member, but the ord
 non-minority columns still changes the fit.}
 
 I reran the analysis with every combination of these decisions
-(\fillin{\sensNRuns{}} runs).\footnote{\fillin{Two model sizes $\times$ three neutral-rater
-treatments $\times$ three column orders when the split is by Likert rating, plus two model sizes
-$\times$ three column orders when the split is by the sign of the score, where there are no neutral
-raters: \sensNRuns{} runs, \sensNRunsPerModel{} per model. The xlarge and xxl sizes could not be
-run here (\hyperref[app:rsq]{Appendix~A}).}} Across the runs, I calculated the following metrics:
+(\fillin{\sensNRuns{}} runs).\footnote{\fillin{\sensNModels{} model sizes $\times$ \sensNNeutral{}
+neutral-rater treatments $\times$ \sensNOrders{} column orders when the split is by Likert rating,
+plus \sensNModels{} model sizes $\times$ \sensNOrders{} column orders when the split is by the sign
+of the score, where there are no neutral raters: \sensNRuns{} runs, \sensNRunsPerModel{} per
+model.}} Across the runs, I calculated the following metrics:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=0.25em]
   \item Proportion of runs where minority representation increases from initial to final:
         \fillin{\sensPropInitToFinal{}}
   \item Proportion of runs where minority representation is larger in final than the prevalence
-        among population (\fix{\oursShareLarge}):\footnote{Corrected. The draft gave 0.291. That is
-        the true share under one variant --- neutral raters dropped --- not under the primary
-        specification, where it is \oursShareLarge{}. Each run is compared against its own true
-        share rather than a single fixed number, since the minority rule changes the share as well
-        as the weight.}
+        among population (\fix{\oursShareLarge}):\footnote{\fillin{Each run is compared against its own true share
+        rather than a single fixed number, since the minority rule changes the share as well as the
+        weight.}}
         \fillin{\sensPropAboveShare{}. The largest revised-winner weight in the sweep is
         \sensMaxRevWin{}, against a mean true share of \sensTrueShareMean{}.}
   \item Average representation at each of the 4 stages, with the range across runs:
@@ -425,37 +440,33 @@ R^2_{\text{marginal}} = \frac{\sigma_f^2}{\sigma_f^2 + \sigma_u^2 + \sigma_\vare
 \qquad
 R^2_{\text{conditional}} = \frac{\sigma_f^2 + \sigma_u^2}{\sigma_f^2 + \sigma_u^2 + \sigma_\varepsilon^2}.
 \end{equation*}
-Under sentence-t5-large the fitted slope is $\hat\beta = \oursMixedBetaLarge{}$ (SE
-\oursMixedBetaSELarge{}); under sentence-t5-base it is \oursMixedBetaBase{} (SE
-\oursMixedBetaSEBase{}).}
+The fitted slope $\hat\beta$ under each model is given in Table~\ref{tab:rsq}.}
 
 \begin{table}[h]
 \centering
 \small
 \caption{\fillin{Fit of the position component score to the Likert rating, by embedding model:
-marginal and conditional $r^2$ of the random-intercept model above, and the Pearson correlation
-of the raw scatter (the main-text Figure 4A quantity) with its square.}}
+marginal and conditional $r^2$ of the random-intercept model above, the Pearson correlation of
+the raw scatter (the main-text Figure 4A quantity) with its square, and the fitted slope.}}
 \label{tab:rsq}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
- & marginal $r^2$ & conditional $r^2$ & Pearson $r$ & Pearson $r^2$ \\
+ & marginal $r^2$ & conditional $r^2$ & Pearson $r$ & Pearson $r^2$ & $\hat\beta$ (SE) \\
 \midrule
-\fillin{sentence-t5-base}   & \fillin{\oursMarginalRsqBase}  & \fillin{\oursConditionalRsqBase}  & \fillin{\oursPearsonRBase}  & \fillin{\oursPearsonRsqBase} \\
-\fillin{sentence-t5-large}  & \fillin{\oursMarginalRsqLarge} & \fillin{\oursConditionalRsqLarge} & \fillin{\oursPearsonRLarge} & \fillin{\oursPearsonRsqLarge} \\
-\fillin{sentence-t5-xlarge} & \multicolumn{4}{c}{\fillin{not evaluated --- see note}} \\
+\fillin{sentence-t5-base}  & \fillin{\oursMarginalRsqBase}  & \fillin{\oursConditionalRsqBase}  & \fillin{\oursPearsonRBase}  & \fillin{\oursPearsonRsqBase}  & \fillin{\oursMixedBetaBase{} (\oursMixedBetaSEBase)} \\
+\fillin{sentence-t5-large} & \fillin{\oursMarginalRsqLarge} & \fillin{\oursConditionalRsqLarge} & \fillin{\oursPearsonRLarge} & \fillin{\oursPearsonRsqLarge} & \fillin{\oursMixedBetaLarge{} (\oursMixedBetaSELarge)} \\
+\fillin{sentence-t5-xl}    & \fillin{\oursMarginalRsqXl}    & \fillin{\oursConditionalRsqXl}    & \fillin{\oursPearsonRXl}    & \fillin{\oursPearsonRsqXl}    & \fillin{\oursMixedBetaXl{} (\oursMixedBetaSEXl)} \\
+\fillin{sentence-t5-xxl}   & \fillin{\oursMarginalRsqXxl}   & \fillin{\oursConditionalRsqXxl}   & \fillin{\oursPearsonRXxl}   & \fillin{\oursPearsonRsqXxl}   & \fillin{\oursMixedBetaXxl{} (\oursMixedBetaSEXxl)} \\
 \midrule
-\fillin{paper}              & \fillin{\paperMarginalRsq} & \fillin{\paperConditionalRsq} & \fillin{\paperFigAr} & \fillin{\paperFigArSq} \\
+\fillin{paper}             & \fillin{\paperMarginalRsq} & \fillin{\paperConditionalRsq} & \fillin{\paperFigAr} & \fillin{\paperFigArSq} & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\fillin{The xlarge row is empty for a hardware reason rather than a scientific one: sentence-t5-xl
-is a 3B-parameter model and this machine has no GPU and 7~GB of RAM, so it could not be embedded
-here. The two sizes that could be run bracket the question well enough to answer it --- base falls
-well short of the paper's \paperMarginalRsq{} and large lands essentially on it --- and the
-direction of the remaining risk is worth stating plainly: if the authors used a larger ST5 than
-large, the axis would be slightly \emph{better} than mine, and a better axis moves the minority
-weight further from the paper's value, not closer (\hyperref[sec:sensitivity]{Sensitivity
-analysis}).}
+\fillin{The xl and xxl sizes were embedded on a GPU node of Isambard-AI, since this machine has no
+GPU. The four sizes order the question cleanly: base falls well short of the paper's
+\paperMarginalRsq{}, large lands on it, and xl and xxl overshoot it. A better axis does not bring
+the minority weight closer to the paper's value; it moves it further away
+(\hyperref[sec:results]{Results}, Table~\ref{tab:phases}).}
 
 \end{document}

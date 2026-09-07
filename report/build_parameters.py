@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 VALUES = ROOT / "report" / "values.json"
 OUT = ROOT / "report" / "parameters.tex"
 
-SUFFIX = {"st5-base": "Base", "st5-large": "Large"}
+SUFFIX = {"st5-base": "Base", "st5-large": "Large", "st5-xl": "Xl", "st5-xxl": "Xxl"}
 PHASE_MACRO = {"initial_candidates": "InitCand", "initial_winner": "InitWin",
                "revised_candidates": "RevCand", "revised_winner": "RevWin"}
 
@@ -41,12 +41,15 @@ def spec_rows(V) -> list[tuple[str, str]]:
         ("paperFigAr", p["fig4a_r"], "f2"), ("paperFigBwithin", p["fig4b_within"], "f2"),
         ("paperMarginalRsq", p["marginal_r2"], "f2"), ("paperConditionalRsq", p["conditional_r2"], "f2"),
         ("paperFigArSq", p["fig4a_r"] ** 2, "f2"),
+        ("paperNGroups", p["sample"]["n_groups"], "int"), ("paperNParticipants", p["sample"]["n_participants"], "int"),
+        ("paperRoundsPerGroup", p["sample"]["rounds_per_group"], "int"),
     ]
 
     g = V["groups"]
-    rows += [("groupMin", g["min"], "int"), ("groupMax", g["max"], "int"), ("groupNRounds", g["n_rounds"], "int")]
+    rows += [("groupMin", g["min"], "int"), ("groupMax", g["max"], "int"), ("groupNRounds", g["n_rounds"], "int"),
+             ("groupNGroups", g["n_groups"], "int"), ("groupNParticipants", g["n_participants"], "int")]
 
-    for name, mac in (("neutral_dropped", "NeutralDropped"), ("ties_kept", "TiesKept")):
+    for name, mac in (("neutral_dropped", "NeutralDropped"),):
         r = V["share_by_rule"][name]
         rows += [(f"shareRule{mac}", r["true_share"], "f3"), (f"shareRule{mac}NRounds", r["n_rounds"], "int")]
 
@@ -59,7 +62,6 @@ def spec_rows(V) -> list[tuple[str, str]]:
                  (f"oursFigAr{sfx}", o["fig4a_r"], "f2"), (f"oursFigBwithin{sfx}", o["fig4b_within"], "f2")]
         for ph, pm in PHASE_MACRO.items():
             rows.append((f"ours{pm}{sfx}", o[ph], "f3"))
-            rows.append((f"ours{pm}SE{sfx}", o["phase_se"][ph], "f3"))
             rows.append((f"ours{pm}BootSE{sfx}", o["phase_boot_se"][ph], "f3"))
         mx = ax["mixed"]
         rows += [(f"oursMarginalRsqGap{sfx}", abs(V["paper"]["marginal_r2"] - mx["marginal_r2"]), "f3"),
@@ -79,6 +81,12 @@ def spec_rows(V) -> list[tuple[str, str]]:
             rows += [(f"sens{pm}Mean{sfx}", s[ph]["mean"], "f3"),
                      (f"sens{pm}Min{sfx}", s[ph]["min"], "f3"), (f"sens{pm}Max{sfx}", s[ph]["max"], "f3")]
 
+    n_boot = {V["ours"][m]["n_boot"] for m in SUFFIX if m in V["ours"]}
+    if len(n_boot) != 1:
+        raise SystemExit(f"models bootstrapped with different resample counts: {n_boot}")
+    rows.append(("nBoot", n_boot.pop(), "int"))
+    d = V["sensitivity"]["design"]
+    rows += [("sensNModels", d["n_models"], "int"), ("sensNNeutral", d["n_neutral"], "int"), ("sensNOrders", d["n_orders"], "int")]
     sp = V["sensitivity"]["pooled"]
     rows += [("sensNRuns", sp["n_runs"], "int"), ("sensNRunsPerModel", V["sensitivity"]["n_runs_per_model"], "int"),
              ("sensPropInitToFinal", sp["prop_increase_initial_to_final"], "pct0"),

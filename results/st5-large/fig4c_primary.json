@@ -288,6 +288,7 @@
    ]
   }
  },
+ "n_boot": 500,
  "contrasts": {
   "revised_winner - initial_winner": {
    "diff": 0.0231587616007721,

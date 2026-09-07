@@ -3,7 +3,7 @@
 The report never contains a literal number: values.json -> build_parameters.py -> parameters.tex
 -> \\macro in the .tex.  Run from the repo root:
 
-    uv run python report/compute_values.py [--models st5-base st5-large] [--skip-mixed]
+    uv run python report/compute_values.py [--models st5-base st5-large st5-xl st5-xxl] [--skip-mixed]
 """
 from __future__ import annotations
 
@@ -20,12 +20,11 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from hm_fig4c.data import COHORTS  # noqa: E402
-from hm_fig4c.pipeline import PHASES, run_minority_analysis, score_all, select_cohort  # noqa: E402
+from hm_fig4c.pipeline import NEUTRAL_OPTIONS, ORDER_OPTIONS, PHASES, run_minority_analysis, score_all, select_cohort  # noqa: E402
 PRIMARY_MODEL = "st5-large"
 
-# Minority rules whose true share the report quotes when explaining the gap to the paper's 0.285.
-SHARE_RULES = {"neutral_dropped": dict(neutral="drop_participant", ties="exclude"),
-               "ties_kept": dict(neutral="as_majority", ties="agree")}
+# Minority rule whose true share the report quotes when explaining the gap to the paper's 0.285.
+SHARE_RULES = {"neutral_dropped": dict(neutral="drop_participant", ties="exclude")}
 
 
 def group_sizes(prep_dir: Path) -> dict:
@@ -33,7 +32,9 @@ def group_sizes(prep_dir: Path) -> dict:
     op = pd.read_parquet(prep_dir / "opinions.parquet")
     op = select_cohort(op, "cohorts_1_3", prereg_only=True)
     sizes = op.groupby(["metadata.version", "launch_id", "round_id"])["participant_id"].nunique()
-    return {"min": int(sizes.min()), "max": int(sizes.max()), "n_rounds": int(len(sizes))}
+    return {"min": int(sizes.min()), "max": int(sizes.max()), "n_rounds": int(len(sizes)),
+            "n_groups": int(op.groupby(["metadata.version", "launch_id"]).ngroups),
+            "n_participants": int(op["participant_id"].nunique())}
 
 
 def marginal_r2(opinions: pd.DataFrame) -> dict:
@@ -96,7 +97,7 @@ def sensitivity_summary(paths: dict[str, Path]) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--models", nargs="+", default=["st5-base", "st5-large"])
+    ap.add_argument("--models", nargs="+", default=["st5-base", "st5-large", "st5-xl", "st5-xxl"])
     ap.add_argument("--skip-mixed", action="store_true", help="skip the random-effects fit and rule shares (need embeddings)")
     ap.add_argument("--out", default=str(ROOT / "report" / "values.json"))
     args = ap.parse_args()
@@ -116,6 +117,10 @@ def main() -> None:
     V["paper"]["fig4b_within"] = first["paper"]["fig4b_within"]
     V["paper"]["marginal_r2"] = cites["axis_validation"]["marginal_r2"]
     V["paper"]["conditional_r2"] = cites["axis_validation"]["conditional_r2"]
+    V["paper"]["sample"] = {k: v for k, v in cites["sample"].items() if not k.startswith("_")}
+    smp = V["paper"]["sample"]
+    if smp["n_groups"] * smp["rounds_per_group"] != V["paper"]["n_rounds"]:
+        raise SystemExit("paper sample: groups x rounds per group != n_rounds")
     V["citations"] = cites
 
     V["ours"], V["contrasts"], V["axis"] = {}, {}, {}
@@ -124,7 +129,7 @@ def main() -> None:
         V["ours"][m] = json.loads((rdir / "summary.json").read_text())["ours"]
         prim = json.loads((rdir / "fig4c_primary.json").read_text())
         V["contrasts"][m] = prim.get("contrasts", {})
-        V["ours"][m]["phase_se"] = {p: prim["phases"][p]["se"] for p in PHASES}
+        V["ours"][m]["n_boot"] = prim["n_boot"]
         V["ours"][m]["phase_boot_se"] = {p: prim["phases"][p].get("boot_se") for p in PHASES}
         V["ours"][m]["phase_boot_ci"] = {p: prim["phases"][p].get("boot_ci95") for p in PHASES}
         V["ours"][m]["opinions_sanity_true_share"] = prim["phases"]["opinions"]["true_share"]
@@ -140,6 +145,10 @@ def main() -> None:
                     V["share_by_rule"] = true_share_by_rule(opinions, candidates)
 
     V["sensitivity"] = sensitivity_summary({m: ROOT / "results" / m / "sensitivity.csv" for m in args.models})
+    V["sensitivity"]["design"] = {"n_models": len(args.models), "n_neutral": len(NEUTRAL_OPTIONS), "n_orders": len(ORDER_OPTIONS)}
+    expected = len(NEUTRAL_OPTIONS) * len(ORDER_OPTIONS) + len(ORDER_OPTIONS)  # Likert split x neutral x order, plus score split x order
+    if V["sensitivity"]["n_runs_per_model"] != expected:
+        raise SystemExit(f"sensitivity grid has {V['sensitivity']['n_runs_per_model']} cells per model, expected {expected}")
     V["groups"] = group_sizes(ROOT / "prepared")
     V["cohorts_in_primary"] = list(COHORTS["cohorts_1_3"])
 

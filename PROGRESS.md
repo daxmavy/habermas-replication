@@ -200,3 +200,22 @@ falls. Revised winner > initial winner in 48/48 sweep cells; revised winner > it
 anywhere: 0.274, ST5-base). Larger ST5 models make the level gap to the paper wider, not narrower.
 
 Report not yet extended to four models: `uv run python report/compute_values.py --models st5-base st5-large st5-xl st5-xxl`.
+
+## Report revision to Max's feedback (2026-09-07 evening) — four models, bootstrap error bars, 9-cell sweep
+
+- Prose: tied-rounds reading dropped from the minority-share footnote (an absurd reading); "position component score"
+  attributed to the paper, SM 5.1.1 naming sentence removed; the base-as-alternative and Pearson-r sentences removed from
+  the model-choice paragraph; representation defined for a target output $x_0$ with score $a_0$, $\lambda_i$ as part of the
+  solution to the optimisation problem; the three observations are an enumerate; the validation paragraph is one sentence;
+  the "Corrected. The draft read ..." footnotes are gone (blue text stays, without footnotes).
+- Error bars: bootstrap only. The analytic active-set SE is no longer emitted as a macro (`build_parameters.py`) or used by
+  `figures.py`; captions and the results footnote describe the cluster bootstrap (\nBoot = 500, recorded by
+  `run_minority_analysis` as `n_boot`).
+- Sweep: "drop the whole group" removed from `NEUTRAL_OPTIONS`; grid is neutral (2) x order (3) + score-split x order (3)
+  = 9 cells per model, 36 runs over four models. All four notebooks re-run.
+- Four models everywhere: `compute_values.py` defaults to base/large/xl/xxl; new phases table (weights with bootstrap SE by
+  model); Fig. 2 (contrast) and Fig. 3 (sweep) show all four sizes (paper = orange, sizes = blue ramp light->dark);
+  Appendix A table has xl/xxl rows and a slope column; closing paragraph rewritten (xl/xxl overshoot the paper's r^2).
+- Validation table gains the sample: groups 349 = paper's 349; rounds 1047 = 1047; unique participants 1720 vs the
+  paper's 1692 (SM 4.4: 485/726/481; ours 492/742/486, no cross-cohort duplicates) — unexplained, left visible.
+  Marginal r^2: base 0.291, large 0.392, xl 0.447, xxl 0.503 vs paper 0.41 -> large remains the closest.

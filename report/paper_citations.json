@@ -34,5 +34,11 @@
  "group_design": {
   "_source": "SM 1.2 / 4.1 (\"participants were silently organised into groups of five\"); target size raised to 6 in one later setup",
   "designed_size": 5
+ },
+ "sample": {
+  "_source": "SM 4.4 'Main Task (Ablation) Cohorts 1 - 3' (docs/science.adq2852_sm.pdf, PDF p.95): Cohort 1 100 groups / 485 unique participants, Cohort 2 150 / 726, Cohort 3 99 / 481 ('total n = 1692'). Three questions per group: SM 8 (VCA), 'In each of our other cohorts, three questions were sampled randomly from a large set for each group to deliberate over', so 349 x 3 = 1047 rounds.",
+  "n_groups": 349,
+  "n_participants": 1692,
+  "rounds_per_group": 3
  }
 }
