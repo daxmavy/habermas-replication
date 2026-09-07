@@ -107,7 +107,7 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
 
 
 # ----------------------------------------------------------------------------- sensitivity grid
-NEUTRAL_OPTIONS = {"non-minority": "as_majority", "rater dropped": "drop_participant"}
+NEUTRAL_OPTIONS = {"non-minority": "as_majority", "opinion dropped": "drop_participant"}
 ORDER_OPTIONS = {"data": "data", "sorted by score": "sorted", "random": "random"}
 SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
 
@@ -115,7 +115,7 @@ SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
 def sensitivity_grid() -> dict[str, dict]:
     """Every combination of the choices the SM leaves open, for one embedding model (model size is the
     remaining axis and is swept by running the notebook once per model).  When the minority side is
-    taken from the sign of the position score there are no neutral raters, so that split is crossed
+    taken from the sign of the position score there are no neutral opinions, so that split is crossed
     with column order only.  All runs use the pre-registered rounds of cohorts 1-3 with tied rounds
     excluded, as the SM specifies."""
     grid = {}

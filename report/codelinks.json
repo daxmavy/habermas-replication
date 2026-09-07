@@ -3,14 +3,14 @@
   {
    "module": "hm_fig4c/data.py",
    "symbol": "build_tables",
-   "start": 97,
-   "end": 187
+   "start": 113,
+   "end": 203
   },
   {
    "module": "hm_fig4c/data.py",
    "symbol": "prepare",
-   "start": 221,
-   "end": 232
+   "start": 236,
+   "end": 247
   },
   {
    "module": "hm_fig4c/preprocess.py",
@@ -29,8 +29,8 @@
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "assign_minority",
-   "start": 59,
-   "end": 93
+   "start": 73,
+   "end": 107
   },
   {
    "module": "hm_fig4c/pipeline.py",
@@ -43,8 +43,8 @@
   {
    "module": "hm_fig4c/data.py",
    "symbol": "endpoint_texts",
-   "start": 38,
-   "end": 47
+   "start": 50,
+   "end": 63
   },
   {
    "module": "hm_fig4c/analysis.py",
@@ -56,7 +56,7 @@
    "module": "hm_fig4c/analysis.py",
    "symbol": "score_texts",
    "start": 41,
-   "end": 55
+   "end": 69
   },
   {
    "module": "hm_fig4c/embed.py",
@@ -75,42 +75,42 @@
   {
    "module": "report/compute_values.py",
    "symbol": "marginal_r2",
-   "start": 40,
-   "end": 57
+   "start": 43,
+   "end": 60
   }
  ],
  "codeRepresentation": [
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "convex_lstsq",
-   "start": 97,
-   "end": 108
+   "start": 111,
+   "end": 122
   },
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "convex_fit_with_se",
-   "start": 111,
-   "end": 132
+   "start": 125,
+   "end": 146
   },
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "build_design",
-   "start": 135,
-   "end": 156
+   "start": 149,
+   "end": 170
   },
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "minority_weight",
-   "start": 172,
-   "end": 185
+   "start": 186,
+   "end": 199
   }
  ],
  "codeSanity": [
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "opinion_self_regression",
-   "start": 223,
-   "end": 246
+   "start": 237,
+   "end": 260
   }
  ],
  "codeResults": [
@@ -123,8 +123,8 @@
   {
    "module": "hm_fig4c/analysis.py",
    "symbol": "cluster_bootstrap",
-   "start": 188,
-   "end": 220
+   "start": 202,
+   "end": 234
   },
   {
    "module": "report/figures.py",
@@ -149,8 +149,8 @@
   {
    "module": "report/compute_values.py",
    "symbol": "sensitivity_summary",
-   "start": 82,
-   "end": 95
+   "start": 103,
+   "end": 116
   }
  ],
  "codeValidationExtra": [
@@ -159,6 +159,26 @@
    "symbol": "fig4b_within_range",
    "start": 60,
    "end": 71
+  }
+ ],
+ "codeEndpoints": [
+  {
+   "module": "hm_fig4c/data.py",
+   "symbol": "endpoint_texts",
+   "start": 50,
+   "end": 63
+  },
+  {
+   "module": "hm_fig4c/analysis.py",
+   "symbol": "score_texts",
+   "start": 41,
+   "end": 69
+  },
+  {
+   "module": "report/compute_values.py",
+   "symbol": "endpoint_variants",
+   "start": 73,
+   "end": 88
   }
  ]
 }

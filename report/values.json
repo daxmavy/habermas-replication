@@ -216,6 +216,56 @@
    }
   }
  },
+ "endpoints": {
+  "mean_generic_specific": {
+   "description": "generic phrase and released statement embedded separately, endpoint = their normalised mean",
+   "fig4a_r": 0.641768185646137,
+   "initial_candidates": 0.2088437873587145,
+   "initial_candidates_boot_se": 0.016262941041879145,
+   "initial_winner": 0.1500105820058828,
+   "initial_winner_boot_se": 0.017608612488570912,
+   "marginal_r2": 0.3958728485021357,
+   "n_rounds": 560,
+   "opinions_sanity": 0.2629230197099295,
+   "revised_candidates": 0.19495595249783704,
+   "revised_candidates_boot_se": 0.01618861894334329,
+   "revised_winner": 0.1721419069014753,
+   "revised_winner_boot_se": 0.016684919419227222,
+   "true_share": 0.2624551971326165
+  },
+  "prefixed": {
+   "description": "generic phrase and released statement as one text, as in the SM's example (pinned)",
+   "fig4a_r": 0.6326342956348658,
+   "initial_candidates": 0.20649282363503868,
+   "initial_candidates_boot_se": 0.016555720504844964,
+   "initial_winner": 0.1408080151963527,
+   "initial_winner_boot_se": 0.018394091603239848,
+   "marginal_r2": 0.3921752180127449,
+   "n_rounds": 560,
+   "opinions_sanity": 0.26292301970992843,
+   "revised_candidates": 0.18567146240856003,
+   "revised_candidates_boot_se": 0.016579084571172745,
+   "revised_winner": 0.1639667767971248,
+   "revised_winner_boot_se": 0.016937950241949728,
+   "true_share": 0.2624551971326165
+  },
+  "prefixed_not_lower": {
+   "description": "as pinned, with the released statements' capitalised 'NOT' lowercased, as in the SM's example",
+   "fig4a_r": 0.6314498784511913,
+   "initial_candidates": 0.20788489404057614,
+   "initial_candidates_boot_se": 0.016702107785940154,
+   "initial_winner": 0.14307381872513364,
+   "initial_winner_boot_se": 0.018531879570188488,
+   "marginal_r2": 0.39075898081733634,
+   "n_rounds": 560,
+   "opinions_sanity": 0.2629230197099296,
+   "revised_candidates": 0.18723425689408474,
+   "revised_candidates_boot_se": 0.016659164753735658,
+   "revised_winner": 0.16658800243545008,
+   "revised_winner_boot_se": 0.0169144539335149,
+   "true_share": 0.2624551971326165
+  }
+ },
  "groups": {
   "max": 5,
   "min": 4,
@@ -571,9 +621,9 @@
    "split=Likert rating | neutral=non-minority | order=data",
    "split=Likert rating | neutral=non-minority | order=sorted by score",
    "split=Likert rating | neutral=non-minority | order=random",
-   "split=Likert rating | neutral=rater dropped | order=data",
-   "split=Likert rating | neutral=rater dropped | order=sorted by score",
-   "split=Likert rating | neutral=rater dropped | order=random",
+   "split=Likert rating | neutral=opinion dropped | order=data",
+   "split=Likert rating | neutral=opinion dropped | order=sorted by score",
+   "split=Likert rating | neutral=opinion dropped | order=random",
    "split=sign of position score | neutral=n/a | order=data",
    "split=sign of position score | neutral=n/a | order=sorted by score",
    "split=sign of position score | neutral=n/a | order=random"

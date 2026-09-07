@@ -19,9 +19,12 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from hm_fig4c.data import COHORTS  # noqa: E402
+from hm_fig4c.data import COHORTS, ENDPOINT_STYLES  # noqa: E402
 from hm_fig4c.pipeline import NEUTRAL_OPTIONS, ORDER_OPTIONS, PHASES, run_minority_analysis, score_all, select_cohort  # noqa: E402
 PRIMARY_MODEL = "st5-large"
+# Readings of SM 5.1.2's chosen endpoints that are consistent with its description (see data.ENDPOINT_STYLES); the
+# first is the pinned one used everywhere else in the report.
+ENDPOINT_TEST = ["prefixed", "prefixed_not_lower", "mean_generic_specific"]
 
 # Minority rule whose true share the report quotes when explaining the gap to the paper's 0.285.
 SHARE_RULES = {"neutral_dropped": dict(neutral="drop_participant", ties="exclude")}
@@ -64,6 +67,24 @@ def true_share_by_rule(opinions: pd.DataFrame, candidates: pd.DataFrame) -> dict
         r = run_minority_analysis(opinions, candidates, phases=["initial_winner"], include_opinions=False, **rule)
         e = r["phases"]["initial_winner"]
         out[name] = {"true_share": e["true_share"], "n_rounds": e["n_rounds"]}
+    return out
+
+
+def endpoint_variants(prep_dir: Path, emb_dir: Path, styles: list[str], n_boot: int) -> dict:
+    """The primary specification under each reading of the endpoint description, on one embedding model."""
+    out = {}
+    for style in styles:
+        opinions, _, _, candidates = score_all(prep_dir, emb_dir, endpoint_style=style)
+        r = run_minority_analysis(opinions, candidates, n_boot=n_boot)
+        mx = marginal_r2(opinions)
+        e = {"description": ENDPOINT_STYLES[style], "n_rounds": r["phases"]["initial_winner"]["n_rounds"],
+             "true_share": r["phases"]["initial_winner"]["true_share"], "opinions_sanity": r["phases"]["opinions"]["weight"],
+             "fig4a_r": mx["pearson_r"], "marginal_r2": mx["marginal_r2"]}
+        for ph in PHASES:
+            e[ph] = r["phases"][ph]["weight"]
+            e[ph + "_boot_se"] = r["phases"][ph]["boot_se"]
+        out[style] = e
+        print(f"[endpoints/{style}] revised winner = {e['revised_winner']:.3f}, r = {e['fig4a_r']:.3f}")
     return out
 
 
@@ -143,6 +164,11 @@ def main() -> None:
                       f"(pearson r = {V['axis'][m]['mixed']['pearson_r']:.3f})")
                 if m == PRIMARY_MODEL:
                     V["share_by_rule"] = true_share_by_rule(opinions, candidates)
+                    V["endpoints"] = endpoint_variants(ROOT / "prepared", emb, ENDPOINT_TEST, V["ours"][m]["n_boot"])
+                    pinned = V["endpoints"][ENDPOINT_TEST[0]]
+                    for ph in PHASES:  # the pinned reading must reproduce the notebook's primary numbers
+                        if abs(pinned[ph] - V["ours"][m][ph]) > 1e-6:
+                            raise SystemExit(f"endpoint test: pinned {ph} {pinned[ph]} != notebook {V['ours'][m][ph]}")
 
     V["sensitivity"] = sensitivity_summary({m: ROOT / "results" / m / "sensitivity.csv" for m in args.models})
     V["sensitivity"]["design"] = {"n_models": len(args.models), "n_neutral": len(NEUTRAL_OPTIONS), "n_orders": len(ORDER_OPTIONS)}

@@ -219,3 +219,16 @@ Report not yet extended to four models: `uv run python report/compute_values.py 
 - Validation table gains the sample: groups 349 = paper's 349; rounds 1047 = 1047; unique participants 1720 vs the
   paper's 1692 (SM 4.4: 485/726/481; ours 492/742/486, no cross-cohort duplicates) — unexplained, left visible.
   Marginal r^2: base 0.291, large 0.392, xl 0.447, xxl 0.503 vs paper 0.41 -> large remains the closest.
+
+## Second round of Max's feedback (2026-09-07, late) — endpoint readings, wording
+
+- Ambiguity table: model-size cell now says the report focuses on large but Figs. 2-3 show all sizes; "rater" -> "opinion"
+  everywhere (pipeline label `opinion dropped`, notebooks re-run); Discussion cites the autonomous Fig. 4D replication.
+- Column order: across the 36 sweep cells the spread of the minority weight over the three orders has median 0.005,
+  90th percentile 0.011, max 0.027 (base, score split) — under one bootstrap SE (0.017 for large). Kept in the sweep.
+- Endpoint construction (new subsection + table, `compute_values.endpoint_variants`, `data.ENDPOINT_STYLES`): the three
+  readings consistent with SM 5.1.2's "generic + question-specific combination" — one concatenated text (pinned), the same
+  with the released "NOT" lowercased as in the SM example (2,069 new endpoint texts embedded for base/large), and the
+  generic phrase and statement embedded separately with the endpoint as their normalised mean. Under large the revised
+  winner is 0.164 / 0.167 / 0.172 (r 0.633 / 0.631 / 0.642): within one bootstrap SE of one another, none near 0.36.
+  `analysis.score_texts` now takes an endpoint as the normalised mean of its texts (single-text styles unchanged).

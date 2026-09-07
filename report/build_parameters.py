@@ -17,6 +17,7 @@ OUT = ROOT / "report" / "parameters.tex"
 SUFFIX = {"st5-base": "Base", "st5-large": "Large", "st5-xl": "Xl", "st5-xxl": "Xxl"}
 PHASE_MACRO = {"initial_candidates": "InitCand", "initial_winner": "InitWin",
                "revised_candidates": "RevCand", "revised_winner": "RevWin"}
+ENDPOINT_MACRO = {"prefixed": "Pinned", "prefixed_not_lower": "NotLower", "mean_generic_specific": "MeanEmb"}
 
 
 def fmt(v, spec: str) -> str:
@@ -81,6 +82,13 @@ def spec_rows(V) -> list[tuple[str, str]]:
             rows += [(f"sens{pm}Mean{sfx}", s[ph]["mean"], "f3"),
                      (f"sens{pm}Min{sfx}", s[ph]["min"], "f3"), (f"sens{pm}Max{sfx}", s[ph]["max"], "f3")]
 
+    for style, mac in ENDPOINT_MACRO.items():
+        e = V["endpoints"][style]
+        rows += [(f"axis{mac}Opinions", e["opinions_sanity"], "f3"), (f"axis{mac}FigAr", e["fig4a_r"], "f2"),
+                 (f"axis{mac}MarginalRsq", e["marginal_r2"], "f3"), (f"axis{mac}NRounds", e["n_rounds"], "int")]
+        for ph, pm in PHASE_MACRO.items():
+            rows += [(f"axis{mac}{pm}", e[ph], "f3"), (f"axis{mac}{pm}BootSE", e[ph + "_boot_se"], "f3")]
+    rows.append(("axisNStyles", len(ENDPOINT_MACRO), "int"))
     n_boot = {V["ours"][m]["n_boot"] for m in SUFFIX if m in V["ours"]}
     if len(n_boot) != 1:
         raise SystemExit(f"models bootstrapped with different resample counts: {n_boot}")

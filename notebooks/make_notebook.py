@@ -26,7 +26,7 @@ pre-deliberation rating. Fig. 4B: 96% of group-statement scores within the range
 
 Method (SM 5.1, 5.4.1): Sentence-T5 embeddings; per-question position axis = unit vector from the embedding of
 "No, I disagree. <negating statement>" to "Yes, I agree. <affirming statement>"; position score = projection onto that axis;
-minority = the side of neutral with fewer pre-deliberation ratings, neutral raters count as non-minority; convex regression
+minority = the side of neutral with fewer pre-deliberation ratings, neutral opinions count as non-minority; convex regression
 (weights >= 0, sum = 1) of statement scores on the group's opinion scores, one regression per (group size, minority size) level,
 minority weight = sum of minority coefficients, averaged over levels weighted by number of rounds.""")
 
@@ -79,7 +79,7 @@ plt.savefig(f"{OUT_DIR}/fig4b.png", dpi=150)""")
     md("""## 4. Fig. 4C — minority weight via convex regression (primary specification)
 
 Main-task cohorts 1–3, pre-registered groups (n = 1047 rounds); minority = smaller side of neutral on the pre-deliberation
-rating, neutral raters kept as non-minority (SM 5.4.1); rounds with a tie or no dissent excluded; columns ordered as in the data.
+rating, neutral opinions kept as non-minority (SM 5.4.1); rounds with a tie or no dissent excluded; columns ordered as in the data.
 Analytic SEs are the OLS standard errors of the constrained fit (as in the paper); bootstrap SEs resample rounds.""")
     code("""res = P.run_minority_analysis(opinions, candidates, cohort="cohorts_1_3", neutral="as_majority", order="data", n_boot=N_BOOT)
 P.save_results(res, f"{OUT_DIR}/fig4c_primary.json")
@@ -91,7 +91,7 @@ P.plot_fig4c(res, ax=ax, include_opinions=True, title=f"Cohorts 1-3 (pre-registe
 plt.tight_layout(); plt.savefig(f"{OUT_DIR}/fig4c.png", dpi=200)""")
 
     md("""## 5. Sensitivity analyses
-Every combination of the choices the SM leaves open (`P.sensitivity_grid()`): neutral-rater treatment × basis for the
+Every combination of the choices the SM leaves open (`P.sensitivity_grid()`): neutral-opinion treatment × basis for the
 minority split × column order of the design matrix; model size is swept by running this notebook once per embedding model.
 Sample (pre-registered rounds of cohorts 1–3) and tie handling (excluded) are as the SM specifies and are not varied.""")
     code("""sens = P.run_sensitivity(opinions, candidates, P.sensitivity_grid())

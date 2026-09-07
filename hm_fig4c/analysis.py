@@ -43,15 +43,29 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
     """Position score for each row of df (needs question_id + text column)."""
     from .data import endpoint_texts
     q = questions.set_index("question_id")
+
+    def endpoint(texts: list[str]):
+        """Embedding of an endpoint: the (normalised) mean over its texts, or None if any is not embedded."""
+        ids = [text_id_fn(t) for t in texts]
+        if not all(t in lookup for t in ids):
+            return None
+        if len(ids) == 1:  # ST5 embeddings are already unit-norm; leave the single-text case untouched
+            return mat[lookup[ids[0]]]
+        e = mat[[lookup[t] for t in ids]].mean(axis=0)
+        return e / np.linalg.norm(e)
+
+    endpoints = {}
     out = np.full(len(df), np.nan)
     for i, (qid, text) in enumerate(zip(df["question_id"], df[text_col])):
         if not isinstance(text, str):
             continue
         tid = text_id_fn(text)
-        a_txt, n_txt = endpoint_texts(q.at[qid, "affirming"], q.at[qid, "negating"], endpoint_style)
-        aff, neg = text_id_fn(a_txt), text_id_fn(n_txt)
-        if tid in lookup and aff in lookup and neg in lookup:
-            out[i] = position_axis_scores(mat[lookup[tid]][None, :], mat[lookup[neg]], mat[lookup[aff]], method)[0]
+        if qid not in endpoints:
+            a_txts, n_txts = endpoint_texts(q.at[qid, "affirming"], q.at[qid, "negating"], endpoint_style)
+            endpoints[qid] = (endpoint(a_txts), endpoint(n_txts))
+        aff, neg = endpoints[qid]
+        if tid in lookup and aff is not None and neg is not None:
+            out[i] = position_axis_scores(mat[lookup[tid]][None, :], neg, aff, method)[0]
     return pd.Series(out, index=df.index)
 
 

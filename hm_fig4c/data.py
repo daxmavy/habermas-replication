@@ -34,16 +34,32 @@ EMBED_PRIORITY = ["cohort1", "cohort2", "cohort3", "cohort4", "training", "vca"]
 
 AFFIRM_PREFIX, NEGATE_PREFIX = "Yes, I agree. ", "No, I disagree. "
 
+# Readings of SM 5.1.2's chosen endpoints, "a generic + question-specific combination (i.e. 'Yes, I agree. It is the
+# government's role to [...]')".  A style maps a question's affirming/negating statements to the texts whose normalised
+# mean embedding is the endpoint; the first three are consistent with that description, the last two are SM options
+# it did not choose.
+ENDPOINT_STYLES = {
+    "prefixed": "generic phrase and released statement as one text, as in the SM's example (pinned)",
+    "prefixed_not_lower": "as pinned, with the released statements' capitalised 'NOT' lowercased, as in the SM's example",
+    "mean_generic_specific": "generic phrase and released statement embedded separately, endpoint = their normalised mean",
+    "plain": "released statement only",
+    "generic": "generic phrase only",
+}
 
-def endpoint_texts(affirming: str, negating: str, style: str = "prefixed") -> tuple[str, str]:
-    """Position-axis endpoint texts. SM 5.1.2: 'generic + question-specific' endpoints, e.g.
-    'Yes, I agree. It is the government's role to [...]' / 'No, I disagree. It is not the government's role to [...]'."""
+
+def endpoint_texts(affirming: str, negating: str, style: str = "prefixed") -> tuple[list[str], list[str]]:
+    """Texts whose embeddings define the affirming and negating endpoints under `style` (see ENDPOINT_STYLES)."""
+    a, n = affirming.strip(), negating.strip()
     if style == "prefixed":
-        return AFFIRM_PREFIX + affirming.strip(), NEGATE_PREFIX + negating.strip()
+        return [AFFIRM_PREFIX + a], [NEGATE_PREFIX + n]
+    if style == "prefixed_not_lower":
+        return [AFFIRM_PREFIX + a.replace("NOT", "not")], [NEGATE_PREFIX + n.replace("NOT", "not")]
+    if style == "mean_generic_specific":
+        return [AFFIRM_PREFIX.strip(), a], [NEGATE_PREFIX.strip(), n]
     if style == "plain":
-        return affirming.strip(), negating.strip()
+        return [a], [n]
     if style == "generic":
-        return AFFIRM_PREFIX.strip(), NEGATE_PREFIX.strip()
+        return [AFFIRM_PREFIX.strip()], [NEGATE_PREFIX.strip()]
     raise ValueError(style)
 
 
@@ -194,11 +210,10 @@ def build_text_table(opinions: pd.DataFrame, statements: pd.DataFrame, questions
     rows = []
     for q in questions.itertuples():
         pq = q.question_id in prereg_q
-        a, n = endpoint_texts(q.affirming, q.negating, "prefixed")
-        rows.append((a, "position_prefixed", -2, pq))
-        rows.append((n, "position_prefixed", -2, pq))
-        rows.append((q.affirming, "position", -1, pq))
-        rows.append((q.negating, "position", -1, pq))
+        for style, kind, prio_ in (("prefixed", "position_prefixed", -2), ("prefixed_not_lower", "position_prefixed_not_lower", -2),
+                                   ("plain", "position", -1)):
+            for t in sum(endpoint_texts(q.affirming, q.negating, style), []):
+                rows.append((t, kind, prio_, pq))
     rows.append((AFFIRM_PREFIX.strip(), "position_generic", -2, True)); rows.append((NEGATE_PREFIX.strip(), "position_generic", -2, True))
     for r in opinions.itertuples():
         rows.append((r.opinion_text, "opinion", prio.get(r.cohort, 99), bool(r.prereg)))

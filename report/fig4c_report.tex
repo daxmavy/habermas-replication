@@ -16,6 +16,8 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
 \usepackage{caption}
+\usepackage{float}
+\usepackage{array}
 
 \captionsetup{font=small,labelfont=bf,justification=raggedright,singlelinecheck=false}
 \setlength{\parindent}{0pt}
@@ -138,14 +140,14 @@ group were excluded from this analysis.
 The sample for this analysis is the pre-registered groups of
 cohorts 1--3: \groupNRounds{} rounds, of which \oursNRoundsLarge{} contain a minority under this
 rule, giving a true minority share of \oursShareLarge{}.\footnote{\fillin{The paper reports
-\paperShare{}. The gap is almost entirely the treatment of neutral raters. SM 5.4.1 counts a
+\paperShare{}. The gap is almost entirely the treatment of neutral opinions. SM 5.4.1 counts a
 neutral (4) rating as non-minority: ``we may define the `minority' side of the Likert scale as the
 side that contains the smaller number of opinions, and define all other opinions as `non-minority'
 opinions---which include `majority' opinions [\ldots] as well as `neutral' opinions (i.e.\ with a
 Likert rating of 4), if any.'' Applied literally, with rounds that have equal numbers on each side
 excluded, that rule gives \oursShareLarge{} on these rounds. One other reading lands on the
-paper's figure: dropping neutral raters from their groups before the sides are counted gives
-\shareRuleNeutralDropped{} (\shareRuleNeutralDroppedNRounds{} rounds). The treatment of neutral raters is carried through the
+paper's figure: dropping neutral opinions from their groups before the sides are counted gives
+\shareRuleNeutralDropped{} (\shareRuleNeutralDroppedNRounds{} rounds). The treatment of neutral opinions is carried through the
 \hyperref[sec:sensitivity]{sensitivity analysis} below.}}
 
 \section*{How does the HM paper measure how well-represented minority opinions are?}
@@ -174,7 +176,8 @@ generic prefix (``Yes, I agree.'' or ``No, I disagree.'') concatenated with the 
 affirming or negating position statement --- and one illustrative example, but not the exact
 phrases used for each question. Here each endpoint is the prefix followed by the position statement
 released with the data; the axis is the unit vector from the negating to the affirming endpoint (SM
-eq.~3) and the score is the projection onto it (SM eq.~5).}}
+eq.~3) and the score is the projection onto it (SM eq.~5). The readings that description admits are
+tested in the \hyperref[sec:endpoints]{sensitivity analysis} (Table~\ref{tab:endpoints}).}}
 
 The main detail missing from the SM is what exact embedding model was used for this process. While
 the SM describes Sentence-T5, there are various sizes of this model that could be used.
@@ -242,7 +245,7 @@ phase, so that differences between phases are bootstrapped on matched samples).}
 Sentence-T5 size. Error bars: paper, $\pm 1$ standard error of the regression coefficient as
 printed (SM Figure S60); ours, $\pm 1$ cluster-bootstrap standard error over rounds. The two dotted
 lines are the true minority share in each case (\paperShare{} for the paper, \oursShareLarge{}
-here; the difference is the treatment of neutral raters). $n=\oursNRoundsLarge$ rounds with a
+here; the difference is the treatment of neutral opinions). $n=\oursNRoundsLarge$ rounds with a
 minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, for every model.}}
 \label{fig:contrast}
 \end{figure}
@@ -330,7 +333,7 @@ estimates the paper reports.}}
 As noted above, there are several aspects of the analysis plan which are not specified in the SM.
 These are:
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \small
 \caption{\fillin{Underspecified choices, the options considered, and the option taken in the
@@ -340,9 +343,10 @@ primary specification above.}}
 \toprule
 \fillin{ambiguity} & \fillin{possible options} & \fillin{option chosen above} \\
 \midrule
-\fillin{ST5 model size} & \fillin{base, large, xl, xxl} & \fillin{large (\hyperref[app:rsq]{Appendix~A})} \\
-\fillin{Neutral (Likert 4) raters} & \fillin{count as non-minority; drop the rater} & \fillin{count as non-minority (SM 5.4.1)} \\
+\fillin{ST5 model size} & \fillin{base, large, xl, xxl} & \fillin{I focus on values from the large model (\hyperref[app:rsq]{Appendix~A}), but Figures~\ref{fig:contrast} and~\ref{fig:sensitivity} show results across all model sizes} \\
+\fillin{Neutral (Likert 4) opinions} & \fillin{count as non-minority; drop the opinion} & \fillin{count as non-minority (SM 5.4.1)} \\
 \fillin{Basis for splitting minority / non-minority} & \fillin{Likert rating; sign of the position component score (SM Fig.\ S62)} & \fillin{Likert rating (SM Fig.\ S60)} \\
+\fillin{Position-axis endpoints: how ``generic + question-specific'' is combined} & \fillin{one text, as in the SM example; one text with the released ``NOT'' lowercased, as in the SM example; generic phrase and statement embedded separately and averaged} & \fillin{one text, released statements (Table~\ref{tab:endpoints})} \\
 \fillin{Column order: how a round's opinions are assigned to the regressors} & \fillin{order in the released data; sorted by position component score; random} & \fillin{data order} \\
 \bottomrule
 \end{tabular}
@@ -357,11 +361,52 @@ non-minority block. The minority weight sums the minority columns, which removes
 on order within the minority block when the minority has one member, but the order of the
 non-minority columns still changes the fit.}
 
+\subsection*{Endpoint construction}
+\phantomsection\label{sec:endpoints}
+\codebox{\codeEndpoints}
+
+\fillin{SM 5.1.2 pins the endpoints to ``a generic + question-specific combination'' and gives the
+example ``Yes, I agree. It is the government's role to [\ldots]''; SM 5.1.1 fixes the axis as the
+unit vector from the negating to the affirming embedding (eq.~3) and the score as the projection
+onto it (eq.~5). Two things in that description can be read more than one way. ``Combination'' is
+shown as a single text, but could also mean combining the two endpoints at the embedding level. And
+the released position statements write the negation in capitals (``\ldots should NOT be allowed
+\ldots''), where the SM's example reads ``is not''. Table~\ref{tab:endpoints} runs the primary
+specification under sentence-t5-large with each reading. The three readings agree to within one
+bootstrap standard error of one another at every phase, and none moves the revised winner
+(\axisPinnedRevWin{}, \axisNotLowerRevWin{} and \axisMeanEmbRevWin{}) towards the paper's
+\paperRevWin{}: the endpoint construction is not where the gap comes from.}
+
+\begin{table}[H]
+\centering
+\small
+\caption{\fillin{The primary specification under sentence-t5-large with each reading of the SM's
+endpoint description: minority weight by phase (cluster-bootstrap standard error in parentheses)
+and the two axis-quality checks (Pearson $r$ of Figure 4A, marginal $r^2$ of Appendix~A).
+$n=\axisPinnedNRounds$ rounds with a minority in every column.}}
+\label{tab:endpoints}
+\begin{tabular}{l>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.2cm}}
+\toprule
+ & \fillin{one text, released statements (pinned)} & \fillin{one text, ``NOT'' lowercased as in the SM example} & \fillin{generic phrase and statement embedded separately, averaged} \\
+\midrule
+\fillin{Initial statements} & \fillin{\axisPinnedInitCand{} (\axisPinnedInitCandBootSE)} & \fillin{\axisNotLowerInitCand{} (\axisNotLowerInitCandBootSE)} & \fillin{\axisMeanEmbInitCand{} (\axisMeanEmbInitCandBootSE)} \\
+\fillin{Initial winner} & \fillin{\axisPinnedInitWin{} (\axisPinnedInitWinBootSE)} & \fillin{\axisNotLowerInitWin{} (\axisNotLowerInitWinBootSE)} & \fillin{\axisMeanEmbInitWin{} (\axisMeanEmbInitWinBootSE)} \\
+\fillin{Revised statements} & \fillin{\axisPinnedRevCand{} (\axisPinnedRevCandBootSE)} & \fillin{\axisNotLowerRevCand{} (\axisNotLowerRevCandBootSE)} & \fillin{\axisMeanEmbRevCand{} (\axisMeanEmbRevCandBootSE)} \\
+\fillin{Revised winner} & \fillin{\axisPinnedRevWin{} (\axisPinnedRevWinBootSE)} & \fillin{\axisNotLowerRevWin{} (\axisNotLowerRevWinBootSE)} & \fillin{\axisMeanEmbRevWin{} (\axisMeanEmbRevWinBootSE)} \\
+\midrule
+\fillin{Fig.\ 4A $r$} & \fillin{\axisPinnedFigAr} & \fillin{\axisNotLowerFigAr} & \fillin{\axisMeanEmbFigAr} \\
+\fillin{Marginal $r^2$} & \fillin{\axisPinnedMarginalRsq} & \fillin{\axisNotLowerMarginalRsq} & \fillin{\axisMeanEmbMarginalRsq} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{The sweep}
+
 I reran the analysis with every combination of these decisions
 (\fillin{\sensNRuns{}} runs).\footnote{\fillin{\sensNModels{} model sizes $\times$ \sensNNeutral{}
-neutral-rater treatments $\times$ \sensNOrders{} column orders when the split is by Likert rating,
+neutral-opinion treatments $\times$ \sensNOrders{} column orders when the split is by Likert rating,
 plus \sensNModels{} model sizes $\times$ \sensNOrders{} column orders when the split is by the sign
-of the score, where there are no neutral raters: \sensNRuns{} runs, \sensNRunsPerModel{} per
+of the score, where there are no neutral opinions: \sensNRuns{} runs, \sensNRunsPerModel{} per
 model.}} Across the runs, I calculated the following metrics:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=0.25em]
@@ -399,7 +444,9 @@ regression method. We fail to replicate the substantive findings for this part o
 however.
 
 This finding actually aligns somewhat with the finding that people's beliefs shifted towards the
-majority position (although there are many possible explanations for this finding).
+majority position. An autonomously Claude-generated replication of Figure 4(d) found a correlation
+between majority-dominated groups and shifts towards majority opinion (unlike the paper, which found
+no correlation); however I have not checked this closely yet.
 
 \clearpage
 \section*{Appendix A: the paper's $R^2$ statistic}
