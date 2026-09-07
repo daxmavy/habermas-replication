@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  7 SEP 2026 18:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.9.5)  7 SEP 2026 18:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -942,7 +942,7 @@ lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmri9.pfb></usr/share/tex
 mf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lms
 y8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb></usr/share/texmf/font
 s/type1/public/lm/lmtt10.pfb>
-Output written on fig4c_report.pdf (8 pages, 413144 bytes).
+Output written on fig4c_report.pdf (8 pages, 413137 bytes).
 PDF statistics:
  414 PDF objects out of 1000 (max. 8388607)
  231 compressed objects within 3 object streams
