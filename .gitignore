@@ -7,3 +7,4 @@ __pycache__/
 .ipynb_checkpoints/
 notebooks/*_out.ipynb
 nohup.out
+isambard/logs/

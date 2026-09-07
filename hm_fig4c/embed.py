@@ -23,7 +23,7 @@ def load_embeddings(cache_dir: Path) -> tuple[dict[str, int], np.ndarray]:
     return {t: i for i, t in enumerate(df["text_id"])}, mat
 
 
-def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int, batch_size: int, chunk_size: int, max_priority: int | None, dtype: str = "fp32", prereg_only: bool = False):
+def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int, batch_size: int, chunk_size: int, max_priority: int | None, dtype: str = "fp32", prereg_only: bool = False, device: str = "cpu", shard: str = "0/1"):
     import torch
     from sentence_transformers import SentenceTransformer
 
@@ -39,19 +39,23 @@ def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int,
         texts = texts[texts["prereg"]]
     done = set(load_cache(cache_dir)["text_id"])
     todo = texts[~texts["text_id"].isin(done)].reset_index(drop=True)
-    print(f"{model_name}: {len(done)} cached, {len(todo)} to embed", flush=True)
+    shard_i, shard_n = (int(x) for x in shard.split("/"))
+    todo = todo.iloc[shard_i::shard_n].reset_index(drop=True)  # every shard_n-th text: disjoint shards, each still sorted by length
+    print(f"{model_name}: {len(done)} cached, {len(todo)} to embed (shard {shard_i}/{shard_n})", flush=True)
     if not len(todo):
         return
-    kw = {"model_kwargs": {"torch_dtype": torch.bfloat16}} if dtype == "bf16" else {}
-    model = SentenceTransformer(model_name, device="cpu", **kw)
+    kw = {"model_kwargs": {"torch_dtype": torch.bfloat16 if dtype == "bf16" else torch.float32}}
+    model = SentenceTransformer(model_name, device=device, **kw)
     model.max_seq_length = max_seq_length
-    print("max_seq_length =", model.max_seq_length, "| threads =", torch.get_num_threads(), "| dtype =", dtype, flush=True)
+    print("max_seq_length =", model.max_seq_length, "| device =", device, "| threads =", torch.get_num_threads(), "| dtype =", dtype, flush=True)
     t0 = time.time(); n_done = 0
     for start in range(0, len(todo), chunk_size):
         chunk = todo.iloc[start:start + chunk_size]
         emb = model.encode(chunk["text"].tolist(), batch_size=batch_size, show_progress_bar=False, convert_to_numpy=True)
         out = pd.DataFrame({"text_id": chunk["text_id"].values, "embedding": list(emb.astype(np.float32))})
-        out.to_parquet(cache_dir / f"chunk_{int(time.time() * 1000)}_{start}.parquet", index=False)
+        final = cache_dir / f"chunk_{int(time.time() * 1000)}_{shard_i}_{start}.parquet"
+        out.to_parquet(final.with_suffix(".tmp"), index=False)
+        final.with_suffix(".tmp").replace(final)  # atomic: a chunk killed mid-write never appears in the cache glob
         n_done += len(chunk)
         el = time.time() - t0
         print(f"  {n_done}/{len(todo)} done | {n_done / el:.2f} texts/s | eta {(len(todo) - n_done) / (n_done / el) / 60:.1f} min", flush=True)
@@ -69,5 +73,7 @@ if __name__ == "__main__":
     ap.add_argument("--max-priority", type=int, default=None, help="only embed texts with priority <= this")
     ap.add_argument("--dtype", choices=["fp32", "bf16"], default="fp32")
     ap.add_argument("--prereg-only", action="store_true", help="only texts belonging to pre-registered rounds (and their questions)")
+    ap.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    ap.add_argument("--shard", default="0/1", help="I/N: embed only every N-th text starting at I, for N concurrent workers on one cache")
     a = ap.parse_args()
-    run(Path(a.texts), a.model, Path(a.cache_dir), a.max_seq_length, a.batch_size, a.chunk_size, a.max_priority, a.dtype, a.prereg_only)
+    run(Path(a.texts), a.model, Path(a.cache_dir), a.max_seq_length, a.batch_size, a.chunk_size, a.max_priority, a.dtype, a.prereg_only, a.device, a.shard)

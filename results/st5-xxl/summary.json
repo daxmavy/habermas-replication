@@ -1,0 +1,32 @@
+{
+ "paper": {
+  "n_rounds": 1047,
+  "minority_share": 0.285,
+  "opinions_sanity": 0.28,
+  "initial_candidates": 0.28,
+  "initial_winner": 0.29,
+  "revised_candidates": 0.33,
+  "revised_winner": 0.36,
+  "revised_winner_se": 0.03,
+  "revised_winner_t_vs_true": 2.64,
+  "fig4a_r": 0.64,
+  "fig4b_within": 0.96
+ },
+ "ours": {
+  "n_rounds": 560,
+  "n_rounds_total": 1047,
+  "minority_share": 0.2624551971326165,
+  "opinions_sanity": 0.2629230197099306,
+  "initial_candidates": 0.18535550324541297,
+  "initial_winner": 0.11021168655264604,
+  "revised_candidates": 0.15536594242530252,
+  "revised_winner": 0.13583218459345947,
+  "revised_winner_se": 0.01610835753872763,
+  "revised_winner_t_vs_true": -7.86070288263286,
+  "fig4a_r": 0.7131416327938201,
+  "fig4b_within": 0.8519579751671442,
+  "model": "st5-xxl",
+  "endpoints": "prefixed",
+  "axis": "unit"
+ }
+}

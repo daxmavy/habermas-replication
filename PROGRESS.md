@@ -170,3 +170,33 @@ sign measure but matches our SE for mean rating change (0.078); their y scale or
 Concurrency note: another Claude session was revising the report in this tree at the same time. My `git checkout` of
 `notebooks/fig4c.ipynb` / `make_notebook.py` at ~18:15 reverted its uncommitted sensitivity-grid cells; restored from the executed
 `fig4c_*_out.ipynb` (sources verified identical). Do not `git checkout`/`stash` shared files here without checking `ps`/mtimes.
+
+## ST5-xl and ST5-xxl (2026-09-07) — embeddings on Isambard-AI, sweep extended to four model sizes
+
+Embeddings for all 51,764 texts computed on Isambard-AI Phase 2 (one GH200, fp32, Slurm job 6385195, 31 min:
+xl 7 min at ~140 texts/s, xxl 24 min at ~37 texts/s) -> `embeddings/st5-xl`, `embeddings/st5-xxl` (copies stay on
+`$SCRATCHDIR/habermas-fig4c/embeddings` there). Workflow, all in `isambard/`: `sync.sh to` -> `setup_env.sh` on the login
+node (uv env from the lockfile + model weights to `$SCRATCHDIR/hf`) -> `sbatch embed_st5.sbatch` (1 GPU by default; `--gpus=4`
+shards the texts over four concurrent srun steps) -> `sync.sh from`. `hm_fig4c/embed.py` gained `--device cuda`, `--shard I/N`
+and atomic chunk writes; `pyproject.toml` pins torch per platform (cpu index on x86_64, cu126 on aarch64 — the nodes run
+driver 565 = CUDA 12.7, and PyPI's aarch64 torch is a CUDA 13 build). xxl at batch 64 hit one allocator OOM warning on the
+longest texts and recovered on retry; pass `HM_EXTRA="--batch-size 32"` if it ever fails outright.
+
+Notebooks run locally as before (`HM_EMB_DIR=../embeddings/st5-{xl,xxl}`) -> `results/st5-xl`, `results/st5-xxl`; the
+factorial sweep is now 4 models x 12 cells = 48 runs.
+
+| phase (cohorts 1-3 prereg, 560 rounds, true share 0.262) | paper | ST5-base | ST5-large | ST5-xl | ST5-xxl |
+|---|---|---|---|---|---|
+| initial statements | 0.28 | 0.211 | 0.206 | 0.200 | 0.185 |
+| initial winner | 0.29 | 0.160 | 0.141 | 0.123 | 0.110 |
+| revised statements | 0.33 | 0.209 | 0.186 | 0.178 | 0.155 |
+| revised winner (± SE) | 0.36 (0.03) | 0.199 (0.018) | 0.164 (0.017) | 0.157 (0.016) | 0.136 (0.016) |
+| t vs true share | 2.64 | -3.5 | -5.8 | -6.5 | -7.9 |
+| Fig 4A r | 0.64 | 0.56 | 0.63 | 0.67 | 0.71 |
+| Fig 4B within range | 0.96 | 0.86 | 0.86 | 0.86 | 0.85 |
+
+Monotone in model size: the position axis gets better (Fig 4A r passes the paper's 0.64 at xl) while every minority weight
+falls. Revised winner > initial winner in 48/48 sweep cells; revised winner > its own true share in 0/48 (largest value
+anywhere: 0.274, ST5-base). Larger ST5 models make the level gap to the paper wider, not narrower.
+
+Report not yet extended to four models: `uv run python report/compute_values.py --models st5-base st5-large st5-xl st5-xxl`.
