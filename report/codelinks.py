@@ -6,10 +6,9 @@ code moves. Emits report/codelinks.tex:
     \\newcommand{\\codeIntro}{\\CodeRef{hm_fig4c/data.py}{97}{188}{build\\_tables}...}
 
 \\CodeRef renders as a hyperlink when \\repourl is set in the .tex preamble, and as a plain
-file:line reference otherwise (this VM cannot create the GitHub remote -- the exe.dev proxy
-serves only /repos/OWNER/REPO -- so the fallback is the default).
+file:line reference otherwise.
 
-    uv run python report/codelinks.py
+    python report/codelinks.py
 """
 from __future__ import annotations
 

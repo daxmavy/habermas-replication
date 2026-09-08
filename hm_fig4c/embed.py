@@ -1,12 +1,15 @@
 """Embed texts with a Sentence-T5 model; incremental, resumable cache of chunk parquet files."""
 from __future__ import annotations
 
-import argparse
 import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+# The report uses the pre-registered rounds of cohorts 1-3 plus the position-statement endpoints,
+# which is what priority <= MAX_PRIORITY and prereg select (see hm_fig4c.data.build_text_table).
+MAX_PRIORITY = 3
 
 
 def load_cache(cache_dir: Path) -> pd.DataFrame:
@@ -23,57 +26,34 @@ def load_embeddings(cache_dir: Path) -> tuple[dict[str, int], np.ndarray]:
     return {t: i for i, t in enumerate(df["text_id"])}, mat
 
 
-def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int, batch_size: int, chunk_size: int, max_priority: int | None, dtype: str = "fp32", prereg_only: bool = False, device: str = "cpu", shard: str = "0/1"):
+def run(texts_path: Path, model_name: str, cache_dir: Path, max_seq_length: int = 512,
+        batch_size: int = 16, chunk_size: int = 256):
+    """Embed the texts the analysis needs into cache_dir, in fp32, skipping what is already cached."""
     import torch
     from sentence_transformers import SentenceTransformer
 
-    torch.set_num_threads(max(1, torch.get_num_threads()))
     cache_dir = Path(cache_dir); cache_dir.mkdir(parents=True, exist_ok=True)
     texts = pd.read_parquet(texts_path)
     if "prereg" not in texts:
         texts["prereg"] = True
     texts = texts.sort_values(["priority", "prereg", "n_words"], ascending=[True, False, True])
-    if max_priority is not None:
-        texts = texts[texts["priority"] <= max_priority]
-    if prereg_only:
-        texts = texts[texts["prereg"]]
+    texts = texts[(texts["priority"] <= MAX_PRIORITY) & texts["prereg"]]
     done = set(load_cache(cache_dir)["text_id"])
     todo = texts[~texts["text_id"].isin(done)].reset_index(drop=True)
-    shard_i, shard_n = (int(x) for x in shard.split("/"))
-    todo = todo.iloc[shard_i::shard_n].reset_index(drop=True)  # every shard_n-th text: disjoint shards, each still sorted by length
-    print(f"{model_name}: {len(done)} cached, {len(todo)} to embed (shard {shard_i}/{shard_n})", flush=True)
+    print(f"{model_name}: {len(done)} cached, {len(todo)} to embed", flush=True)
     if not len(todo):
         return
-    kw = {"model_kwargs": {"torch_dtype": torch.bfloat16 if dtype == "bf16" else torch.float32}}
-    model = SentenceTransformer(model_name, device=device, **kw)
+    device = "cuda" if torch.cuda.is_available() else "cpu"  # whatever this machine has
+    model = SentenceTransformer(model_name, device=device, model_kwargs={"torch_dtype": torch.float32})
     model.max_seq_length = max_seq_length
-    print("max_seq_length =", model.max_seq_length, "| device =", device, "| threads =", torch.get_num_threads(), "| dtype =", dtype, flush=True)
-    t0 = time.time(); n_done = 0
+    n_done = 0
     for start in range(0, len(todo), chunk_size):
         chunk = todo.iloc[start:start + chunk_size]
         emb = model.encode(chunk["text"].tolist(), batch_size=batch_size, show_progress_bar=False, convert_to_numpy=True)
         out = pd.DataFrame({"text_id": chunk["text_id"].values, "embedding": list(emb.astype(np.float32))})
-        final = cache_dir / f"chunk_{int(time.time() * 1000)}_{shard_i}_{start}.parquet"
+        final = cache_dir / f"chunk_{int(time.time() * 1000)}_{start}.parquet"
         out.to_parquet(final.with_suffix(".tmp"), index=False)
         final.with_suffix(".tmp").replace(final)  # atomic: a chunk killed mid-write never appears in the cache glob
         n_done += len(chunk)
-        el = time.time() - t0
-        print(f"  {n_done}/{len(todo)} done | {n_done / el:.2f} texts/s | eta {(len(todo) - n_done) / (n_done / el) / 60:.1f} min", flush=True)
+        print(f"  {n_done}/{len(todo)} done", flush=True)
     print("EMBED_DONE", model_name, flush=True)
-
-
-if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--texts", default="prepared/texts.parquet")
-    ap.add_argument("--model", default="sentence-transformers/sentence-t5-base")
-    ap.add_argument("--cache-dir", required=True)
-    ap.add_argument("--max-seq-length", type=int, default=512)
-    ap.add_argument("--batch-size", type=int, default=16)
-    ap.add_argument("--chunk-size", type=int, default=256)
-    ap.add_argument("--max-priority", type=int, default=None, help="only embed texts with priority <= this")
-    ap.add_argument("--dtype", choices=["fp32", "bf16"], default="fp32")
-    ap.add_argument("--prereg-only", action="store_true", help="only texts belonging to pre-registered rounds (and their questions)")
-    ap.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
-    ap.add_argument("--shard", default="0/1", help="I/N: embed only every N-th text starting at I, for N concurrent workers on one cache")
-    a = ap.parse_args()
-    run(Path(a.texts), a.model, Path(a.cache_dir), a.max_seq_length, a.batch_size, a.chunk_size, a.max_priority, a.dtype, a.prereg_only, a.device, a.shard)

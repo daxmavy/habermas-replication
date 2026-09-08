@@ -33,11 +33,8 @@
 \newcommand{\fix}[1]{\textcolor{fixblue}{#1}}
 
 % ---------------------------------------------------------------- code references
-% Set \repourl to the repository base (e.g. https://github.com/OWNER/habermas-fig4c) and every
-% code reference below becomes a permalink pinned to \repocommitfull. Left empty, they render as
-% plain file:line references. This VM cannot create the remote: the exe.dev GitHub proxy serves
-% only /repos/OWNER/REPO, so `gh repo create` returns 403.
-\newcommand{\repourl}{}
+% Code references are permalinks pinned to \repocommitfull.
+\newcommand{\repourl}{https://github.com/daxmavy/habermas-replication}
 % #1 raw path (for the URL), #2 escaped path (for display), #3 start, #4 end, #5 label
 \newcommand{\CodeRef}[5]{%
   \ifx\repourl\empty
@@ -80,6 +77,10 @@ believe represented their opinion. In this report, I aim to replicate this findi
 publicly-released data from the original HM paper. To cut to the chase, I was unable to replicate
 this finding.
 
+This report assumes familiarity with the Habermas Machine paper, and also largely assumes familiarity
+with the relevant sections of the Supplementary Materials. I aim to provide a technical report of my findings,
+rather than writing for a general academic audience.
+
 \section*{Approach to reproduction}
 \codebox{\codeApproach}
 
@@ -91,10 +92,9 @@ reported in the original paper. There are several points where the SM are ambigu
 aspect of the analysis pipeline unspecified. I approach this in the following manner: First, I
 present the analysis pipeline which I believe is most likely to match the original analysis. Then,
 after I have presented this ``most-likely'' pipeline, I perform an exhaustive sensitivity analysis,
-in which I vary every ambiguous detail (\fillin{\hyperref[sec:sensitivity]{Sensitivity analysis}}).
+in which I vary these ambiguous details (\fillin{\hyperref[sec:sensitivity]{Sensitivity analysis}}).
 
-\fillin{\textbf{Scope.} This report replicates one claim: the minority-weight result shown as
-Figure 4C in the main paper.}
+This report's scope is limited to the minority-weight result shown as Figure 4C in the main paper.
 
 \section*{What is the Habermas Machine (HM)?}
 
@@ -118,7 +118,7 @@ Figure~\fillin{\ref{fig:paper}}, which is copied from Figure 4(c) in the paper.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/fig_paper.pdf}
+\includegraphics[width=\linewidth]{figures/fig_paper.pdf}
 \caption{\fillin{The paper's own result, redrawn from the data labels of SM Figure S60
 (``Position Embedding'' panel), which SM 5.2.2 identifies as the expanded version of main-text
 Figure 4C. Dotted line: the true proportion of minority opinions (\paperShare). Error bar on the
@@ -255,7 +255,7 @@ minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, f
 \fillin{Three observations:}
 {\color{fillred}
 \begin{enumerate}[leftmargin=1.6em,itemsep=0.25em]
-  \item The sanity check reproduces exactly.
+  \item The sanity check reproduces (as described earlier).
   \item Every statement phase sits below the true share rather than at or above it:
         under sentence-t5-large the revised winner carries \oursRevWinLarge{} $\pm$
         \oursRevWinBootSELarge{} against the paper's \paperRevWin{}.
@@ -347,8 +347,8 @@ primary specification above.}}
 \fillin{ST5 model size} & \fillin{base, large, xl, xxl} & \fillin{I focus on values from the large model (\hyperref[app:rsq]{Appendix~A}), but Figures~\ref{fig:contrast} and~\ref{fig:sensitivity} show results across all model sizes} \\
 \fillin{Neutral (Likert 4) opinions} & \fillin{count as non-minority; drop the opinion} & \fillin{count as non-minority (SM 5.4.1)} \\
 \fillin{Basis for splitting minority / non-minority} & \fillin{Likert rating; sign of the position component score (SM Fig.\ S62)} & \fillin{Likert rating (SM Fig.\ S60)} \\
-\fillin{Position-axis endpoints: how ``generic + question-specific'' is combined} & \fillin{one text, as in the SM example; one text with the released ``NOT'' lowercased, as in the SM example; generic phrase and statement embedded separately and averaged} & \fillin{one text, released statements (Table~\ref{tab:endpoints})} \\
-\fillin{Column order: how a round's opinions are assigned to the regressors} & \fillin{order in the released data; sorted by position component score; random} & \fillin{data order} \\
+\fillin{Position-axis endpoints: the released statements write the negation as ``NOT''} & \fillin{as released; ``NOT'' lowercased, as in the SM example} & \fillin{as released (Table~\ref{tab:endpoints})} \\
+\fillin{Column order: how a round's opinions are assigned to the regressors} & \fillin{order in the released data; random} & \fillin{data order} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -357,7 +357,7 @@ primary specification above.}}
 coefficient per column of the design matrix, and each row of that matrix is one round's opinion
 scores, so a column pools ``the $j$-th opinion'' across rounds. SM eq.~13 indexes a round's
 opinions by $j$ without saying how $j$ is assigned. Here the minority opinions always occupy the
-first columns, and the three options above fix the order within the minority block and within the
+first columns, and the two options above fix the order within the minority block and within the
 non-minority block. The minority weight sums the minority columns, which removes the dependence
 on order within the minority block when the minority has one member, but the order of the
 non-minority columns still changes the fit.}
@@ -369,34 +369,67 @@ non-minority columns still changes the fit.}
 \fillin{SM 5.1.2 pins the endpoints to ``a generic + question-specific combination'' and gives the
 example ``Yes, I agree. It is the government's role to [\ldots]''; SM 5.1.1 fixes the axis as the
 unit vector from the negating to the affirming embedding (eq.~3) and the score as the projection
-onto it (eq.~5). Two things in that description can be read more than one way. ``Combination'' is
-shown as a single text, but could also mean combining the two endpoints at the embedding level. And
-the released position statements write the negation in capitals (``\ldots should NOT be allowed
-\ldots''), where the SM's example reads ``is not''. Table~\ref{tab:endpoints} runs the primary
-specification under sentence-t5-large with each reading. The three readings agree to within one
-bootstrap standard error of one another at every phase, and none moves the revised winner
-(\axisPinnedRevWin{}, \axisNotLowerRevWin{} and \axisMeanEmbRevWin{}) towards the paper's
-\paperRevWin{}: the endpoint construction is not where the gap comes from.}
+onto it (eq.~5). Each endpoint is therefore a single text: the generic phrase (``Yes, I agree.'' or
+``No, I disagree.'') followed by the question's affirming or negating position statement as
+released with the data. Table~\ref{tab:endpoint-examples} works through the construction for two
+questions, the two asked in the most pre-registered rounds of cohorts 1--3, and lists the complete
+set of endpoint texts that results.}
+
+\fillin{One detail of that description can be read more than one way. The released position
+statements write the negation in capitals (``\ldots should NOT be \ldots''), where the SM's example
+reads ``is not''. Table~\ref{tab:endpoints} runs the primary specification under sentence-t5-large
+with the statements as released (the pinned reading) and with ``NOT'' lowercased. The two readings
+agree to within one bootstrap standard error of one another at every phase, and neither moves the
+revised winner (\axisPinnedRevWin{} and \axisNotLowerRevWin{}) towards the paper's \paperRevWin{}:
+the endpoint construction is not where the gap comes from.}
 
 \begin{table}[H]
 \centering
 \small
-\caption{\fillin{The primary specification under sentence-t5-large with each reading of the SM's
-endpoint description: minority weight by phase (cluster-bootstrap standard error in parentheses)
-and the two axis-quality checks (Pearson $r$ of Figure 4A, marginal $r^2$ of Appendix~A).
-$n=\axisPinnedNRounds$ rounds with a minority in every column.}}
-\label{tab:endpoints}
-\begin{tabular}{l>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.2cm}>{\centering\arraybackslash}p{3.2cm}}
+\caption{\fillin{Two worked examples of the endpoint construction: the questions asked in the most
+pre-registered rounds of cohorts 1--3 (\exampleANRounds{} and \exampleBNRounds{} rounds), their
+affirming and negating position statements as released with the data, and the complete set of
+endpoint texts that each reading in Table~\ref{tab:endpoints} embeds. Where a statement contains no
+``NOT'' the two readings coincide.}}
+\label{tab:endpoint-examples}
+\begin{tabular}{p{2.8cm}p{5.8cm}p{5.8cm}}
 \toprule
- & \fillin{one text, released statements (pinned)} & \fillin{one text, ``NOT'' lowercased as in the SM example} & \fillin{generic phrase and statement embedded separately, averaged} \\
+ & \fillin{example 1} & \fillin{example 2} \\
 \midrule
-\fillin{Initial statements} & \fillin{\axisPinnedInitCand{} (\axisPinnedInitCandBootSE)} & \fillin{\axisNotLowerInitCand{} (\axisNotLowerInitCandBootSE)} & \fillin{\axisMeanEmbInitCand{} (\axisMeanEmbInitCandBootSE)} \\
-\fillin{Initial winner} & \fillin{\axisPinnedInitWin{} (\axisPinnedInitWinBootSE)} & \fillin{\axisNotLowerInitWin{} (\axisNotLowerInitWinBootSE)} & \fillin{\axisMeanEmbInitWin{} (\axisMeanEmbInitWinBootSE)} \\
-\fillin{Revised statements} & \fillin{\axisPinnedRevCand{} (\axisPinnedRevCandBootSE)} & \fillin{\axisNotLowerRevCand{} (\axisNotLowerRevCandBootSE)} & \fillin{\axisMeanEmbRevCand{} (\axisMeanEmbRevCandBootSE)} \\
-\fillin{Revised winner} & \fillin{\axisPinnedRevWin{} (\axisPinnedRevWinBootSE)} & \fillin{\axisNotLowerRevWin{} (\axisNotLowerRevWinBootSE)} & \fillin{\axisMeanEmbRevWin{} (\axisMeanEmbRevWinBootSE)} \\
+\fillin{Question} & \fillin{\exampleAQuestion} & \fillin{\exampleBQuestion} \\
+\fillin{Released affirming statement} & \fillin{\exampleAAffirming} & \fillin{\exampleBAffirming} \\
+\fillin{Released negating statement} & \fillin{\exampleANegating} & \fillin{\exampleBNegating} \\
 \midrule
-\fillin{Fig.\ 4A $r$} & \fillin{\axisPinnedFigAr} & \fillin{\axisNotLowerFigAr} & \fillin{\axisMeanEmbFigAr} \\
-\fillin{Marginal $r^2$} & \fillin{\axisPinnedMarginalRsq} & \fillin{\axisNotLowerMarginalRsq} & \fillin{\axisMeanEmbMarginalRsq} \\
+\multicolumn{3}{l}{\fillin{\emph{Pinned reading: statements as released}}} \\
+\fillin{Affirming endpoint} & \fillin{``\exampleAPinnedAff''} & \fillin{``\exampleBPinnedAff''} \\
+\fillin{Negating endpoint} & \fillin{``\exampleAPinnedNeg''} & \fillin{``\exampleBPinnedNeg''} \\
+\midrule
+\multicolumn{3}{l}{\fillin{\emph{``NOT'' lowercased, as in the SM example}}} \\
+\fillin{Affirming endpoint} & \fillin{``\exampleANotLowerAff''} & \fillin{``\exampleBNotLowerAff''} \\
+\fillin{Negating endpoint} & \fillin{``\exampleANotLowerNeg''} & \fillin{``\exampleBNotLowerNeg''} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{\fillin{The primary specification under sentence-t5-large under each reading of the
+released ``NOT'': minority weight by phase (cluster-bootstrap standard error in parentheses)
+and the two axis-quality checks (Pearson $r$ of Figure 4A, marginal $r^2$ of Appendix~A).
+$n=\axisPinnedNRounds$ rounds with a minority in both columns.}}
+\label{tab:endpoints}
+\begin{tabular}{l>{\centering\arraybackslash}p{3.6cm}>{\centering\arraybackslash}p{3.6cm}}
+\toprule
+ & \fillin{statements as released (pinned)} & \fillin{``NOT'' lowercased, as in the SM example} \\
+\midrule
+\fillin{Initial statements} & \fillin{\axisPinnedInitCand{} (\axisPinnedInitCandBootSE)} & \fillin{\axisNotLowerInitCand{} (\axisNotLowerInitCandBootSE)} \\
+\fillin{Initial winner} & \fillin{\axisPinnedInitWin{} (\axisPinnedInitWinBootSE)} & \fillin{\axisNotLowerInitWin{} (\axisNotLowerInitWinBootSE)} \\
+\fillin{Revised statements} & \fillin{\axisPinnedRevCand{} (\axisPinnedRevCandBootSE)} & \fillin{\axisNotLowerRevCand{} (\axisNotLowerRevCandBootSE)} \\
+\fillin{Revised winner} & \fillin{\axisPinnedRevWin{} (\axisPinnedRevWinBootSE)} & \fillin{\axisNotLowerRevWin{} (\axisNotLowerRevWinBootSE)} \\
+\midrule
+\fillin{Fig.\ 4A $r$} & \fillin{\axisPinnedFigAr} & \fillin{\axisNotLowerFigAr} \\
+\fillin{Marginal $r^2$} & \fillin{\axisPinnedMarginalRsq} & \fillin{\axisNotLowerMarginalRsq} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -425,11 +458,13 @@ model.}} Across the runs, I calculated the following metrics:
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.92\linewidth]{figures/fig_sensitivity.pdf}
-\caption{\fillin{Mean minority weight at each phase across the \sensNRunsPerModel{} specifications
-run under each embedding model; whiskers span the full range (minimum to maximum) of those
-specifications. Dotted line: the mean true minority share across all \sensNRuns{} runs
-(\sensTrueShareMean{}).}}
+\includegraphics[width=\linewidth]{figures/fig_sensitivity.pdf}
+\caption{\fillin{The paper's result against the sensitivity sweep. Orange: the paper's values (SM
+Figure S60), with its $\pm 1$ standard error on the revised winner. Blue: the mean minority weight
+at each phase across the \sensNRunsPerModel{} specifications run under each embedding model, with
+whiskers spanning the full range (minimum to maximum) of those specifications. Dotted lines: the
+paper's true minority share (\paperShare{}) and the mean true minority share across all
+\sensNRuns{} runs (\sensTrueShareMean{}).}}
 \label{fig:sensitivity}
 \end{figure}
 
