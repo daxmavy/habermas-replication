@@ -216,23 +216,43 @@
    }
   }
  },
- "endpoints": {
-  "mean_generic_specific": {
-   "description": "generic phrase and released statement embedded separately, endpoint = their normalised mean",
-   "fig4a_r": 0.641768185646137,
-   "initial_candidates": 0.2088437873587145,
-   "initial_candidates_boot_se": 0.016262941041879145,
-   "initial_winner": 0.1500105820058828,
-   "initial_winner_boot_se": 0.017608612488570912,
-   "marginal_r2": 0.3958728485021357,
-   "n_rounds": 560,
-   "opinions_sanity": 0.2629230197099295,
-   "revised_candidates": 0.19495595249783704,
-   "revised_candidates_boot_se": 0.01618861894334329,
-   "revised_winner": 0.1721419069014753,
-   "revised_winner_boot_se": 0.016684919419227222,
-   "true_share": 0.2624551971326165
+ "endpoint_examples": [
+  {
+   "affirming": "The UK should raise taxes on people earning more than $200,000 to help pay for the National Health Service.",
+   "endpoints": {
+    "prefixed": {
+     "affirming": "Yes, I agree. The UK should raise taxes on people earning more than $200,000 to help pay for the National Health Service.",
+     "negating": "No, I disagree. The UK should NOT raise taxes on people earning more than $200,000 to help pay for the National Health Service."
+    },
+    "prefixed_not_lower": {
+     "affirming": "Yes, I agree. The UK should raise taxes on people earning more than $200,000 to help pay for the National Health Service.",
+     "negating": "No, I disagree. The UK should not raise taxes on people earning more than $200,000 to help pay for the National Health Service."
+    }
+   },
+   "n_rounds": 7,
+   "negating": "The UK should NOT raise taxes on people earning more than $200,000 to help pay for the National Health Service.",
+   "question": "Should the UK raise taxes on people earning more than $200,000 to help pay for the National Health Service?",
+   "question_id": "S173964506"
   },
+  {
+   "affirming": "Employers should be forced to provide their employees with at least one day off from work each week.",
+   "endpoints": {
+    "prefixed": {
+     "affirming": "Yes, I agree. Employers should be forced to provide their employees with at least one day off from work each week.",
+     "negating": "No, I disagree. Employers should NOT be forced to provide their employees with at least one day off from work each week."
+    },
+    "prefixed_not_lower": {
+     "affirming": "Yes, I agree. Employers should be forced to provide their employees with at least one day off from work each week.",
+     "negating": "No, I disagree. Employers should not be forced to provide their employees with at least one day off from work each week."
+    }
+   },
+   "n_rounds": 7,
+   "negating": "Employers should NOT be forced to provide their employees with at least one day off from work each week.",
+   "question": "Should employers be forced to provide their employees with at least one day off from work each week?",
+   "question_id": "S173969028"
+  }
+ ],
+ "endpoints": {
   "prefixed": {
    "description": "generic phrase and released statement as one text, as in the SM's example (pinned)",
    "fig4a_r": 0.6326342956348658,
@@ -477,155 +497,152 @@
   "design": {
    "n_models": 4,
    "n_neutral": 2,
-   "n_orders": 3
+   "n_orders": 2
   },
-  "n_runs_per_model": 9,
+  "n_runs_per_model": 6,
   "per_model": {
    "st5-base": {
     "initial_candidates": {
-     "max": 0.278045017007477,
-     "mean": 0.24122604179568327,
+     "max": 0.2661492570192654,
+     "mean": 0.23870823516789041,
      "min": 0.2114022645248201
     },
     "initial_winner": {
-     "max": 0.2445154830872501,
-     "mean": 0.19568356059417408,
+     "max": 0.2237530048773104,
+     "mean": 0.19248221343885674,
      "min": 0.1595018849802522
     },
-    "max_revised_winner": 0.2743451364519159,
-    "n_runs": 9,
+    "max_revised_winner": 0.2492114382856459,
+    "n_runs": 6,
     "prop_final_above_true_share": 0.0,
     "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
-     "max": 0.2800172181916238,
-     "mean": 0.23986223012443986,
+     "max": 0.2595928712382277,
+     "mean": 0.2368966476012946,
      "min": 0.2089490748766066
     },
     "revised_winner": {
-     "max": 0.2743451364519159,
-     "mean": 0.23164562934072652,
+     "max": 0.2492114382856459,
+     "mean": 0.2276302850492116,
      "min": 0.1989706252086598
     },
-    "true_share_mean": 0.2803794310474984
+    "true_share_mean": 0.28037943104749846
    },
    "st5-large": {
     "initial_candidates": {
-     "max": 0.2481877070369285,
-     "mean": 0.2311006794823253,
+     "max": 0.245206534084843,
+     "mean": 0.23065250419105718,
      "min": 0.2064928236350386
     },
     "initial_winner": {
-     "max": 0.2044068551243939,
-     "mean": 0.17318426596740435,
+     "max": 0.2002119361325575,
+     "mean": 0.17330682532419284,
      "min": 0.1408080151963527
     },
-    "max_revised_winner": 0.219019118547468,
-    "n_runs": 9,
+    "max_revised_winner": 0.2168830665538664,
+    "n_runs": 6,
     "prop_final_above_true_share": 0.0,
     "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
-     "max": 0.2385379780474573,
-     "mean": 0.21302086934292533,
+     "max": 0.2334329262393665,
+     "mean": 0.21297264023095897,
      "min": 0.18567146240856
     },
     "revised_winner": {
-     "max": 0.219019118547468,
-     "mean": 0.1933313745702439,
+     "max": 0.2168830665538664,
+     "mean": 0.19356378550859044,
      "min": 0.1639667767971248
     },
-    "true_share_mean": 0.2797577537716037
+    "true_share_mean": 0.2797577537716038
    },
    "st5-xl": {
     "initial_candidates": {
      "max": 0.249659315823224,
-     "mean": 0.22649779427607988,
+     "mean": 0.2266650094275278,
      "min": 0.1998054740793688
     },
     "initial_winner": {
      "max": 0.1877320640258141,
-     "mean": 0.15666261948802665,
+     "mean": 0.15756526768893425,
      "min": 0.123343959235259
     },
     "max_revised_winner": 0.2064576612544422,
-    "n_runs": 9,
+    "n_runs": 6,
     "prop_final_above_true_share": 0.0,
     "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
      "max": 0.2293168113612511,
-     "mean": 0.20602126872358256,
+     "mean": 0.20659561653416667,
      "min": 0.1779964789250481
     },
     "revised_winner": {
      "max": 0.2064576612544422,
-     "mean": 0.1847574956466362,
-     "min": 0.1567209607790861
+     "mean": 0.18555339059265122,
+     "min": 0.1570927252333671
     },
     "true_share_mean": 0.27796125618706263
    },
    "st5-xxl": {
     "initial_candidates": {
-     "max": 0.2237851939164354,
-     "mean": 0.207587407141904,
+     "max": 0.2210053987459115,
+     "mean": 0.2056963311577349,
      "min": 0.1841894695151517
     },
     "initial_winner": {
-     "max": 0.151947152700836,
-     "mean": 0.13761842309052502,
+     "max": 0.1513612648225138,
+     "mean": 0.1367246459097679,
      "min": 0.110211686552646
     },
     "max_revised_winner": 0.1753056029203554,
-    "n_runs": 9,
+    "n_runs": 6,
     "prop_final_above_true_share": 0.0,
     "prop_increase_initial_to_final": 0.0,
     "revised_candidates": {
-     "max": 0.1961921273636878,
-     "mean": 0.18189272644170218,
+     "max": 0.1936654033910436,
+     "mean": 0.18041395408295002,
      "min": 0.1553659424253025
     },
     "revised_winner": {
      "max": 0.1753056029203554,
-     "mean": 0.1599485735388181,
+     "mean": 0.15918879541584166,
      "min": 0.1358321845934594
     },
-    "true_share_mean": 0.27967585266822537
+    "true_share_mean": 0.2796758526682254
    }
   },
   "pooled": {
    "initial_candidates": {
-    "max": 0.278045017007477,
-    "mean": 0.2266029806739981,
+    "max": 0.2661492570192654,
+    "mean": 0.2254305199860526,
     "min": 0.1841894695151517
    },
    "initial_winner": {
-    "max": 0.2445154830872501,
-    "mean": 0.1657872172850325,
+    "max": 0.2237530048773104,
+    "mean": 0.16501973809043793,
     "min": 0.110211686552646
    },
-   "max_revised_winner": 0.2743451364519159,
-   "n_runs": 36,
+   "max_revised_winner": 0.2492114382856459,
+   "n_runs": 24,
    "prop_final_above_true_share": 0.0,
    "prop_increase_initial_to_final": 0.0,
    "revised_candidates": {
-    "max": 0.2800172181916238,
-    "mean": 0.2101992736581625,
+    "max": 0.2595928712382277,
+    "mean": 0.2092197146123426,
     "min": 0.1553659424253025
    },
    "revised_winner": {
-    "max": 0.2743451364519159,
-    "mean": 0.19242076827410617,
+    "max": 0.2492114382856459,
+    "mean": 0.19148406414157373,
     "min": 0.1358321845934594
    },
    "true_share_mean": 0.27944357341859755
   },
   "variants": [
    "split=Likert rating | neutral=non-minority | order=data",
-   "split=Likert rating | neutral=non-minority | order=sorted by score",
    "split=Likert rating | neutral=non-minority | order=random",
    "split=Likert rating | neutral=opinion dropped | order=data",
-   "split=Likert rating | neutral=opinion dropped | order=sorted by score",
    "split=Likert rating | neutral=opinion dropped | order=random",
    "split=sign of position score | neutral=n/a | order=data",
-   "split=sign of position score | neutral=n/a | order=sorted by score",
    "split=sign of position score | neutral=n/a | order=random"
   ]
  },

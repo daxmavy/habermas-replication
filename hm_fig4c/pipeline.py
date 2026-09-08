@@ -1,4 +1,4 @@
-"""End-to-end Fig. 4C pipeline: prepared tables + embedding cache -> position scores -> convex regression -> figure."""
+"""End-to-end Fig. 4C pipeline: prepared tables + embedding cache -> position scores -> convex regression."""
 from __future__ import annotations
 
 import json
@@ -13,8 +13,6 @@ from .embed import load_embeddings
 
 KEY = ["metadata.version", "launch_id", "round_id"]
 PHASES = ["initial_candidates", "initial_winner", "revised_candidates", "revised_winner"]
-PHASE_LABELS = {"opinions": "Opinions\n(sanity check)", "initial_candidates": "Initial\nstatements", "initial_winner": "Initial\nwinner",
-                "revised_candidates": "Revised\nstatements", "revised_winner": "Revised\nwinner"}
 
 
 def load_prepared(prep_dir: Path):
@@ -157,28 +155,6 @@ def per_level_table(res: dict) -> pd.DataFrame:
         for r in res["phases"].get(phase, {}).get("per_level", []):
             rows.append({"phase": phase, **{k: v for k, v in r.items() if k != "coefs"}})
     return pd.DataFrame(rows).pivot(index=["n", "k", "true_share"], columns="phase", values=["minority_weight", "se", "n_rounds"])
-
-
-def plot_fig4c(res: dict, ax=None, title: str | None = None, include_opinions: bool = False):
-    import matplotlib.pyplot as plt
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(4.6, 3.6))
-    phases = (["opinions"] if include_opinions and "opinions" in res["phases"] else []) + [p for p in PHASES if p in res["phases"]]
-    colors = {"opinions": "#8da0cb", "initial_candidates": "#c6dbef", "initial_winner": "#9e9ac8", "revised_candidates": "#807dba", "revised_winner": "#6a51a3"}
-    x = np.arange(len(phases))
-    w = [res["phases"][p]["weight"] for p in phases]; se = [res["phases"][p]["se"] for p in phases]
-    ax.bar(x, w, yerr=se, color=[colors[p] for p in phases], edgecolor="k", lw=0.6, capsize=3, error_kw={"lw": 1.2})
-    true = res["phases"][phases[-1]]["true_share"]
-    ax.axhline(true, ls="--", color="k", lw=1.2)
-    ax.annotate("true proportion\nof minority opinions", (x[0] - 0.4, true + 0.01), fontsize=7, style="italic", va="bottom")
-    for xi, wi in zip(x, w):
-        ax.text(xi, 0.02, f"{wi:.2f}", ha="center", fontsize=7, color="white" if wi > 0.05 else "k")
-    ax.set_xticks(x); ax.set_xticklabels([PHASE_LABELS[p] for p in phases], fontsize=8)
-    ax.set_ylabel("Weight of minority opinions"); ax.set_xlabel("Group statement type"); ax.set_ylim(0, max(0.45, max(w) + max(se) + 0.05))
-    ax.set_title(title or f"{res['cohort']} (n = {res['phases']['initial_winner']['n_rounds']} rounds)", fontsize=9)
-    for s_ in ["top", "right"]:
-        ax.spines[s_].set_visible(False)
-    return ax
 
 
 def save_results(res: dict, path: Path):

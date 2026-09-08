@@ -67,10 +67,11 @@ def grouped_bars(ax, groups: list[str], series: list[dict], group_width: float =
     return x
 
 
-def reference_line(ax, x_text: float, y: float, label: str, color: str, ls, va: str) -> None:
-    """A horizontal true-share rule, labelled just past the last group; va places the label above or below it."""
+def reference_line(ax, x_text: float, y: float, label: str, color: str, ls, va: str, pad: float = 0.004) -> None:
+    """A horizontal true-share rule, labelled just past the last group; va="bottom" puts the label above the rule,
+    va="top" below it, each offset by `pad` so the dotted rule never runs through the text."""
     ax.axhline(y, ls=ls, lw=1, color=color)
-    ax.text(x_text, y, label, va=va, fontsize=6, color=color)
+    ax.text(x_text, y + (pad if va == "bottom" else -pad), label, va=va, fontsize=6, color=color)
 
 
 def paper_series(V, keys: list[str]) -> dict:
@@ -91,7 +92,7 @@ def fig_paper(V, path):
     keys = ["opinions_sanity"] + PHASES
     fig, ax = plt.subplots(figsize=FIGSIZE)
     x = grouped_bars(ax, [LABELS["opinions"]] + [LABELS[k] for k in PHASES], [paper_series(V, keys)], group_width=0.6)
-    reference_line(ax, x[-1] + 0.45, V["paper"]["minority_share"], "true share (paper)", C_PAPER, LINE_PAPER, "center")
+    reference_line(ax, x[-1] + 0.45, V["paper"]["minority_share"], "true share (paper)", C_PAPER, LINE_PAPER, "bottom")
     save(fig, path)
 
 
@@ -134,7 +135,6 @@ def main():
     for name, fn in (("fig_paper", fig_paper), ("fig_contrast", fig_contrast), ("fig_sensitivity", fig_sensitivity)):
         path = OUT / f"{name}.pdf"
         fn(V, path)
-        fn(V, OUT / f"{name}.png")
         print("wrote", path)
 
 

@@ -1,15 +1,15 @@
 #!/bin/bash
 # One-time environment setup on an Isambard-AI login node (no GPU there; nothing heavy runs here).
-# From ~/habermas-fig4c, after `isambard/sync.sh to` on the VM:
+# From ~/habermas-fig4c-report, after `isambard/sync.sh to` on the VM:
 #   HM_MODELS="xl xxl" bash isambard/setup_env.sh
 # Installs uv, builds .venv from uv.lock (managed CPython 3.12 for aarch64, torch from the cu126 index; the
-# hm_fig4c package is imported from the repo root, so the project itself is not installed),
-# and downloads the model weights into $SCRATCHDIR/hf so the job can run with HF_HUB_OFFLINE=1.
+# project is not a package -- hm_fig4c is imported from the repo root), and downloads the model weights into
+# $SCRATCHDIR/hf so the job can run with HF_HUB_OFFLINE=1.
 set -eu
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
-uv sync --frozen --no-install-project
+uv sync --frozen
 .venv/bin/python -c "import platform, torch; print(platform.machine(), 'torch', torch.__version__, '| cuda build', torch.version.cuda)"
 export HF_HOME="$SCRATCHDIR/hf"
 mkdir -p "$HF_HOME" isambard/logs
