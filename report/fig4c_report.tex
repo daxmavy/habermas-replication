@@ -32,7 +32,8 @@
 
 \section*{Introduction}
 
-In the original Habermas Machine (HM) paper, the authors consider the possibility that the HM
+In the original Habermas Machine (HM) paper (Tessler et al., 2024), the authors consider the
+possibility that the HM
 might exhibit a ``tyranny of the majority'' phenomenon, in which minority perspectives are
 under-represented in the HM's output, relative to their prevalence among the population. They
 found that it did not do so. To do this, they developed a novel method for describing to what
@@ -309,15 +310,13 @@ Column order: how a round's opinions are assigned to the regressors & order in t
 \end{tabular}
 \end{table}
 
-The last row needs a word of explanation. The regression at each level of division fits one
+To explain the last row `Column order': The regression at each level of division fits one
 coefficient per column of the design matrix, and each row of that matrix is one round's opinion
-scores, so a column pools ``the $j$-th opinion'' across rounds. SM eq.~13 indexes a round's
-opinions by $j$ without saying how $j$ is assigned. Here the minority opinions always occupy the
-first columns, and the two options above fix the order within the minority block and within the
-non-minority block. The minority weight sums the minority columns, which removes the dependence
-on order within the minority block when the minority has one member, but the order of the
-non-minority columns still changes the fit. \hyperref[app:blocks]{Appendix~B} refits the same
-quantity with one weight per block, which removes the choice altogether.
+scores, so a column pools ``the $j$-th opinion'' across rounds. It is not described in the SM how datapoints are assigned to columns. 
+It seems self-evident that minority and majority opinions should always stay in their own sets of columns (to prevent them being mixed together in the regression).
+However, what determines the ordering within each group of columns is unclear; moreover, the results shift slightly when one perturbs the ordering. 
+In \hyperref[app:blocks]{Appendix~B}, I consider a simpler and more robust method which is ordering-invariant (fitting one parameter for all minority opinions, rather than
+for each column), and find almost identical results.
 
 \subsection*{Endpoint construction}
 \phantomsection\label{sec:endpoints}
@@ -440,11 +439,13 @@ majority position. An autonomously Claude-generated replication of Figure 4(d) f
 between majority-dominated groups and shifts towards majority opinion (unlike the paper, which found
 no correlation); however I have not checked this closely yet.
 
-There are two ambiguities where I am particularly unsure about. Firstly, the construction of the
-endpoints. The exact phrasing is not released, and they affect all other parts of the analysis.
-Secondly, it is not clear to me how to think about the column ordering; I suspect that I may have
-made a mistake in the interpretation here because it is odd that changing the order of columns
-should change the results.
+\section*{References}
+
+{\hangindent=1.5em\hangafter=1
+Tessler, M. H., Bakker, M. A., Jarrett, D., Sheahan, H., Chadwick, M. J., Koster, R., Evans, G.,
+Campbell-Gillingham, L., Collins, T., Parkes, D. C., Botvinick, M., \& Summerfield, C. (2024). AI
+can help humans find common ground in democratic deliberation. \emph{Science}, \emph{386}(6719),
+eadq2852. \href{https://doi.org/10.1126/science.adq2852}{https://doi.org/10.1126/science.adq2852}\par}
 
 \clearpage
 \section*{Appendix A: the paper's $R^2$ statistic}
@@ -516,22 +517,22 @@ Note that a better axis does not bring the minority weight closer to the paper's
 \section*{Appendix B: one weight per block}
 \phantomsection\label{app:blocks}
 
-Note: this section was generated using Claude Opus 5; the derivation and the order-invariance check
-were reproduced independently before it was committed.
+Note: the text section was generated using Claude Opus 5 and then edited, but I came up with the idea.
 
 The regression in the \hyperref[sec:results]{Results} fits one coefficient per column of the design
 matrix. Each row of that matrix holds one round's opinion scores, so a column pools ``the $j$-th
 opinion'' across rounds, and the $j$-th opinion is a different person in every round. SM eq.~13
-indexes a round's opinions by $j$ without saying how $j$ is assigned, and the assignment changes the
-answer: the column-order row of Table~\ref{tab:ambiguity} varies it, and under sentence-t5-large the
-data order and a random order move the minority weight by up to
-\blockedOrderMaxDiffPerOpinion{}. That a relabelling of the regressors should move the estimate at
-all is the part of this reproduction I trust least.
+indexes a round's opinions by $j$ without saying how $j$ is assigned. 
+Notably, this means that changing the ordering of data changes results; I verified this empirically.
+This seems like a flaw in the regression method, but this is the approach that I think best matches the approach described in the paper/SM.
 
-One way to remove the choice is to assume that opinions within a block are interchangeable, so that
-every minority opinion carries the same weight and every non-minority opinion carries the same
-weight. Write $\bar a_M$ and $\bar a_N$ for the mean position component scores of the round's
-minority and non-minority opinions, and $a$ for the weight given to the minority block. The problem
+I developed a simpler approach which is ordering-invariant, and tested whether this different approach changed the results or conclusion of the replication.
+
+My idea is the following: instead of calculating column-level regression parameters and then averaging them across minority and non-minority groups, why not
+just calculate the average position embedding score for minority and non-minority groups, and calculate a single regression parameter for the minority group?
+
+Write $\bar a_M$ and $\bar a_N$ for the mean position component scores of the round's
+minority and non-minority opinion groups, and $a$ for the weight given to the minority group. The problem
 of the \hyperref[sec:results]{Results} section then has a single free parameter:
 %
 \begin{equation*}
@@ -540,13 +541,13 @@ of the \hyperref[sec:results]{Results} section then has a single free parameter:
 \end{equation*}
 %
 Each of the $|M|$ minority opinions now carries $\lambda_i = a/|M|$ and each of the $|N|$ others
-$(1-a)/|N|$, so the weight the fit puts on the minority block, $\sum_{x_i \in M} \lambda_i$, is
+$(1-a)/|N|$, so the weight the fit puts on the minority group, $\sum_{x_i \in M} \lambda_i$, is
 exactly $a$. This is the same estimand as before with one assumption added --- exchangeability
-within a block --- and not a different quantity. Nothing else changes: the same levels of division,
+within minority/majority opinion groups --- and not a different quantity. Nothing else changes: the same levels of division,
 the same minimum number of rounds per level, the same weighting of levels by rounds and the same
 cluster bootstrap, so the two fits are computed on identical samples.
 
-A block mean does not depend on the order of the opinions inside the block, so this fit is invariant
+A minority / majority mean does not depend on the order of the opinions inside the block, so this fit is invariant
 to the column order by construction. It is also invariant in fact: across the sanity check and the
 four phases, under every embedding model, the largest absolute difference between the data order and
 a random order is \blockedOrderMaxDiff{}.
@@ -575,13 +576,7 @@ Revised winner & \blockedRevWinBase{} (\blockedRevWinBootSEBase) & \blockedRevWi
 \end{tabular}
 \end{table}
 
-The restriction does not rescue the replication. Every phase still sits below the true share of
-\oursShareLarge{} under every model; the winner-selection step still drops minority weight at both
-rounds; the revision step still lifts the revised winner above the initial winner without carrying
-it up to proportionality; and the revised winner still falls as the embedding model grows
-(\blockedRevWinBase{}, \blockedRevWinLarge{}, \blockedRevWinXl{} and \blockedRevWinXxl{}). The two
-fits also agree numerically: under sentence-t5-large no phase moves by more than
-\blockedMaxGapLarge{}. Whatever separates this reproduction from the paper, it is not the column
-ordering.
+The parameter estimates are almost exactly identical to the ordering-sensitive approach taken in the paper. 
+This plausibly more robust approach thus produces the same results as the replication.
 
 \end{document}

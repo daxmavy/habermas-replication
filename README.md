@@ -71,5 +71,6 @@ change by re-running the analysis.
 - `notebooks/` — `prepare.ipynb`, `analysis.ipynb` and `report.ipynb`, committed with their outputs.
 - `results/` — the committed per-model outputs of the analysis notebook and the executed notebook itself.
 - `report/` — `fig4c_report.tex`, the generated `parameters.tex` and `figures/`, and the PDF.
+- `paper/` — the paper this replicates and its supplementary materials, which specify the method.
 - `pyproject.toml`, `uv.lock`, `.python-version` — the environment.
 - `data/`, `prepared/`, `embeddings/` — inputs and intermediates, written by the steps above and not committed.
