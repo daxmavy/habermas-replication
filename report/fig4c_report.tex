@@ -316,7 +316,8 @@ opinions by $j$ without saying how $j$ is assigned. Here the minority opinions a
 first columns, and the two options above fix the order within the minority block and within the
 non-minority block. The minority weight sums the minority columns, which removes the dependence
 on order within the minority block when the minority has one member, but the order of the
-non-minority columns still changes the fit.
+non-minority columns still changes the fit. \hyperref[app:blocks]{Appendix~B} refits the same
+quantity with one weight per block, which removes the choice altogether.
 
 \subsection*{Endpoint construction}
 \phantomsection\label{sec:endpoints}
@@ -514,6 +515,9 @@ Note that a better axis does not bring the minority weight closer to the paper's
 \clearpage
 \section*{Appendix B: one weight per block}
 \phantomsection\label{app:blocks}
+
+Note: this section was generated using Claude Opus 5; the derivation and the order-invariance check
+were reproduced independently before it was committed.
 
 The regression in the \hyperref[sec:results]{Results} fits one coefficient per column of the design
 matrix. Each row of that matrix holds one round's opinion scores, so a column pools ``the $j$-th
