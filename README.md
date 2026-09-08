@@ -13,8 +13,10 @@ make report        # values.json -> parameters.tex -> figures -> codelinks -> PD
 ```
 
 `make report` rebuilds the PDF from the committed `results/<model>/{fig4c_primary.json,
-sensitivity.csv, summary.json}`, the embeddings and the prepared tables. To rebuild everything
-from the public dataset instead:
+sensitivity.csv, summary.json}`, the prepared tables and the embedding caches of all four
+Sentence-T5 sizes (`report/compute_values.py` refits the position-axis regression on each). So the
+data, prepare and embed steps below must have run once, including the GPU sizes. To rebuild
+everything from the public dataset instead:
 
 ```bash
 make all           # data -> prepare -> embed (CPU models) -> results -> report
@@ -30,8 +32,8 @@ MD5s. They are not committed (451 MB). `make prepare` turns them into `prepared/
 `make embed` writes Sentence-T5 embeddings of the texts the analysis needs into
 `embeddings/<model>/`; neither directory is committed.
 
-`sentence-t5-base` and `sentence-t5-large` embed on CPU in a couple of hours
-(`scripts/embed_cpu.sh`). `sentence-t5-xl` and `sentence-t5-xxl` need a GPU: `isambard/` holds the
+`sentence-t5-base` and `sentence-t5-large` embed on CPU in one to two hours each on two cores
+(`scripts/embed_cpu.sh`; 16,741 texts per model). `sentence-t5-xl` and `sentence-t5-xxl` need a GPU: `isambard/` holds the
 Slurm job (`embed_st5.sbatch`), the environment setup and the sync script used to run them on
 Isambard-AI GH200 nodes.
 
