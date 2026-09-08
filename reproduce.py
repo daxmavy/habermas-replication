@@ -11,13 +11,15 @@ Steps:
     results     execute notebooks/analysis.ipynb once per model -> results/<model>/
     report      execute notebooks/report.ipynb (parameters.tex + figures), then pdflatex twice
 
-Notebooks are executed in place and committed with their outputs; `results` saves its executed copy
-as results/<model>/analysis.ipynb. --models applies to embed and results.
+Notebooks are executed in place and committed with their outputs. `results` saves the executed copy of
+each run as results/<model>/analysis.ipynb, and leaves notebooks/analysis.ipynb showing the primary
+model's run. --models applies to embed and results.
 """
 from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 NOTEBOOKS = ROOT / "notebooks"
 MODELS = ["st5-base", "st5-large", "st5-xl", "st5-xxl"]
+PRIMARY = "st5-large"   # the model the report quotes throughout, and the run notebooks/analysis.ipynb keeps
 
 
 def py(*args: str) -> None:
@@ -68,6 +71,10 @@ def step_results(models: list[str]) -> None:
         print(f"=== {model} ===", flush=True)
         os.environ["HM_EMB_DIR"] = f"../embeddings/{model}"
         run_notebook("analysis.ipynb", ROOT / "results" / model / "analysis.ipynb")
+    # Leave notebooks/analysis.ipynb holding a finished run, so it reads with its outputs on GitHub.
+    kept = PRIMARY if PRIMARY in models else models[0]
+    shutil.copyfile(ROOT / "results" / kept / "analysis.ipynb", NOTEBOOKS / "analysis.ipynb")
+    print(f"notebooks/analysis.ipynb now shows the {kept} run", flush=True)
 
 
 def step_report(_: list[str]) -> None:

@@ -34,7 +34,8 @@ sizes; the default is all four.
 The three notebooks are the analysis. They are committed with their outputs, so every table, plot
 and figure can be read on GitHub without running anything: `notebooks/prepare.ipynb` shows the raw
 dataset and the tables it builds from it, `notebooks/analysis.ipynb` computes the minority weights
-for one embedding model (`results/` keeps the executed copy of each run), and
+for one embedding model and is committed showing the sentence-t5-large run (`results/` keeps the
+executed copy of every run), and
 `notebooks/report.ipynb` collects the four runs, draws the three figures into `report/figures/` and
 writes `report/parameters.tex`, after which `report` builds the PDF.
 
