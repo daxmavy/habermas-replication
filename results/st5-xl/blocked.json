@@ -1,0 +1,70 @@
+{
+ "columns": "blocks",
+ "n_boot": 500,
+ "order_max_abs_diff": {
+  "blocks": 0.0,
+  "per_opinion": 0.004449547835674694
+ },
+ "phases": {
+  "opinions": {
+   "weight": 0.2629230197099302,
+   "boot_se": null,
+   "true_share": 0.2629230197099293,
+   "n_targets": 2689,
+   "n_rounds": null,
+   "per_opinion_weight": 0.26292301970992993,
+   "order_data": 0.2629230197099302,
+   "order_random": 0.2629230197099302,
+   "per_opinion_order_data": 0.26292301970992993,
+   "per_opinion_order_random": 0.26292301970992993
+  },
+  "initial_candidates": {
+   "weight": 0.20004446320521768,
+   "boot_se": 0.015744170426860316,
+   "true_share": 0.2624551971326165,
+   "n_targets": 2232,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.19980546729241544,
+   "order_data": 0.20004446320521768,
+   "order_random": 0.20004446320521768,
+   "per_opinion_order_data": 0.19980546729241544,
+   "per_opinion_order_random": 0.20128021984906602
+  },
+  "initial_winner": {
+   "weight": 0.12489645534604857,
+   "boot_se": 0.017083224411861043,
+   "true_share": 0.2624551971326165,
+   "n_targets": 558,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.12334394614979066,
+   "order_data": 0.12489645534604857,
+   "order_random": 0.12489645534604857,
+   "per_opinion_order_data": 0.12334394614979066,
+   "per_opinion_order_random": 0.12779349398546536
+  },
+  "revised_candidates": {
+   "weight": 0.17724174227027278,
+   "boot_se": 0.014989670770686152,
+   "true_share": 0.2624551971326165,
+   "n_targets": 2232,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.1779964717464918,
+   "order_data": 0.17724174227027278,
+   "order_random": 0.17724174227027278,
+   "per_opinion_order_data": 0.1779964717464918,
+   "per_opinion_order_random": 0.18007144685244963
+  },
+  "revised_winner": {
+   "weight": 0.15643699156749385,
+   "boot_se": 0.014976417708381864,
+   "true_share": 0.2624551971326165,
+   "n_targets": 558,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.15709271294100782,
+   "order_data": 0.15643699156749385,
+   "order_random": 0.15643699156749385,
+   "per_opinion_order_data": 0.15709271294100782,
+   "per_opinion_order_random": 0.1584885879474957
+  }
+ }
+}

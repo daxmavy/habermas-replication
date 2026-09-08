@@ -316,7 +316,8 @@ opinions by $j$ without saying how $j$ is assigned. Here the minority opinions a
 first columns, and the two options above fix the order within the minority block and within the
 non-minority block. The minority weight sums the minority columns, which removes the dependence
 on order within the minority block when the minority has one member, but the order of the
-non-minority columns still changes the fit.
+non-minority columns still changes the fit. \hyperref[app:blocks]{Appendix~B} refits the same
+quantity with one weight per block, which removes the choice altogether.
 
 \subsection*{Endpoint construction}
 \phantomsection\label{sec:endpoints}
@@ -439,6 +440,12 @@ majority position. An autonomously Claude-generated replication of Figure 4(d) f
 between majority-dominated groups and shifts towards majority opinion (unlike the paper, which found
 no correlation); however I have not checked this closely yet.
 
+There are two ambiguities where I am particularly unsure about. Firstly, the construction of the
+endpoints. The exact phrasing is not released, and they affect all other parts of the analysis.
+Secondly, it is not clear to me how to think about the column ordering; I suspect that I may have
+made a mistake in the interpretation here because it is odd that changing the order of columns
+should change the results.
+
 \clearpage
 \section*{Appendix A: the paper's $R^2$ statistic}
 \phantomsection\label{app:rsq}
@@ -504,5 +511,77 @@ paper             & \paperMarginalRsq{} & \paperConditionalRsq{} & \paperFigAr{}
 
 Note that a better axis does not bring the minority weight closer to the paper's value; it moves it further away
 (\hyperref[sec:results]{Results}, Table~\ref{tab:phases}).
+
+\clearpage
+\section*{Appendix B: one weight per block}
+\phantomsection\label{app:blocks}
+
+Note: this section was generated using Claude Opus 5; the derivation and the order-invariance check
+were reproduced independently before it was committed.
+
+The regression in the \hyperref[sec:results]{Results} fits one coefficient per column of the design
+matrix. Each row of that matrix holds one round's opinion scores, so a column pools ``the $j$-th
+opinion'' across rounds, and the $j$-th opinion is a different person in every round. SM eq.~13
+indexes a round's opinions by $j$ without saying how $j$ is assigned, and the assignment changes the
+answer: the column-order row of Table~\ref{tab:ambiguity} varies it, and under sentence-t5-large the
+data order and a random order move the minority weight by up to
+\blockedOrderMaxDiffPerOpinion{}. That a relabelling of the regressors should move the estimate at
+all is the part of this reproduction I trust least.
+
+One way to remove the choice is to assume that opinions within a block are interchangeable, so that
+every minority opinion carries the same weight and every non-minority opinion carries the same
+weight. Write $\bar a_M$ and $\bar a_N$ for the mean position component scores of the round's
+minority and non-minority opinions, and $a$ for the weight given to the minority block. The problem
+of the \hyperref[sec:results]{Results} section then has a single free parameter:
+%
+\begin{equation*}
+\text{set } a \text{ to minimise } \Big(a_0 - a\,\bar a_M - (1-a)\,\bar a_N\Big)^2
+\qquad\text{such that}\qquad 0 \leq a \leq 1 .
+\end{equation*}
+%
+Each of the $|M|$ minority opinions now carries $\lambda_i = a/|M|$ and each of the $|N|$ others
+$(1-a)/|N|$, so the weight the fit puts on the minority block, $\sum_{x_i \in M} \lambda_i$, is
+exactly $a$. This is the same estimand as before with one assumption added --- exchangeability
+within a block --- and not a different quantity. Nothing else changes: the same levels of division,
+the same minimum number of rounds per level, the same weighting of levels by rounds and the same
+cluster bootstrap, so the two fits are computed on identical samples.
+
+A block mean does not depend on the order of the opinions inside the block, so this fit is invariant
+to the column order by construction. It is also invariant in fact: across the sanity check and the
+four phases, under every embedding model, the largest absolute difference between the data order and
+a random order is \blockedOrderMaxDiff{}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Minority weight at each phase with one weight per block, by embedding model, with the
+cluster-bootstrap standard error in parentheses. The last column repeats the per-opinion fit of
+Table~\ref{tab:phases} under sentence-t5-large. The sanity-check row regresses the opinions on
+themselves and recovers the true share (\oursShareLarge{}) under this design as it does under the
+other; it is not bootstrapped.}
+\label{tab:blocked}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{4}{c}{one weight per block} & per opinion \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-6}
+ & base & large & xl & xxl & large \\
+\midrule
+Opinions (sanity check) & \blockedOpinionsBase{} & \blockedOpinionsLarge{} & \blockedOpinionsXl{} & \blockedOpinionsXxl{} & \oursOpinionsLarge{} \\
+Initial statements & \blockedInitCandBase{} (\blockedInitCandBootSEBase) & \blockedInitCandLarge{} (\blockedInitCandBootSELarge) & \blockedInitCandXl{} (\blockedInitCandBootSEXl) & \blockedInitCandXxl{} (\blockedInitCandBootSEXxl) & \oursInitCandLarge{} \\
+Initial winner & \blockedInitWinBase{} (\blockedInitWinBootSEBase) & \blockedInitWinLarge{} (\blockedInitWinBootSELarge) & \blockedInitWinXl{} (\blockedInitWinBootSEXl) & \blockedInitWinXxl{} (\blockedInitWinBootSEXxl) & \oursInitWinLarge{} \\
+Revised statements & \blockedRevCandBase{} (\blockedRevCandBootSEBase) & \blockedRevCandLarge{} (\blockedRevCandBootSELarge) & \blockedRevCandXl{} (\blockedRevCandBootSEXl) & \blockedRevCandXxl{} (\blockedRevCandBootSEXxl) & \oursRevCandLarge{} \\
+Revised winner & \blockedRevWinBase{} (\blockedRevWinBootSEBase) & \blockedRevWinLarge{} (\blockedRevWinBootSELarge) & \blockedRevWinXl{} (\blockedRevWinBootSEXl) & \blockedRevWinXxl{} (\blockedRevWinBootSEXxl) & \oursRevWinLarge{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The restriction does not rescue the replication. Every phase still sits below the true share of
+\oursShareLarge{} under every model; the winner-selection step still drops minority weight at both
+rounds; the revision step still lifts the revised winner above the initial winner without carrying
+it up to proportionality; and the revised winner still falls as the embedding model grows
+(\blockedRevWinBase{}, \blockedRevWinLarge{}, \blockedRevWinXl{} and \blockedRevWinXxl{}). The two
+fits also agree numerically: under sentence-t5-large no phase moves by more than
+\blockedMaxGapLarge{}. Whatever separates this reproduction from the paper, it is not the column
+ordering.
 
 \end{document}
