@@ -1,7 +1,7 @@
 """values.json -> report/parameters.tex.  Pure function of the input: --check is a byte comparison.
 
-    uv run python report/build_parameters.py           # write
-    uv run python report/build_parameters.py --check   # exit 1 if stale or hand-edited
+    python report/build_parameters.py           # write
+    python report/build_parameters.py --check   # exit 1 if stale or hand-edited
 """
 from __future__ import annotations
 
@@ -149,7 +149,7 @@ def main():
     if args.check:
         cur = OUT.read_text() if OUT.exists() else ""
         if cur != text:
-            print("parameters.tex is stale or hand-edited. Run: uv run python report/build_parameters.py", file=sys.stderr)
+            print("parameters.tex is stale or hand-edited. Run: python reproduce.py parameters", file=sys.stderr)
             sys.exit(1)
         print("parameters.tex up to date")
         return

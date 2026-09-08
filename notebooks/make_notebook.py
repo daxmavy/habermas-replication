@@ -1,12 +1,11 @@
 """Generate the Fig. 4C analysis notebook (reusable code lives in hm_fig4c/).
 
-    uv run python notebooks/make_notebook.py     # writes notebooks/fig4c.ipynb
+    python notebooks/make_notebook.py     # writes notebooks/fig4c.ipynb
 
 Executing the notebook once per embedding model writes results/<model>/{fig4c_primary.json,
 sensitivity.csv, summary.json}, the only results the report reads:
 
-    cd notebooks && HM_EMB_DIR=../embeddings/st5-large \\
-        ../.venv/bin/jupyter nbconvert --to notebook --execute fig4c.ipynb --output fig4c_st5-large_out.ipynb
+    python reproduce.py results --models st5-large
 """
 import nbformat as nbf
 

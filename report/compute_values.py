@@ -3,7 +3,7 @@
 The report never contains a literal number: values.json -> build_parameters.py -> parameters.tex
 -> \\macro in the .tex.  Run from the repo root:
 
-    uv run python report/compute_values.py [--models st5-base st5-large st5-xl st5-xxl] [--skip-mixed]
+    python report/compute_values.py [--models st5-base st5-large st5-xl st5-xxl] [--skip-mixed]
 """
 from __future__ import annotations
 

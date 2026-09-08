@@ -24,21 +24,3 @@ dependencies = [
 # hm_fig4c/ is imported from the repo root; there is nothing to build or install.
 [tool.uv]
 package = false
-
-# torch: CPU wheels on x86_64 (this VM); CUDA 12.6 wheels on aarch64 (Isambard-AI GH200 nodes,
-# driver 565 = CUDA 12.7, so the PyPI aarch64 wheel -- a CUDA 13 build -- would not initialise).
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu", marker = "platform_machine == 'x86_64'" },
-    { index = "pytorch-cu126", marker = "platform_machine == 'aarch64'" },
-]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
-explicit = true

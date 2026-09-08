@@ -9,4 +9,3 @@ notebooks/*.log
 report/*.aux
 report/*.log
 report/*.out
-isambard/logs/

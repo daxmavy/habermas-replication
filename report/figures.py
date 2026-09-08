@@ -3,7 +3,7 @@
 All three figures are drawn by the same routine, `grouped_bars`: grouped bars with error bars, one figure size, one
 palette, one y-axis, the legend in the same corner and the true-share reference lines drawn the same way.
 
-    uv run python report/figures.py
+    python report/figures.py
 """
 from __future__ import annotations
 
