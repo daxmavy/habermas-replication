@@ -35,11 +35,11 @@ NOTEBOOK = ROOT / "notebooks" / "fig4c.ipynb"
 MAKE_NOTEBOOK = ROOT / "notebooks" / "make_notebook.py"
 
 
-def py(*args: str, cwd: Path = ROOT, env: dict[str, str] | None = None) -> None:
+def py(*args: str, cwd: Path = ROOT) -> None:
     """Run a script of this repo with this interpreter; fail fast if it does not exit 0."""
     cmd = [sys.executable, *args]
     print(f"$ {' '.join(cmd)}", flush=True)
-    code = subprocess.call(cmd, cwd=cwd, env=env)
+    code = subprocess.call(cmd, cwd=cwd)
     if code:
         raise SystemExit(f"failed ({code}): {' '.join(cmd)}")
 
@@ -93,7 +93,7 @@ def step_codelinks(_: list[str]) -> None:
 
 def step_pdf(_: list[str]) -> None:
     cmd = ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "fig4c_report.tex"]
-    for _pass in range(2):   # twice, so \ref and the table of contents settle
+    for _pass in range(2):   # twice, so cross-references settle
         print(f"$ {' '.join(cmd)}", flush=True)
         code = subprocess.call(cmd, cwd=ROOT / "report", stdout=subprocess.DEVNULL)
         if code:
