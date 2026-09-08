@@ -44,6 +44,17 @@ re-running it embeds only the texts that are not in the cache yet, so an interru
 where it stopped. All embeddings are computed in 32-bit floating point, so the results do not
 depend on which machine ran this step.
 
+## Tests
+
+```bash
+uv run pytest
+```
+
+`tests/` pins the decisions that turn Likert ratings into a minority set: which opinions count as
+minority, what happens to a neutral rating, and what happens when the two sides are equal. The SM
+states the last of these in a different section from the rest of the method, so it is easy to get
+wrong and invisible in the output when you do.
+
 ## Data
 
 `data/` holds three parquet files from the public Habermas Machine release accompanying the paper

@@ -8,3 +8,8 @@ notebooks/*.log
 report/*.aux
 report/*.log
 report/*.out
+
+# local scratch
+.venv-light/
+*.sbatch
+embed-*.out
