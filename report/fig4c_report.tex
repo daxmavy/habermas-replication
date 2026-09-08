@@ -33,11 +33,8 @@
 \newcommand{\fix}[1]{\textcolor{fixblue}{#1}}
 
 % ---------------------------------------------------------------- code references
-% Set \repourl to the repository base (e.g. https://github.com/OWNER/habermas-fig4c) and every
-% code reference below becomes a permalink pinned to \repocommitfull. Left empty, they render as
-% plain file:line references. This VM cannot create the remote: the exe.dev GitHub proxy serves
-% only /repos/OWNER/REPO, so `gh repo create` returns 403.
-\newcommand{\repourl}{}
+% Code references are permalinks pinned to \repocommitfull.
+\newcommand{\repourl}{https://github.com/daxmavy/habermas-replication}
 % #1 raw path (for the URL), #2 escaped path (for display), #3 start, #4 end, #5 label
 \newcommand{\CodeRef}[5]{%
   \ifx\repourl\empty
