@@ -39,7 +39,8 @@ Sentence-T5 sizes; the default is all four.
 
 `embed` is the slow step. Its cache is resumable: it writes one parquet file per chunk and re-running
 it embeds only the texts that are not in the cache yet, so an interrupted run continues where it
-stopped.
+stopped. All embeddings are computed in 32-bit floating point, so the results do not depend on
+which machine ran this step.
 
 ## Data
 
