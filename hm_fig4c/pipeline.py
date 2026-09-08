@@ -1,4 +1,4 @@
-"""End-to-end Fig. 4C pipeline: prepared tables + embedding cache -> position scores -> convex regression -> figure."""
+"""End-to-end Fig. 4C pipeline: prepared tables + embedding cache -> position scores -> convex regression."""
 from __future__ import annotations
 
 import json
@@ -13,8 +13,6 @@ from .embed import load_embeddings
 
 KEY = ["metadata.version", "launch_id", "round_id"]
 PHASES = ["initial_candidates", "initial_winner", "revised_candidates", "revised_winner"]
-PHASE_LABELS = {"opinions": "Opinions\n(sanity check)", "initial_candidates": "Initial\nstatements", "initial_winner": "Initial\nwinner",
-                "revised_candidates": "Revised\nstatements", "revised_winner": "Revised\nwinner"}
 
 
 def load_prepared(prep_dir: Path):
@@ -55,6 +53,26 @@ def fig4a_correlation(opinions: pd.DataFrame) -> dict:
     d = opinions.dropna(subset=["score", "pre_rating"])
     r = np.corrcoef(d["score"], d["pre_rating"])[0, 1] if len(d) > 2 else np.nan
     return {"r": float(r), "r2": float(r ** 2), "n": int(len(d))}
+
+
+def marginal_r2(opinions: pd.DataFrame) -> dict:
+    """Paper SM eq. 7: y_ij = a + b*x_position + u_i + e_ij, random intercept per round.
+
+    Marginal R^2 (Nakagawa) = var(fixed prediction) / (var_fixed + var_round + var_resid), the
+    quantity the paper reports as 0.41.  Pearson r is Fig. 4A.
+    """
+    import statsmodels.formula.api as smf
+
+    d = select_cohort(opinions, "cohorts_1_3", prereg_only=True).dropna(subset=["score", "pre_rating"]).copy()
+    d["round_key"] = d["metadata.version"].astype(str) + "|" + d["launch_id"].astype(str) + "|" + d["round_id"].astype(str)
+    fit = smf.mixedlm("pre_rating ~ score", d, groups=d["round_key"]).fit(reml=True)
+    var_f = float(np.var(fit.predict(d), ddof=0))  # MixedLM.predict gives the fixed-effects part only
+    var_u = float(fit.cov_re.iloc[0, 0])
+    var_e = float(fit.scale)
+    r = float(np.corrcoef(d["score"], d["pre_rating"])[0, 1])
+    return {"marginal_r2": var_f / (var_f + var_u + var_e), "conditional_r2": (var_f + var_u) / (var_f + var_u + var_e),
+            "beta": float(fit.params["score"]), "beta_se": float(fit.bse["score"]),
+            "pearson_r": r, "pearson_r2": r ** 2, "n": int(len(d)), "n_rounds": int(d["round_key"].nunique())}
 
 
 def fig4b_within_range(opinions: pd.DataFrame, statements: pd.DataFrame) -> dict:
@@ -157,28 +175,6 @@ def per_level_table(res: dict) -> pd.DataFrame:
         for r in res["phases"].get(phase, {}).get("per_level", []):
             rows.append({"phase": phase, **{k: v for k, v in r.items() if k != "coefs"}})
     return pd.DataFrame(rows).pivot(index=["n", "k", "true_share"], columns="phase", values=["minority_weight", "se", "n_rounds"])
-
-
-def plot_fig4c(res: dict, ax=None, title: str | None = None, include_opinions: bool = False):
-    import matplotlib.pyplot as plt
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(4.6, 3.6))
-    phases = (["opinions"] if include_opinions and "opinions" in res["phases"] else []) + [p for p in PHASES if p in res["phases"]]
-    colors = {"opinions": "#8da0cb", "initial_candidates": "#c6dbef", "initial_winner": "#9e9ac8", "revised_candidates": "#807dba", "revised_winner": "#6a51a3"}
-    x = np.arange(len(phases))
-    w = [res["phases"][p]["weight"] for p in phases]; se = [res["phases"][p]["se"] for p in phases]
-    ax.bar(x, w, yerr=se, color=[colors[p] for p in phases], edgecolor="k", lw=0.6, capsize=3, error_kw={"lw": 1.2})
-    true = res["phases"][phases[-1]]["true_share"]
-    ax.axhline(true, ls="--", color="k", lw=1.2)
-    ax.annotate("true proportion\nof minority opinions", (x[0] - 0.4, true + 0.01), fontsize=7, style="italic", va="bottom")
-    for xi, wi in zip(x, w):
-        ax.text(xi, 0.02, f"{wi:.2f}", ha="center", fontsize=7, color="white" if wi > 0.05 else "k")
-    ax.set_xticks(x); ax.set_xticklabels([PHASE_LABELS[p] for p in phases], fontsize=8)
-    ax.set_ylabel("Weight of minority opinions"); ax.set_xlabel("Group statement type"); ax.set_ylim(0, max(0.45, max(w) + max(se) + 0.05))
-    ax.set_title(title or f"{res['cohort']} (n = {res['phases']['initial_winner']['n_rounds']} rounds)", fontsize=9)
-    for s_ in ["top", "right"]:
-        ax.spines[s_].set_visible(False)
-    return ax
 
 
 def save_results(res: dict, path: Path):

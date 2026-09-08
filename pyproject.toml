@@ -1,7 +1,7 @@
 [project]
-name = "habermas-fig4c"
+name = "habermas-fig4c-report"
 version = "0.1.0"
-description = "Add your description here"
+description = "Replication of Figure 4C of Tessler et al. (2024), the Habermas Machine paper, as a single PDF report."
 authors = [
     { name = "Max Davy", email = "max.davy98@gmail.com" }
 ]
@@ -11,8 +11,8 @@ dependencies = [
     "jupyter>=1.1.1",
     "matplotlib>=3.11.1",
     "nbconvert>=7.17.1",
+    "nbformat>=5.10.4",
     "numpy>=2.5.2",
-    "optimum[onnxruntime]>=2.1.0",
     "pandas>=3.0.5",
     "pyarrow>=25.0.1",
     "scipy>=1.18.1",
@@ -21,27 +21,6 @@ dependencies = [
     "torch>=2.14.0",
 ]
 
-[project.scripts]
-habermas-fig4c = "habermas_fig4c:main"
-
-# torch: CPU wheels on x86_64 (this VM); CUDA 12.6 wheels on aarch64 (Isambard-AI GH200 nodes,
-# driver 565 = CUDA 12.7, so the PyPI aarch64 wheel -- a CUDA 13 build -- would not initialise).
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu", marker = "platform_machine == 'x86_64'" },
-    { index = "pytorch-cu126", marker = "platform_machine == 'aarch64'" },
-]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
-explicit = true
-
-[build-system]
-requires = ["uv_build>=0.12.9,<0.13.0"]
-build-backend = "uv_build"
+# hm_fig4c/ is imported from the repo root; there is nothing to build or install.
+[tool.uv]
+package = false
