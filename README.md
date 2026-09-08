@@ -17,30 +17,31 @@ uv sync
 uv run python reproduce.py all
 ```
 
-`all` runs the whole chain from the public dataset to the PDF. The steps also run individually,
-in this order:
+`all` runs the whole chain from the public dataset to the PDF. The five steps also run
+individually, in this order:
 
 ```bash
-uv run python reproduce.py data        # downloads the three dataset files into data/
-uv run python reproduce.py prepare     # writes prepared/{opinions,statements,questions,candidates,texts}.parquet
-uv run python reproduce.py embed       # writes embeddings/<model>/chunk_*.parquet, one directory per Sentence-T5 size
-uv run python reproduce.py results     # executes notebooks/fig4c.ipynb once per model, writing results/<model>/{fig4c_primary.json,sensitivity.csv,summary.json}
-uv run python reproduce.py values      # writes report/values.json
-uv run python reproduce.py parameters  # writes report/parameters.tex
-uv run python reproduce.py figures     # writes report/figures/*.pdf
-uv run python reproduce.py codelinks   # writes report/codelinks.tex and report/codelinks.json
-uv run python reproduce.py pdf         # writes report/fig4c_report.pdf
+uv run python reproduce.py data      # downloads the three dataset files into data/
+uv run python reproduce.py prepare   # notebooks/prepare.ipynb: data/ -> prepared/*.parquet
+uv run python reproduce.py embed     # embeddings/<model>/, one directory per Sentence-T5 size
+uv run python reproduce.py results   # notebooks/analysis.ipynb once per model -> results/<model>/
+uv run python reproduce.py report    # notebooks/report.ipynb, then pdflatex -> report/fig4c_report.pdf
 ```
 
-`report` is short for the last five steps. `notebook` regenerates `notebooks/fig4c.ipynb` from
-`notebooks/make_notebook.py`; `results` does that for you when the generator is the newer of the two.
-`--models st5-base st5-large` restricts `embed`, `results` and `values` to a subset of the four
-Sentence-T5 sizes; the default is all four.
+`--models st5-base st5-large` restricts `embed` and `results` to a subset of the four Sentence-T5
+sizes; the default is all four.
 
-`embed` is the slow step. Its cache is resumable: it writes one parquet file per chunk and re-running
-it embeds only the texts that are not in the cache yet, so an interrupted run continues where it
-stopped. All embeddings are computed in 32-bit floating point, so the results do not depend on
-which machine ran this step.
+The three notebooks are the analysis. They are committed with their outputs, so every table, plot
+and figure can be read on GitHub without running anything: `notebooks/prepare.ipynb` shows the raw
+dataset and the tables it builds from it, `notebooks/analysis.ipynb` computes the minority weights
+for one embedding model (`results/` keeps the executed copy of each run), and
+`notebooks/report.ipynb` collects the four runs, draws the three figures into `report/figures/` and
+writes `report/parameters.tex`, after which `report` builds the PDF.
+
+`embed` is the slow step. Its cache is resumable: it writes one parquet file per chunk and
+re-running it embeds only the texts that are not in the cache yet, so an interrupted run continues
+where it stopped. All embeddings are computed in 32-bit floating point, so the results do not
+depend on which machine ran this step.
 
 ## Data
 
@@ -57,20 +58,17 @@ Neither `data/`, `prepared/` nor `embeddings/` is committed.
 
 ## No number is typed into the report
 
-`report/compute_values.py` writes every quantity the report quotes to `report/values.json`;
-`report/build_parameters.py` renders that as `\newcommand` macros in `report/parameters.tex`, which
-`report/fig4c_report.tex` reads. The `.tex` contains no literal numbers, so a number can only change
-by re-running the analysis. `uv run python reproduce.py check` fails if `parameters.tex` has drifted
-from `values.json`. `report/codelinks.py` resolves the report's code references by symbol name and
-pins them to the current commit.
+`notebooks/report.ipynb` writes every quantity the report quotes as a named macro into
+`report/parameters.tex`. `report/fig4c_report.tex` contains no literal result, so a number can only
+change by re-running the analysis.
 
 ## Repository layout
 
-- `reproduce.py` — the steps above; run it from the repository root.
+- `reproduce.py` — the five steps above; run it from the repository root.
 - `scripts/` — `download_data.py` (fetch the dataset) and `embed.py` (embed the texts the analysis needs).
-- `hm_fig4c/` — the library: dataset loading, preprocessing, embedding, scoring and the analysis pipeline.
-- `notebooks/` — `make_notebook.py`, which generates the analysis notebook `fig4c.ipynb`.
-- `results/` — the committed per-model outputs of the notebook, the only results the report reads.
-- `report/` — the LaTeX source, the scripts that generate its numbers, figures and code references, and the PDF.
+- `hm_fig4c/` — the library: `data.py`, `preprocess.py`, `embed.py`, `analysis.py`, `pipeline.py`.
+- `notebooks/` — `prepare.ipynb`, `analysis.ipynb` and `report.ipynb`, committed with their outputs.
+- `results/` — the committed per-model outputs of the analysis notebook and the executed notebook itself.
+- `report/` — `fig4c_report.tex`, the generated `parameters.tex` and `figures/`, and the PDF.
 - `pyproject.toml`, `uv.lock`, `.python-version` — the environment.
 - `data/`, `prepared/`, `embeddings/` — inputs and intermediates, written by the steps above and not committed.

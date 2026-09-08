@@ -55,6 +55,26 @@ def fig4a_correlation(opinions: pd.DataFrame) -> dict:
     return {"r": float(r), "r2": float(r ** 2), "n": int(len(d))}
 
 
+def marginal_r2(opinions: pd.DataFrame) -> dict:
+    """Paper SM eq. 7: y_ij = a + b*x_position + u_i + e_ij, random intercept per round.
+
+    Marginal R^2 (Nakagawa) = var(fixed prediction) / (var_fixed + var_round + var_resid), the
+    quantity the paper reports as 0.41.  Pearson r is Fig. 4A.
+    """
+    import statsmodels.formula.api as smf
+
+    d = select_cohort(opinions, "cohorts_1_3", prereg_only=True).dropna(subset=["score", "pre_rating"]).copy()
+    d["round_key"] = d["metadata.version"].astype(str) + "|" + d["launch_id"].astype(str) + "|" + d["round_id"].astype(str)
+    fit = smf.mixedlm("pre_rating ~ score", d, groups=d["round_key"]).fit(reml=True)
+    var_f = float(np.var(fit.predict(d), ddof=0))  # MixedLM.predict gives the fixed-effects part only
+    var_u = float(fit.cov_re.iloc[0, 0])
+    var_e = float(fit.scale)
+    r = float(np.corrcoef(d["score"], d["pre_rating"])[0, 1])
+    return {"marginal_r2": var_f / (var_f + var_u + var_e), "conditional_r2": (var_f + var_u) / (var_f + var_u + var_e),
+            "beta": float(fit.params["score"]), "beta_se": float(fit.bse["score"]),
+            "pearson_r": r, "pearson_r2": r ** 2, "n": int(len(d)), "n_rounds": int(d["round_key"].nunique())}
+
+
 def fig4b_within_range(opinions: pd.DataFrame, statements: pd.DataFrame) -> dict:
     """Fraction of group-statement scores lying within [min, max] of their group's opinion scores."""
     rng = opinions.dropna(subset=["score"]).groupby(KEY)["score"].agg(["min", "max"])

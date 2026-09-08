@@ -4,7 +4,6 @@ prepared/
 embeddings/*/
 __pycache__/
 .ipynb_checkpoints/
-notebooks/*_out.ipynb
 notebooks/*.log
 report/*.aux
 report/*.log
