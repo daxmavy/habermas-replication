@@ -141,10 +141,34 @@ def convex_fit_with_se(X: np.ndarray, y: np.ndarray, contrast: np.ndarray):
     return w, float(contrast @ w), se, sigma2, r2
 
 
+def design_row(minority_scores: np.ndarray, other_scores: np.ndarray, columns: str = "per_opinion") -> np.ndarray:
+    """One row of the design matrix from a round's minority and non-minority opinion scores.
+
+    per_opinion : the scores themselves, minority first, so each column is one opinion slot.
+    blocks      : the two block means, so every opinion of a block carries the same weight and the row -- and
+                  therefore the fit -- does not depend on the order of the opinions within either block.
+    """
+    if columns == "per_opinion":
+        return np.concatenate([minority_scores, other_scores])
+    if columns == "blocks":
+        return np.array([minority_scores.mean(), other_scores.mean()])
+    raise ValueError(columns)
+
+
+def minority_contrast(n: int, k: int, columns: str = "per_opinion") -> np.ndarray:
+    """The vector c with c @ w = the summed minority weight, for a level with n opinions of which k are minority."""
+    if columns == "per_opinion":
+        return np.array([1.0] * k + [0.0] * (n - k))
+    if columns == "blocks":
+        return np.array([1.0, 0.0])
+    raise ValueError(columns)
+
+
 def build_design(opinions_div: pd.DataFrame, targets: pd.DataFrame, score_col: str = "score", target_col: str = "score",
-                 order: str = "data", seed: int = 0):
-    """Per (n_div, k_min) level: X (targets x n_div) of opinion scores with minority columns first, y = target scores,
-    keys = round key per row (several targets per round are allowed, e.g. all candidate statements)."""
+                 order: str = "data", seed: int = 0, columns: str = "per_opinion"):
+    """Per (n_div, k_min) level: X (targets x columns) of opinion scores, y = target scores, keys = round key per row
+    (several targets per round are allowed, e.g. all candidate statements), contrast = the vector that sums the
+    minority weight.  `columns` picks the design: see `design_row`."""
     key = ["metadata.version", "launch_id", "round_id"]
     tg = targets.dropna(subset=[target_col]).groupby(key)[target_col].apply(list)
     rng = np.random.default_rng(seed)
@@ -155,12 +179,13 @@ def build_design(opinions_div: pd.DataFrame, targets: pd.DataFrame, score_col: s
         mn, mj = g[g["is_minority"]], g[~g["is_minority"]]
         if order == "random":
             mn, mj = mn.sample(frac=1, random_state=rng.integers(1 << 31)), mj.sample(frac=1, random_state=rng.integers(1 << 31))
-        row = np.concatenate([mn[score_col].values, mj[score_col].values])
+        row = design_row(mn[score_col].values, mj[score_col].values, columns)
         lvl = (int(g["n_div"].iloc[0]), int(g["k_min"].iloc[0]))
         d = levels.setdefault(lvl, {"X": [], "y": [], "keys": []})
         for yv in tg[k]:
             d["X"].append(row); d["y"].append(yv); d["keys"].append(k)
-    return {l: {"X": np.array(v["X"]), "y": np.array(v["y"]), "keys": v["keys"]} for l, v in levels.items()}
+    return {l: {"X": np.array(v["X"]), "y": np.array(v["y"]), "keys": v["keys"], "contrast": minority_contrast(*l, columns)}
+            for l, v in levels.items()}
 
 
 @dataclass
@@ -181,8 +206,7 @@ def minority_weight(design: dict, min_rounds: int = 10) -> MinorityWeightResult:
     for (n, k), d in sorted(design.items()):
         if len(d["y"]) < min_rounds:
             continue
-        contrast = np.array([1.0] * k + [0.0] * (n - k))
-        w, mw, se, s2, r2 = convex_fit_with_se(d["X"], d["y"], contrast)
+        w, mw, se, s2, r2 = convex_fit_with_se(d["X"], d["y"], d["contrast"])
         rows.append(dict(n=n, k=k, n_rounds=len(d["y"]), true_share=k / n, minority_weight=mw, se=se, r2=r2, coefs=np.round(w, 3).tolist()))
     per = pd.DataFrame(rows)
     wts = per["n_rounds"] / per["n_rounds"].sum()
@@ -210,11 +234,11 @@ def cluster_bootstrap(designs: dict, n_boot: int = 500, seed: int = 0, min_round
             for i, k in enumerate(designs[p][l]["keys"]):
                 m.setdefault(k, []).append(i)
             idx[p] = m
-        prep.append((l, rounds, idx))
+        prep.append((l, rounds, idx, designs[phases[0]][l]["contrast"]))
     out = np.empty((n_boot, len(phases)))
     for b in range(n_boot):
         num = np.zeros(len(phases)); den = np.zeros(len(phases))
-        for (n, k), rounds, idx in prep:
+        for (n, k), rounds, idx, contrast in prep:
             samp = rng.choice(len(rounds), len(rounds), replace=True)
             for pi, p in enumerate(phases):
                 present = [j for j in samp if rounds[j] in idx[p]]
@@ -222,23 +246,26 @@ def cluster_bootstrap(designs: dict, n_boot: int = 500, seed: int = 0, min_round
                     continue
                 rows = np.concatenate([idx[p][rounds[j]] for j in present]).astype(int)
                 w = convex_lstsq(designs[p][(n, k)]["X"][rows], designs[p][(n, k)]["y"][rows])
-                num[pi] += len(present) * w[:k].sum(); den[pi] += len(present)
+                num[pi] += len(present) * (contrast @ w); den[pi] += len(present)
         out[b] = num / np.where(den > 0, den, np.nan)
     return out
 
 
-def opinion_self_regression(opinions_div: pd.DataFrame, score_col: str = "score", min_rounds: int = 10) -> pd.DataFrame:
+def opinion_self_regression(opinions_div: pd.DataFrame, score_col: str = "score", min_rounds: int = 10,
+                            columns: str = "per_opinion") -> pd.DataFrame:
     """SM sanity check: regress each individual opinion on convex combinations of the same group's opinions
-    (one target per opinion); the summed minority weight should equal the proportion of opinions in the minority."""
+    (one target per opinion); the summed minority weight should equal the proportion of opinions in the minority.
+    `columns` picks the design, as in `build_design`; the targets are the individual opinions either way."""
     key = ["metadata.version", "launch_id", "round_id"]
     levels = {}
     for k, g in opinions_div.groupby(key):
         if g[score_col].isna().any():
             continue
         mn, mj = g[g["is_minority"]], g[~g["is_minority"]]
-        row = np.concatenate([mn[score_col].values, mj[score_col].values])
+        targets = np.concatenate([mn[score_col].values, mj[score_col].values])
+        row = design_row(mn[score_col].values, mj[score_col].values, columns)
         lvl = (int(g["n_div"].iloc[0]), int(g["k_min"].iloc[0]))
-        for target in row:
+        for target in targets:
             levels.setdefault(lvl, {"X": [], "y": []}); levels[lvl]["X"].append(row); levels[lvl]["y"].append(target)
     rows = []
     for (n, k), d in sorted(levels.items()):
@@ -246,7 +273,7 @@ def opinion_self_regression(opinions_div: pd.DataFrame, score_col: str = "score"
         if len(y) < min_rounds:
             continue
         w = convex_lstsq(X, y)
-        rows.append(dict(n=n, k=k, n_targets=len(y), true_share=k / n, minority_weight=w[:k].sum()))
+        rows.append(dict(n=n, k=k, n_targets=len(y), true_share=k / n, minority_weight=minority_contrast(n, k, columns) @ w))
     per = pd.DataFrame(rows)
     wts = per["n_targets"] / per["n_targets"].sum()
     per.loc[len(per)] = dict(n="all", k="-", n_targets=per["n_targets"].sum(), true_share=(wts * per["true_share"]).sum(), minority_weight=(wts * per["minority_weight"]).sum())

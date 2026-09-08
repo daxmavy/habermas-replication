@@ -91,20 +91,21 @@ def fig4b_within_range(opinions: pd.DataFrame, statements: pd.DataFrame) -> dict
 
 def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, cohort: str = "cohorts_1_3", neutral: str = "as_majority",
                           ties: str = "exclude", order: str = "data", min_rounds: int = 10, n_boot: int = 0, seed: int = 0,
-                          prereg_only: bool = True, phases: list[str] = PHASES, include_opinions: bool = True, minority_by: str = "rating") -> dict:
+                          prereg_only: bool = True, phases: list[str] = PHASES, include_opinions: bool = True, minority_by: str = "rating",
+                          columns: str = "per_opinion") -> dict:
     op = select_cohort(opinions, cohort, prereg_only); ca = select_cohort(candidates, cohort, prereg_only)
     op_div = assign_minority(op, neutral=neutral, ties=ties, by=minority_by)
     res = {"cohort": cohort, "neutral": neutral, "ties": ties, "order": order, "prereg_only": prereg_only, "minority_by": minority_by, "phases": {}}
     designs = {}
     for phase in phases:
-        design = build_design(op_div, phase_targets(ca, phase), "score", "score", order=order, seed=seed)
+        design = build_design(op_div, phase_targets(ca, phase), "score", "score", order=order, seed=seed, columns=columns)
         designs[phase] = design
         mw = minority_weight(design, min_rounds=min_rounds)
         res["phases"][phase] = {"weight": mw.weight, "se": mw.se, "n_targets": mw.n_rounds,
                                 "n_rounds": int(sum(len(set(d["keys"])) for d in design.values())),
                                 "true_share": mw.true_share, "t_vs_true": mw.t_vs_true, "per_level": mw.per_level.to_dict(orient="records")}
     if include_opinions:
-        sr = opinion_self_regression(op_div, "score", min_rounds=min_rounds)
+        sr = opinion_self_regression(op_div, "score", min_rounds=min_rounds, columns=columns)
         last = sr.iloc[-1]
         res["phases"]["opinions"] = {"weight": float(last["minority_weight"]), "se": 0.0, "n_targets": int(last["n_targets"]),
                                      "true_share": float(last["true_share"]), "per_level": sr.iloc[:-1].to_dict(orient="records")}

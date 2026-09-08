@@ -1,0 +1,70 @@
+{
+ "columns": "blocks",
+ "n_boot": 500,
+ "order_max_abs_diff": {
+  "blocks": 0.0,
+  "per_opinion": 0.00431477830009
+ },
+ "phases": {
+  "opinions": {
+   "weight": 0.2629230197099287,
+   "boot_se": null,
+   "true_share": 0.2629230197099293,
+   "n_targets": 2689,
+   "n_rounds": null,
+   "per_opinion_weight": 0.2629230197099284,
+   "order_data": 0.2629230197099287,
+   "order_random": 0.2629230197099287,
+   "per_opinion_order_data": 0.2629230197099284,
+   "per_opinion_order_random": 0.2629230197099284
+  },
+  "initial_candidates": {
+   "weight": 0.20779359277160703,
+   "boot_se": 0.016475729835801797,
+   "true_share": 0.2624551971326165,
+   "n_targets": 2232,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.20649282532656493,
+   "order_data": 0.20779359277160703,
+   "order_random": 0.20779359277160703,
+   "per_opinion_order_data": 0.20649282532656493,
+   "per_opinion_order_random": 0.20883869578996944
+  },
+  "initial_winner": {
+   "weight": 0.14077293261081503,
+   "boot_se": 0.018361424378515484,
+   "true_share": 0.2624551971326165,
+   "n_targets": 558,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.1408080232603286,
+   "order_data": 0.14077293261081503,
+   "order_random": 0.14077293261081503,
+   "per_opinion_order_data": 0.1408080232603286,
+   "per_opinion_order_random": 0.1451228015604186
+  },
+  "revised_candidates": {
+   "weight": 0.1845422841599,
+   "boot_se": 0.016244299980691095,
+   "true_share": 0.2624551971326165,
+   "n_targets": 2232,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.18567147282885774,
+   "order_data": 0.1845422841599,
+   "order_random": 0.1845422841599,
+   "per_opinion_order_data": 0.18567147282885774,
+   "per_opinion_order_random": 0.18846871839187146
+  },
+  "revised_winner": {
+   "weight": 0.16349432763638347,
+   "boot_se": 0.016739609272294977,
+   "true_share": 0.2624551971326165,
+   "n_targets": 558,
+   "n_rounds": 560,
+   "per_opinion_weight": 0.16396678368451245,
+   "order_data": 0.16349432763638347,
+   "order_random": 0.16349432763638347,
+   "per_opinion_order_data": 0.16396678368451245,
+   "per_opinion_order_random": 0.16646958310066964
+  }
+ }
+}
