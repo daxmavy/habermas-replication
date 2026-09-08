@@ -17,10 +17,22 @@ OUT = ROOT / "report" / "parameters.tex"
 SUFFIX = {"st5-base": "Base", "st5-large": "Large", "st5-xl": "Xl", "st5-xxl": "Xxl"}
 PHASE_MACRO = {"initial_candidates": "InitCand", "initial_winner": "InitWin",
                "revised_candidates": "RevCand", "revised_winner": "RevWin"}
-ENDPOINT_MACRO = {"prefixed": "Pinned", "prefixed_not_lower": "NotLower", "mean_generic_specific": "MeanEmb"}
+ENDPOINT_MACRO = {"prefixed": "Pinned", "prefixed_not_lower": "NotLower"}
+EXAMPLE_TAGS = ("A", "B")  # one macro family per worked example of the endpoint construction
+# TeX-active characters in data-derived strings (question texts, position statements), escaped in this order.
+TEX_ESCAPES = [("\\", r"\textbackslash{}"), ("&", r"\&"), ("%", r"\%"), ("$", r"\$"), ("#", r"\#"),
+               ("_", r"\_"), ("{", r"\{"), ("}", r"\}"), ("~", r"\textasciitilde{}"), ("^", r"\textasciicircum{}")]
+
+
+def tex_escape(s: str) -> str:
+    for ch, rep in TEX_ESCAPES:
+        s = s.replace(ch, rep)
+    return s
 
 
 def fmt(v, spec: str) -> str:
+    if spec == "tex":
+        return tex_escape(str(v))
     if spec == "int":
         return f"{int(round(v))}"
     if spec == "pct0":
@@ -89,6 +101,15 @@ def spec_rows(V) -> list[tuple[str, str]]:
         for ph, pm in PHASE_MACRO.items():
             rows += [(f"axis{mac}{pm}", e[ph], "f3"), (f"axis{mac}{pm}BootSE", e[ph + "_boot_se"], "f3")]
     rows.append(("axisNStyles", len(ENDPOINT_MACRO), "int"))
+    examples = V["endpoint_examples"]
+    if len(examples) != len(EXAMPLE_TAGS):
+        raise SystemExit(f"expected {len(EXAMPLE_TAGS)} endpoint examples, values.json has {len(examples)}")
+    for ex, tag in zip(examples, EXAMPLE_TAGS):
+        rows += [(f"example{tag}Question", ex["question"], "tex"), (f"example{tag}Affirming", ex["affirming"], "tex"),
+                 (f"example{tag}Negating", ex["negating"], "tex"), (f"example{tag}NRounds", ex["n_rounds"], "int")]
+        for style, mac in ENDPOINT_MACRO.items():
+            rows += [(f"example{tag}{mac}Aff", ex["endpoints"][style]["affirming"], "tex"),
+                     (f"example{tag}{mac}Neg", ex["endpoints"][style]["negating"], "tex")]
     n_boot = {V["ours"][m]["n_boot"] for m in SUFFIX if m in V["ours"]}
     if len(n_boot) != 1:
         raise SystemExit(f"models bootstrapped with different resample counts: {n_boot}")

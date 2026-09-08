@@ -108,7 +108,7 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
 
 # ----------------------------------------------------------------------------- sensitivity grid
 NEUTRAL_OPTIONS = {"non-minority": "as_majority", "opinion dropped": "drop_participant"}
-ORDER_OPTIONS = {"data": "data", "sorted by score": "sorted", "random": "random"}
+ORDER_OPTIONS = {"data": "data", "random": "random"}
 SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
 
 

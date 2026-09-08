@@ -44,15 +44,10 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
     from .data import endpoint_texts
     q = questions.set_index("question_id")
 
-    def endpoint(texts: list[str]):
-        """Embedding of an endpoint: the (normalised) mean over its texts, or None if any is not embedded."""
-        ids = [text_id_fn(t) for t in texts]
-        if not all(t in lookup for t in ids):
-            return None
-        if len(ids) == 1:  # ST5 embeddings are already unit-norm; leave the single-text case untouched
-            return mat[lookup[ids[0]]]
-        e = mat[[lookup[t] for t in ids]].mean(axis=0)
-        return e / np.linalg.norm(e)
+    def endpoint(text: str):
+        """Embedding of an endpoint text, or None if it is not in the cache."""
+        tid = text_id_fn(text)
+        return mat[lookup[tid]] if tid in lookup else None
 
     endpoints = {}
     out = np.full(len(df), np.nan)
@@ -61,8 +56,8 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
             continue
         tid = text_id_fn(text)
         if qid not in endpoints:
-            a_txts, n_txts = endpoint_texts(q.at[qid, "affirming"], q.at[qid, "negating"], endpoint_style)
-            endpoints[qid] = (endpoint(a_txts), endpoint(n_txts))
+            a_txt, n_txt = endpoint_texts(q.at[qid, "affirming"], q.at[qid, "negating"], endpoint_style)
+            endpoints[qid] = (endpoint(a_txt), endpoint(n_txt))
         aff, neg = endpoints[qid]
         if tid in lookup and aff is not None and neg is not None:
             out[i] = position_axis_scores(mat[lookup[tid]][None, :], neg, aff, method)[0]
@@ -158,9 +153,7 @@ def build_design(opinions_div: pd.DataFrame, targets: pd.DataFrame, score_col: s
         if k not in tg.index or g[score_col].isna().any():
             continue
         mn, mj = g[g["is_minority"]], g[~g["is_minority"]]
-        if order == "sorted":
-            mn, mj = mn.sort_values(score_col), mj.sort_values(score_col)
-        elif order == "random":
+        if order == "random":
             mn, mj = mn.sample(frac=1, random_state=rng.integers(1 << 31)), mj.sample(frac=1, random_state=rng.integers(1 << 31))
         row = np.concatenate([mn[score_col].values, mj[score_col].values])
         lvl = (int(g["n_div"].iloc[0]), int(g["k_min"].iloc[0]))

@@ -46,7 +46,7 @@ SECTIONS: dict[str, list[tuple[str, str | None]]] = {
                         ("report/compute_values.py", "sensitivity_summary")],
     "codeValidationExtra": [("hm_fig4c/pipeline.py", "fig4b_within_range")],
     "codeEndpoints": [("hm_fig4c/data.py", "endpoint_texts"), ("hm_fig4c/analysis.py", "score_texts"),
-                      ("report/compute_values.py", "endpoint_variants")],
+                      ("report/compute_values.py", "endpoint_variants"), ("report/compute_values.py", "endpoint_examples")],
 }
 
 

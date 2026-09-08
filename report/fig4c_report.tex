@@ -140,14 +140,15 @@ group were excluded from this analysis.
 The sample for this analysis is the pre-registered groups of
 cohorts 1--3: \groupNRounds{} rounds, of which \oursNRoundsLarge{} contain a minority under this
 rule, giving a true minority share of \oursShareLarge{}.\footnote{\fillin{The paper reports
-\paperShare{}. The gap is almost entirely the treatment of neutral opinions. SM 5.4.1 counts a
-neutral (4) rating as non-minority: ``we may define the `minority' side of the Likert scale as the
+\paperShare{}. The difference between our result and the paper's is potentially explained by different handling
+of neutral (Likert value 4) ratings. SM 5.4.1 counts a neutral rating as part of the non-minority group: 
+``we may define the `minority' side of the Likert scale as the
 side that contains the smaller number of opinions, and define all other opinions as `non-minority'
 opinions---which include `majority' opinions [\ldots] as well as `neutral' opinions (i.e.\ with a
 Likert rating of 4), if any.'' Applied literally, with rounds that have equal numbers on each side
-excluded, that rule gives \oursShareLarge{} on these rounds. One other reading lands on the
-paper's figure: dropping neutral opinions from their groups before the sides are counted gives
-\shareRuleNeutralDropped{} (\shareRuleNeutralDroppedNRounds{} rounds). The treatment of neutral opinions is carried through the
+excluded, that rule gives \oursShareLarge{} on these rounds. One alternative way to handle neutral opinions is
+to drop them from their groups. This gives \shareRuleNeutralDropped{}. We use the first option, because it better
+matches the description in the SM, but consider the other option in the 
 \hyperref[sec:sensitivity]{sensitivity analysis} below.}}
 
 \section*{How does the HM paper measure how well-represented minority opinions are?}
@@ -170,7 +171,7 @@ I now detail my reproduction of each of these steps.
 \codebox{\codeAgreement}
 
 To measure the position component score of a human-authored opinion or a LLM-generated statement,
-it is first mapped into a 768-dimension embedding, and then projected onto the vector going between
+it is first mapped into an embedding space, and then projected onto the vector going between
 two points.\footnote{\fillin{SM 5.1.2 gives the method for constructing the two endpoints --- a
 generic prefix (``Yes, I agree.'' or ``No, I disagree.'') concatenated with the question's own
 affirming or negating position statement --- and one illustrative example, but not the exact
@@ -194,8 +195,8 @@ regression that produces it, and its value under each embedding model.}} In our 
 $R^2$ of each embedding model is shown in Table~\fillin{\ref{tab:rsq}}
 \fillin{(\hyperref[app:rsq]{Appendix~A})}.
 
-Based on these results, we choose model \fillin{sentence-t5-large} as the most-likely model used in
-the original analysis. \fillin{Its marginal $r^2$ of \oursMarginalRsqLarge{} is within
+We choose model \fillin{sentence-t5-large} as the most-likely model used in
+the original analysis, because \fillin{its marginal $r^2$ of \oursMarginalRsqLarge{} is within
 \oursMarginalRsqGapLarge{} of the paper's \paperMarginalRsq{}.}
 
 \section*{Measuring representativeness}
@@ -236,7 +237,8 @@ displays an adjusted version of Figure~\fillin{\ref{fig:paper}} above, where we 
 original paper's results against our own.\footnote{\fillin{The paper's error bar is $\pm 1$ standard error of the estimated
 regression coefficient, as SM Figure S60 states. Error bars on our estimates are $\pm 1$ standard
 error from a cluster bootstrap over rounds (\nBoot{} resamples, drawing the same rounds in every
-phase, so that differences between phases are bootstrapped on matched samples).}}
+phase, so that differences between phases are bootstrapped on matched samples). We take a bootstrap approach because 
+it is unclear how the original authors calculate standard errors in the convex regression setting.}}
 
 \begin{figure}[h]
 \centering
@@ -253,12 +255,11 @@ minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, f
 \fillin{Three observations:}
 {\color{fillred}
 \begin{enumerate}[leftmargin=1.6em,itemsep=0.25em]
-  \item The sanity check reproduces exactly --- the leftmost bars sit on their respective true
-        shares --- so the regression machinery is doing what the paper says it does.
-  \item Every statement phase, by contrast, sits below the true share rather than at or above it:
+  \item The sanity check reproduces exactly.
+  \item Every statement phase sits below the true share rather than at or above it:
         under sentence-t5-large the revised winner carries \oursRevWinLarge{} $\pm$
         \oursRevWinBootSELarge{} against the paper's \paperRevWin{}.
-  \item The shape differs: in the paper the four phases rise monotonically, whereas here the
+  \item In the paper the four phases rise monotonically, whereas here the
         winner-selection step \emph{drops} minority weight at both rounds (initial candidates
         \oursInitCandLarge{} $\rightarrow$ initial winner \oursInitWinLarge{}), and the revision
         step partially restores it (\oursRevWinLarge{}). The paper's rise from initial winner to
@@ -270,8 +271,8 @@ minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, f
 \end{enumerate}}
 
 \fillin{The same holds at every model size (Table~\ref{tab:phases}): the minority weight of the
-revised winner falls as the model grows --- \oursRevWinBase{}, \oursRevWinLarge{}, \oursRevWinXl{}
-and \oursRevWinXxl{} for base, large, xl and xxl --- while the quality of the position axis rises
+revised winner falls as the model grows (\oursRevWinBase{}, \oursRevWinLarge{}, \oursRevWinXl{}
+and \oursRevWinXxl{} for base, large, xl and xxl) while the quality of the position axis rises
 (Table~\ref{tab:rsq}).}
 
 \begin{table}[h]
@@ -428,7 +429,7 @@ model.}} Across the runs, I calculated the following metrics:
 \caption{\fillin{Mean minority weight at each phase across the \sensNRunsPerModel{} specifications
 run under each embedding model; whiskers span the full range (minimum to maximum) of those
 specifications. Dotted line: the mean true minority share across all \sensNRuns{} runs
-(\sensTrueShareMean{}). No specification places the revised winner above its own true share.}}
+(\sensTrueShareMean{}).}}
 \label{fig:sensitivity}
 \end{figure}
 
@@ -451,6 +452,9 @@ no correlation); however I have not checked this closely yet.
 \clearpage
 \section*{Appendix A: the paper's $R^2$ statistic}
 \phantomsection\label{app:rsq}
+
+Note: this section was generated using Claude Fable 5.1 without supervision or code review.
+
 \codebox{\codeAgreementValidation}
 
 \fillin{\textbf{What the paper says.} The main text reports: ``A random-effects estimator of the
@@ -510,10 +514,7 @@ the raw scatter (the main-text Figure 4A quantity) with its square, and the fitt
 \end{tabular}
 \end{table}
 
-\fillin{The xl and xxl sizes were embedded on a GPU node of Isambard-AI, since this machine has no
-GPU. The four sizes order the question cleanly: base falls well short of the paper's
-\paperMarginalRsq{}, large lands on it, and xl and xxl overshoot it. A better axis does not bring
-the minority weight closer to the paper's value; it moves it further away
-(\hyperref[sec:results]{Results}, Table~\ref{tab:phases}).}
+Note that a better axis does not bring the minority weight closer to the paper's value; it moves it further away
+(\hyperref[sec:results]{Results}, Table~\ref{tab:phases}).
 
 \end{document}

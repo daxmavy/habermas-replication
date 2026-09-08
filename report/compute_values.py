@@ -19,12 +19,14 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from hm_fig4c.data import COHORTS, ENDPOINT_STYLES  # noqa: E402
+from hm_fig4c.data import COHORTS, ENDPOINT_STYLES, endpoint_texts  # noqa: E402
 from hm_fig4c.pipeline import NEUTRAL_OPTIONS, ORDER_OPTIONS, PHASES, run_minority_analysis, score_all, select_cohort  # noqa: E402
 PRIMARY_MODEL = "st5-large"
 # Readings of SM 5.1.2's chosen endpoints that are consistent with its description (see data.ENDPOINT_STYLES); the
 # first is the pinned one used everywhere else in the report.
-ENDPOINT_TEST = ["prefixed", "prefixed_not_lower", "mean_generic_specific"]
+ENDPOINT_TEST = ["prefixed", "prefixed_not_lower"]
+# Questions whose endpoint texts the report prints in full, as worked examples of the construction.
+N_ENDPOINT_EXAMPLES = 2
 
 # Minority rule whose true share the report quotes when explaining the gap to the paper's 0.285.
 SHARE_RULES = {"neutral_dropped": dict(neutral="drop_participant", ties="exclude")}
@@ -85,6 +87,26 @@ def endpoint_variants(prep_dir: Path, emb_dir: Path, styles: list[str], n_boot: 
             e[ph + "_boot_se"] = r["phases"][ph]["boot_se"]
         out[style] = e
         print(f"[endpoints/{style}] revised winner = {e['revised_winner']:.3f}, r = {e['fig4a_r']:.3f}")
+    return out
+
+
+def endpoint_examples(prep_dir: Path, styles: list[str], n: int = N_ENDPOINT_EXAMPLES) -> list[dict]:
+    """Worked examples of the endpoint construction: the questions asked in the most pre-registered rounds of
+    cohorts 1-3 (ties broken by question id), with their released position statements and the affirming and
+    negating endpoint texts that each tested reading builds from them."""
+    st = select_cohort(pd.read_parquet(prep_dir / "statements.parquet"), "cohorts_1_3", prereg_only=True)
+    q = pd.read_parquet(prep_dir / "questions.parquet").set_index("question_id")
+    counts = st.groupby("question_id").size().rename("n_rounds").reset_index()
+    top = counts.sort_values(["n_rounds", "question_id"], ascending=[False, True]).head(n)
+    out = []
+    for qid, n_rounds in zip(top["question_id"], top["n_rounds"]):
+        ex = {"question_id": qid, "question": q.at[qid, "question_text"], "affirming": q.at[qid, "affirming"],
+              "negating": q.at[qid, "negating"], "n_rounds": int(n_rounds), "endpoints": {}}
+        for style in styles:
+            aff, neg = endpoint_texts(ex["affirming"], ex["negating"], style)
+            ex["endpoints"][style] = {"affirming": aff, "negating": neg}
+        out.append(ex)
+        print(f"[example] {qid} ({n_rounds} rounds): {ex['question']}")
     return out
 
 
@@ -170,6 +192,7 @@ def main() -> None:
                         if abs(pinned[ph] - V["ours"][m][ph]) > 1e-6:
                             raise SystemExit(f"endpoint test: pinned {ph} {pinned[ph]} != notebook {V['ours'][m][ph]}")
 
+    V["endpoint_examples"] = endpoint_examples(ROOT / "prepared", ENDPOINT_TEST)
     V["sensitivity"] = sensitivity_summary({m: ROOT / "results" / m / "sensitivity.csv" for m in args.models})
     V["sensitivity"]["design"] = {"n_models": len(args.models), "n_neutral": len(NEUTRAL_OPTIONS), "n_orders": len(ORDER_OPTIONS)}
     expected = len(NEUTRAL_OPTIONS) * len(ORDER_OPTIONS) + len(ORDER_OPTIONS)  # Likert split x neutral x order, plus score split x order
