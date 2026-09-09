@@ -90,7 +90,7 @@ def fig4b_within_range(opinions: pd.DataFrame, statements: pd.DataFrame) -> dict
 
 
 def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, cohort: str = "cohorts_1_3", neutral: str = "as_majority",
-                          ties: str = "exclude", order: str = "data", min_rounds: int = 10, n_boot: int = 0, seed: int = 0,
+                          ties: str = "majority_agree", order: str = "data", min_rounds: int = 10, n_boot: int = 0, seed: int = 0,
                           prereg_only: bool = True, phases: list[str] = PHASES, include_opinions: bool = True, minority_by: str = "rating",
                           columns: str = "per_opinion") -> dict:
     op = select_cohort(opinions, cohort, prereg_only); ca = select_cohort(candidates, cohort, prereg_only)
@@ -129,20 +129,22 @@ def run_minority_analysis(opinions: pd.DataFrame, candidates: pd.DataFrame, coho
 NEUTRAL_OPTIONS = {"non-minority": "as_majority", "opinion dropped": "drop_participant"}
 ORDER_OPTIONS = {"data": "data", "random": "random"}
 SPLIT_OPTIONS = {"Likert rating": "rating", "sign of position score": "score"}
+TIE_OPTIONS = {"majority agree": "majority_agree", "majority disagree": "majority_disagree", "round dropped": "exclude"}
 
 
 def sensitivity_grid() -> dict[str, dict]:
     """Every combination of the choices the SM leaves open, for one embedding model (model size is the
     remaining axis and is swept by running the notebook once per model).  When the minority side is
     taken from the sign of the position score there are no neutral opinions, so that split is crossed
-    with column order only.  All runs use the pre-registered rounds of cohorts 1-3 and the tie rule of
-    the primary specification."""
+    with the tie rule and column order only.  All runs use the pre-registered rounds of cohorts 1-3."""
     grid = {}
     for split, by in SPLIT_OPTIONS.items():
         neutrals = NEUTRAL_OPTIONS.items() if by == "rating" else [("n/a", "as_majority")]
         for neutral, nv in neutrals:
-            for order, ov in ORDER_OPTIONS.items():
-                grid[f"split={split} | neutral={neutral} | order={order}"] = dict(minority_by=by, neutral=nv, order=ov)
+            for tie, tv in TIE_OPTIONS.items():
+                for order, ov in ORDER_OPTIONS.items():
+                    grid[f"split={split} | neutral={neutral} | tie={tie} | order={order}"] = dict(
+                        minority_by=by, neutral=nv, ties=tv, order=ov)
     return grid
 
 

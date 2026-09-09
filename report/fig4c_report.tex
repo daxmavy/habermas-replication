@@ -88,7 +88,7 @@ Figure~\ref{fig:paper}, which is copied from Figure 4(c) in the paper.
 (``Position Embedding'' panel), which SM 5.2.2 identifies as the expanded version of main-text
 Figure 4C. Dotted line: the true proportion of minority opinions (\paperShare). Error bar on the
 revised winner: $\pm\paperRevWinSE$, one standard error of the estimated regression coefficient,
-as printed in the paper. $n=\paperNRounds$ rounds.}
+as printed in the paper. The paper does not state how many rounds this figure was fitted on.}
 \label{fig:paper}
 \end{figure}
 
@@ -97,23 +97,40 @@ as printed in the paper. $n=\paperNRounds$ rounds.}
 In the papers' experiments, groups of between \groupMin--\groupMax{} people took part in
 the deliberative process mediated by the HM. Before writing their free-text opinion, they indicated
 their level of agreement with a political proposition using a Likert scale of 1--7. It was thus
-possible to provide a neutral (4) opinion. A group was defined as having a minority group if there
-was an unequal amount of agreeing (5--7) and disagreeing (1--3) opinions. Groups without a minority
-group were excluded from this analysis.
+possible to provide a neutral (4) opinion. SM 5.4.1 puts the minority on whichever side of neutral
+holds fewer opinions, and counts a neutral opinion as non-minority: ``we may define the `minority'
+side of the Likert scale as the side that contains the smaller number of opinions, and define all
+other opinions as `non-minority' opinions---which include `majority' opinions [\ldots] as well as
+`neutral' opinions (i.e.\ with a Likert rating of 4), if any.'' A group whose members all fall on
+the same side of neutral has no minority and cannot enter the regression.
 
-The sample for this analysis is the pre-registered groups of
-cohorts 1--3: \groupNRounds{} rounds, of which \oursNRoundsLarge{} contain a minority under this
-rule, giving a true minority share of \oursShareLarge{}.\footnote{The paper reports
-\paperShare{}. The difference between our result and the paper's is potentially explained by different handling
-of neutral (Likert value 4) ratings. SM 5.4.1 counts a neutral rating as part of the non-minority group: 
-``we may define the `minority' side of the Likert scale as the
-side that contains the smaller number of opinions, and define all other opinions as `non-minority'
-opinions---which include `majority' opinions [\ldots] as well as `neutral' opinions (i.e.\ with a
-Likert rating of 4), if any.'' Applied literally, with rounds that have equal numbers on each side
-excluded, that rule gives \oursShareLarge{} on these rounds. One alternative way to handle neutral opinions is
-to drop them from their groups. This gives \shareRuleNeutralDropped{}. We use the first option, because it better
-matches the description in the SM, but consider the other option in the 
-\hyperref[sec:sensitivity]{sensitivity analysis} below.}
+SM 5.4.1 says nothing about a group whose two sides are equal, and it is tempting to read the
+smaller-side rule as leaving such a group with no minority either. The paper does not. SM 4.1.2.1
+gives the majority direction as
+%
+\[
+  \text{Majority Direction} =
+  \begin{cases}
+    \text{DISAGREE} & \text{if } \#\{i : x_i < 4\} > \#\{i : x_i > 4\},\\
+    \text{AGREE}    & \text{otherwise,}
+  \end{cases}
+\]
+%
+where $x_i$ is participant $i$'s position rating and 4 is the neutral midpoint, and spells out what
+the second branch is for: ``In the case of a tie (e.g., 2 agree, 2 disagree, 1 neutral), we
+arbitrarily set the majority direction to AGREE.'' An equal split therefore keeps both a majority
+and a minority: the disagree side is the minority, and the round stays in.
+
+I follow that rule. The sample is the pre-registered groups of cohorts 1--3: \groupNRounds{} rounds,
+of which \nRoundsTieKept{} contain a minority, giving a true minority share of
+\shareTieKept{}.\footnote{Two of the paper's own figures decide between keeping and dropping these
+rounds. The dotted line in SM Figure S60 is the true minority share, \paperShare{}; the dotted line
+in SM Figure S61, the same analysis with the clusters flipped, is the true majority share,
+\paperMajShare{}. Keeping the tied rounds gives \shareTieKept{} and \majShareTieKept{} on the
+\nRoundsTieKept{} rounds; dropping them gives \shareTieDropped{} and \majShareTieDropped{} on
+\nRoundsTieDropped{}. Only the first reproduces both lines. Dropping neutral opinions from their
+groups rather than counting them as non-minority gives \shareRuleNeutralDropped{}; that choice is
+varied in the \hyperref[sec:sensitivity]{sensitivity analysis} below.}
 
 \section*{How does the HM paper measure how well-represented minority opinions are?}
 
@@ -185,8 +202,9 @@ should come back as simply the proportion of opinions in the
 minority. We
 replicate this implementation check. It passes: the recovered weight is
 \oursOpinionsLarge{} against a true share of \oursShareLarge{}; the paper reports
-\paperOpinions{} against its true share of \paperShare{}. This is the leftmost bar of
-Figure~\ref{fig:contrast}.
+\paperOpinions{} against its true share of \paperShare{}. The true share agrees with the paper's to
+within a thousandth; had I dropped the tied rounds it would be \shareTieDropped{}. This is the
+leftmost bar of Figure~\ref{fig:contrast}.
 
 \section*{Results}
 \phantomsection\label{sec:results}
@@ -206,7 +224,7 @@ it is unclear how the original authors calculate standard errors in the convex r
 Sentence-T5 size. Error bars: paper, $\pm 1$ standard error of the regression coefficient as
 printed (SM Figure S60); ours, $\pm 1$ cluster-bootstrap standard error over rounds. The two dotted
 lines are the true minority share in each case (\paperShare{} for the paper, \oursShareLarge{}
-here; the difference is the treatment of neutral opinions). $n=\oursNRoundsLarge$ rounds with a
+here). $n=\oursNRoundsLarge$ rounds with a
 minority, from \oursNRoundsTotalLarge{} pre-registered rounds in cohorts 1--3, for every model.}
 \label{fig:contrast}
 \end{figure}
@@ -303,6 +321,7 @@ ambiguity & possible options & option chosen above \\
 \midrule
 ST5 model size & base, large, xl, xxl & I focus on values from the large model (\hyperref[app:rsq]{Appendix~A}), but Figures~\ref{fig:contrast} and~\ref{fig:sensitivity} show results across all model sizes \\
 Neutral (Likert 4) opinions & count as non-minority; drop the opinion & count as non-minority (SM 5.4.1) \\
+Groups with equal numbers on each side & majority direction AGREE, so the disagree side is the minority; the mirror of that choice; drop the round & majority direction AGREE, the rule SM 4.1.2.1 states \\
 Basis for splitting minority / non-minority & Likert rating; sign of the position component score (SM Fig.\ S62) & Likert rating (SM Fig.\ S60) \\
 Position-axis endpoints: the released statements write the negation as ``NOT'' & as released; ``NOT'' lowercased, as in the SM example & as released (Table~\ref{tab:endpoints}) \\
 Column order: how a round's opinions are assigned to the regressors & order in the released data; random & data order \\
@@ -393,10 +412,10 @@ Marginal $r^2$ & \axisPinnedMarginalRsq{} & \axisNotLowerMarginalRsq{} \\
 
 I reran the analysis with every combination of these decisions
 (\sensNRuns{} runs).\footnote{\sensNModels{} model sizes $\times$ \sensNNeutral{}
-neutral-opinion treatments $\times$ \sensNOrders{} column orders when the split is by Likert rating,
-plus \sensNModels{} model sizes $\times$ \sensNOrders{} column orders when the split is by the sign
-of the score, where there are no neutral opinions: \sensNRuns{} runs, \sensNRunsPerModel{} per
-model.} Across the runs, I calculated the following metrics:
+neutral-opinion treatments $\times$ \sensNTies{} tie rules $\times$ \sensNOrders{} column orders
+when the split is by Likert rating, plus \sensNModels{} model sizes $\times$ \sensNTies{} tie rules
+$\times$ \sensNOrders{} column orders when the split is by the sign of the score, where there are no
+neutral opinions: \sensNRuns{} runs, \sensNRunsPerModel{} per model.} Across the runs, I calculated the following metrics:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=0.25em]
   \item Proportion of runs where minority representation increases from initial to final:

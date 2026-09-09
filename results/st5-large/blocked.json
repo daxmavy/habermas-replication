@@ -3,68 +3,68 @@
  "n_boot": 500,
  "order_max_abs_diff": {
   "blocks": 0.0,
-  "per_opinion": 0.00431477830009
+  "per_opinion": 0.003408570075098677
  },
  "phases": {
   "opinions": {
-   "weight": 0.2629230197099287,
+   "weight": 0.28298279158699746,
    "boot_se": null,
-   "true_share": 0.2629230197099293,
-   "n_targets": 2689,
+   "true_share": 0.2829827915869981,
+   "n_targets": 3138,
    "n_rounds": null,
-   "per_opinion_weight": 0.2629230197099284,
-   "order_data": 0.2629230197099287,
-   "order_random": 0.2629230197099287,
-   "per_opinion_order_data": 0.2629230197099284,
-   "per_opinion_order_random": 0.2629230197099284
+   "per_opinion_weight": 0.28298279158699635,
+   "order_data": 0.28298279158699746,
+   "order_random": 0.28298279158699746,
+   "per_opinion_order_data": 0.28298279158699635,
+   "per_opinion_order_random": 0.28298279158699635
   },
   "initial_candidates": {
-   "weight": 0.20779359277160703,
-   "boot_se": 0.016475729835801797,
-   "true_share": 0.2624551971326165,
-   "n_targets": 2232,
-   "n_rounds": 560,
-   "per_opinion_weight": 0.20649282532656493,
-   "order_data": 0.20779359277160703,
-   "order_random": 0.20779359277160703,
-   "per_opinion_order_data": 0.20649282532656493,
-   "per_opinion_order_random": 0.20883869578996944
+   "weight": 0.23909628575954459,
+   "boot_se": 0.016282155902941325,
+   "true_share": 0.28409436834094365,
+   "n_targets": 2628,
+   "n_rounds": 659,
+   "per_opinion_weight": 0.2384645734584509,
+   "order_data": 0.23909628575954459,
+   "order_random": 0.23909628575954459,
+   "per_opinion_order_data": 0.2384645734584509,
+   "per_opinion_order_random": 0.24136923243966188
   },
   "initial_winner": {
-   "weight": 0.14077293261081503,
-   "boot_se": 0.018361424378515484,
-   "true_share": 0.2624551971326165,
-   "n_targets": 558,
-   "n_rounds": 560,
-   "per_opinion_weight": 0.1408080232603286,
-   "order_data": 0.14077293261081503,
-   "order_random": 0.14077293261081503,
-   "per_opinion_order_data": 0.1408080232603286,
-   "per_opinion_order_random": 0.1451228015604186
+   "weight": 0.1740623313210145,
+   "boot_se": 0.018447654221451112,
+   "true_share": 0.28409436834094365,
+   "n_targets": 657,
+   "n_rounds": 659,
+   "per_opinion_weight": 0.17428963730088007,
+   "order_data": 0.1740623313210145,
+   "order_random": 0.1740623313210145,
+   "per_opinion_order_data": 0.17428963730088007,
+   "per_opinion_order_random": 0.17769820737597875
   },
   "revised_candidates": {
-   "weight": 0.1845422841599,
-   "boot_se": 0.016244299980691095,
-   "true_share": 0.2624551971326165,
-   "n_targets": 2232,
-   "n_rounds": 560,
-   "per_opinion_weight": 0.18567147282885774,
-   "order_data": 0.1845422841599,
-   "order_random": 0.1845422841599,
-   "per_opinion_order_data": 0.18567147282885774,
-   "per_opinion_order_random": 0.18846871839187146
+   "weight": 0.21275269302505923,
+   "boot_se": 0.01570030456469065,
+   "true_share": 0.28409436834094365,
+   "n_targets": 2628,
+   "n_rounds": 659,
+   "per_opinion_weight": 0.2133475926882868,
+   "order_data": 0.21275269302505923,
+   "order_random": 0.21275269302505923,
+   "per_opinion_order_data": 0.2133475926882868,
+   "per_opinion_order_random": 0.21474294310387368
   },
   "revised_winner": {
-   "weight": 0.16349432763638347,
-   "boot_se": 0.016739609272294977,
-   "true_share": 0.2624551971326165,
-   "n_targets": 558,
-   "n_rounds": 560,
-   "per_opinion_weight": 0.16396678368451245,
-   "order_data": 0.16349432763638347,
-   "order_random": 0.16349432763638347,
-   "per_opinion_order_data": 0.16396678368451245,
-   "per_opinion_order_random": 0.16646958310066964
+   "weight": 0.19944075655889154,
+   "boot_se": 0.016413442164887777,
+   "true_share": 0.28409436834094365,
+   "n_targets": 657,
+   "n_rounds": 659,
+   "per_opinion_weight": 0.19945107018436317,
+   "order_data": 0.19944075655889154,
+   "order_random": 0.19944075655889154,
+   "per_opinion_order_data": 0.19945107018436317,
+   "per_opinion_order_random": 0.19912780621522508
   }
  }
 }
