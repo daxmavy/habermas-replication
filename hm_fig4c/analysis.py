@@ -65,14 +65,22 @@ def score_texts(df: pd.DataFrame, text_col: str, questions: pd.DataFrame, lookup
 
 
 # ----------------------------------------------------------------------------- group structure
+# The minority side in a round where the two sides are equal.  SM 4.1.2.1 resolves such a round rather than
+# dropping it: "In the case of a tie (e.g., 2 agree, 2 disagree, 1 neutral), we arbitrarily set the majority
+# direction to AGREE", which leaves the disagree side as the minority.
+TIE_RULES = {"majority_agree": -1, "majority_disagree": 1, "exclude": 0}
+
+
 def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: str = "exclude", by: str = "rating") -> pd.DataFrame:
     """Add is_minority / n_div / k_min columns. Rows are participant-rounds with a pre_rating.
 
     neutral = 'drop_participant': neutral raters are removed, the group is kept.
               'drop_group'      : any group containing a neutral rater is removed.
               'as_majority'     : neutral raters are kept and counted as non-minority (SM 5.4.1).
-    ties    = 'exclude'         : rounds with equal agree/disagree counts have no minority and are dropped.
-              'agree'/'disagree': in a tie, that side is taken as the minority.
+    ties    = 'majority_agree'  : SM 4.1.2.1's rule -- when the two sides are equal the majority direction is
+                                  set to AGREE, so the disagree side is the minority and the round is kept.
+              'majority_disagree': the mirror of that arbitrary choice, for the sensitivity analysis.
+              'exclude'         : rounds with equal agree/disagree counts are dropped instead.
     by      = 'rating'          : sides from the pre-deliberation Likert rating (SM Fig. S60).
               'score'           : sides from the sign of the opinion's position score (SM Fig. S62; no neutrals).
     Rounds with no dissent are always dropped.
@@ -93,7 +101,9 @@ def assign_minority(opinions: pd.DataFrame, neutral: str = "as_majority", ties: 
     g = df.groupby(key)["side"]
     n_ag = g.transform(lambda s: (s > 0).sum())
     n_dis = g.transform(lambda s: (s < 0).sum())
-    tie_side = {"exclude": 0, "agree": 1, "disagree": -1}[ties]
+    if ties not in TIE_RULES:
+        raise ValueError(f"unknown tie rule {ties!r}; expected one of {sorted(TIE_RULES)}")
+    tie_side = TIE_RULES[ties]
     minority_side = np.where(n_ag < n_dis, 1, np.where(n_dis < n_ag, -1, tie_side))
     df["is_minority"] = (df["side"] == minority_side) & (minority_side != 0)
     df["k_min"] = np.minimum(n_ag, n_dis)

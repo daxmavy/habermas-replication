@@ -21,6 +21,13 @@ dependencies = [
     "torch>=2.14.0",
 ]
 
+[dependency-groups]
+dev = ["pytest>=8"]
+
 # hm_fig4c/ is imported from the repo root; there is nothing to build or install.
 [tool.uv]
 package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
